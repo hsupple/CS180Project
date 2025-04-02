@@ -2,6 +2,10 @@
 
 MAKE SURE TO PULL FROM GIT REPO BEFORE COMMITTING CHANGES!!!
 
+git add .
+git commit -m "##NEW UPDATES MESSAGES##"
+git push origin main
+
 Auction House:
 
 Interface Design - Parshawn
