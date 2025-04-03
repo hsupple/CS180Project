@@ -1,47 +1,38 @@
 import java.util.List;
 
-/**
- * Defines common user behaviors for all platform users.
- * Shared by both buyers and sellers.
- */
-public interface User {
+public class User implements UserInterface {
 
-    // Identification
-    String getUserId();
-    String getUsername();
-    void setUsername(String username);
+    public String getUserId() {}
+    public String getUsername() {}
+    public void setUsername(String username) {}
 
-    // Authentication
-    boolean login(String passwordInput);
-    void logout();
-    boolean checkPassword(String input);
-    void changePassword(String newPassword);
-    void setPassword(String password);
+    public boolean login(String passwordInput) {}
+    public void logout() {}
+    public boolean checkPassword(String input) {}
+    public void changePassword(String newPassword) {}
+    public void setPassword(String password) {}
 
-    // Profile
-    String getEmail();
-    void setEmail(String newEmail);
-    String getPhoneNumber();
-    void setPhoneNumber(String phone);
-    String getProfileSummary(); //
+    public String getEmail() {}
+    public void setEmail(String newEmail) {}
+    public String getPhoneNumber() {}
+    public void setPhoneNumber(String phone) {}
+    public String getProfileSummary() {} //
 
-    // Account Management
-    void deleteAccount();
-    boolean isSeller();
-    boolean isBuyer();
+    public void deleteAccount() {}
+    public boolean isSeller() {}
+    public boolean isBuyer() {}
 
-    // Financials
-    double getBalance();
-    void depositFunds(double amount);
-    void withdrawFunds(double amount) throws InsufficientFundsException;
+    public double getBalance() {}
+    public void depositFunds(double amount) {}
+    public void withdrawFunds(double amount) throws InsufficientFundsException {}
 
-    // Messaging
-    void sendMessage(String recipientUsername, String content);
-    List<Message> getInbox(); // Changed from List<String> to List<Message>
-    void deleteMessage(String messageId);
+    public void sendMessage(String recipientUsername, String content) {}
+    public List<Message> getInbox(){} // Changed from List<String> to List<Message>
+    public void deleteMessage(String messageId) {}
 
-    // Auction Activity
-    List<String> getTransactionHistory();
-    List<Auction> getActiveBids();
-    List<Auction> getWonAuctions();
+    public List<String> getTransactionHistory() {}
+    public List<AuctionInterface> getActiveBids() {}
+    public List<AuctionInterface> getWonAuctions() {}
+
+
 }

@@ -1,24 +1,55 @@
 import java.util.List;
 
 /**
- * Defines seller-specific behaviors on the platform.
+ * Seller class, connects to SellerInterface
+ *
+ * @author Jasmine Burkett
+ * @version 3 April 2025
  */
-public interface Seller extends User {
 
-    // Auction & Listing
-    void createAuction(Item item, double startingPrice, int durationMinutes);
-    void deleteAuction(int auctionId);
-    List<Auction> getActiveAuctions();
-    List<Auction> getSoldAuctions();
+public class Seller implements SellerInterface {
 
-    // Messaging
-    void respondToMessage(String messageId, String response);
+    public List<Auction> activeAuctions;
+    Auction auction;
+    public List<Auction> soldAuctions;
 
-    // Store Display
-    String getStorePage(); // Could return HTML, Markdown, or string summary
-    void updateStoreDescription(String newDescription);
+    public Seller(List<Auction> activeAuctions, List<Auction> soldAuctions) {
+        this.activeAuctions = activeAuctions;
+        this.soldAuctions = soldAuctions;
+    }
 
-    // Search / Filter
-    String getStoreCategory();
-    void setStoreCategory(String category);
+    public void createAuction(ItemInterface item, double startingPrice, int durationMinutes) {
+        Auction auction = new Auction(item, startingPrice, durationMinutes);
+        activeAuctions.add(auction);
+    }
+
+    public void deleteAuction(int auctionID) {
+        auction.getAuctionId();
+        activeAuctions.remove(auctionID);
+    }
+
+    public List<Auction> getActiveAuctions() {
+        return activeAuctions;
+    }
+
+    public List<Auction> getSoldAuctions() {
+        return soldAuctions;
+    }
+
+    //Messaging
+    public void respondToMessage(String messageId, String response) {
+    }
+
+    public String getStorePage() {
+        return activeAuctions.toString();
+    }
+
+    public String getStoreCategory() {
+    }
+
+    public void setStoreCategory(String category) {
+    }
+
+
+
 }

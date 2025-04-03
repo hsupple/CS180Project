@@ -1,36 +1,53 @@
 import java.time.LocalDateTime;
 
-public interface Item {
+public class Item implements ItemInterface {
 
-    // Identification
-    int getItemId();                      // Unique item ID
-    String getTitle();                    // Item name
-    void setTitle(String title);
+    public int getItemId() { // Unique item ID
+    }
 
-    //  Description
-    String getDescription();
-    void setDescription(String description);
+    public String getTitle() { // Item name
+    }
 
-    // Pricing
-    double getStartingPrice();            // Auction starting price
-    void setStartingPrice(double price);
+    public void setTitle(String title) {
+    }
 
-    // Categorization
-    String getCategory();                 // e.g., "Electronics", "Clothing"
-    void setCategory(String category);
+    public String getDescription() {
+    }
 
-    // Seller Info
-    String getSellerUsername();           // Used for linking to Seller profile
+    public void setDescription(String description) {
+    }
 
-    // Timestamps
-    LocalDateTime getListingTime();       // When item was posted
-    void setListingTime(LocalDateTime time);
+    public double getStartingPrice() { // Auction starting price
+    }
 
-    // Optional: Multimedia
-    String getImageUrl();                 // Link to image (for extra credit)
-    void setImageUrl(String url);
+    public void setStartingPrice(double price) {
+    }
 
-    // Status
-    boolean isSold();                     // Whether it has been purchased
-    void markAsSold();                    // Set sold status
+    public String getCategory() { // e.g., "Electronics", "Clothing"
+    }
+
+    public void setCategory(String category) {
+    }
+
+    public String getSellerUsername() { // Used for linking to SellerInterface profile
+    }
+
+    public LocalDateTime getListingTime() { // When item was posted
+    }
+
+    public void setListingTime(LocalDateTime time) {
+    }
+
+    public String getImageUrl() { // Link to image (for extra credit)
+    }
+
+    public void setImageUrl(String url) {
+    }
+
+    public boolean isSold() { // Whether it has been purchased
+    }
+
+    public void markAsSold() { // Set sold status
+    }
+
 }

@@ -1,24 +1,37 @@
 import java.util.List;
 
 /**
- * Defines buyer-specific behaviors on the platform.
+ * Buyer class, connects to BuyerInterface
+ *
+ * @author Jasmine Burkett
+ * @version 3 April 2025
  */
-public interface Buyer extends User {
 
-    // Bidding
-    boolean placeBid(int auctionId, double amount);
-    List<Auction> getActiveBids();
+public class Buyer implements BuyerInterface {
 
-    // Buy It Now
-    boolean buyNow(int auctionId);
+    public Auction auction;
+    public List<Auction> wonAuctions;
+    public List<Auction> activeBids;
+    public List<Auction> bidHistory;
+
+    public List<Auction> getActiveBids() {
+        return activeBids;
+    }
 
     // Messaging
-    void sendMessageToSeller(String sellerUsername, String content);
+    public void sendMessageToSeller(String sellerUsername, String content) {
+    }
 
-    // History
-    List<Auction> getWonAuctions();
-    List<Auction> getBidHistory();
+    public List<Auction> getWonAuctions() {
+        return wonAuctions;
+    }
 
-    // Ratings
-    void leaveRatingForSeller(String sellerUsername, double rating);
+    public List<Auction> getBidHistory() {
+        return bidHistory;
+    }
+
+    public void leaveRatingForSeller(String sellerUsername, double rating) {
+
+    }
+
 }

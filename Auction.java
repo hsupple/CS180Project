@@ -1,35 +1,66 @@
 import java.time.LocalDateTime;
 
-public interface Auction {
+public class Auction implements AuctionInterface {
 
-    // Basic Auction Info
-    int getAuctionId();                      // Unique auction ID
-    Item getItem();                          // The item being auctioned
-    String getSellerUsername();              // Owner of the item
-    LocalDateTime getStartTime();            // Start time of the auction
-    LocalDateTime getEndTime();              // Scheduled end time
+    public Auction(ItemInterface item, double startingPrice, int durationMinutes) {
+    }
 
-    // Bidding
-    boolean placeBid(String bidderUsername, double bidAmount);  // Returns true if successful
-    double getCurrentHighestBid();                              // Current winning bid
-    String getHighestBidderUsername();                          // User with highest bid
+    public int getAuctionId() { // Unique auction ID
+    }
 
-    //Auction Control
-    void startAuction();                    // Sets auction to active
-    void endAuction();                      // Ends normally
-    boolean isActive();                     // True if auction is live and not expired
-    boolean hasEnded();                     // True if ended due to timeout, buy now, or early termination
+    public ItemInterface getItem(ItemInterface item) { // The item being auctioned
+    }
 
-    //Buy It Now (Extra Credit)
-    boolean hasBuyItNowOption();            // Is Buy It Now enabled?
-    void setBuyItNowPrice(double price);    // Set Buy It Now price
-    double getBuyItNowPrice();              // Retrieve Buy It Now price
-    boolean buyItNow(String buyerUsername); // Instantly purchase and end auction
+    public String getSellerUsername(User username) { // Owner of the item
+    }
 
-    //
-    void endAuctionEarly();                 // Ends auction early (by seller)
+    public LocalDateTime getStartTime() { // Start time of the auction
+    }
 
-    //
-    String getWinner();                     // Username of buyer (or null if unsold)
-    double getFinalPrice();                 // Final sale price (bid or Buy It Now)
+    public LocalDateTime getEndTime() { // Scheduled end time
+    }
+
+    public boolean placeBid(String bidderUsername, double bidAmount) { // Returns true if successful
+    }
+
+    public double getCurrentHighestBid() { // Current winning bid
+    }
+
+    public String getHighestBidderUsername() { // UserInterface with highest bid
+    }
+
+    public void startAuction() { // Sets auction to active
+    }
+
+    public void endAuction() { // Ends normally
+    }
+
+    public boolean isActive() { // True if auction is live and not expired
+    }
+
+    public boolean hasEnded() { // True if ended due to timeout, buy now, or early termination
+    }
+
+    public boolean hasBuyItNowOption() { // Is Buy It Now enabled?
+    }
+
+    public void setBuyItNowPrice(double price) { // Set Buy It Now price
+    }
+
+    public double getBuyItNowPrice() { // Retrieve Buy It Now price
+    }
+
+    public boolean buyItNow(String buyerUsername) { // Instantly purchase and end auction
+    }
+
+    public void endAuctionEarly() { // Ends auction early (by seller)
+    }
+
+    public String getWinner() { // Username of buyer (or null if unsold)
+    }
+
+    public double getFinalPrice() {
+        return getCurrentHighestBid();
+    }
+
 }

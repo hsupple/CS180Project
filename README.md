@@ -18,8 +18,8 @@ Data Persistence and Thread Safety - Adwin
 
 Functionality requirements:
 
-Seller accounts
-Buyer accounts
+SellerInterface accounts
+BuyerInterface accounts
 New user account creation
 Password protected login
 Account deletion
@@ -28,16 +28,16 @@ Item listing deletion
 Item search
 Bidding system
 Auction duration timer
-Users can message an item's Seller - Sellers can respond to messages they receive.
+Users can message an item's SellerInterface - Sellers can respond to messages they receive.
 Extra credit opportunity – Add support to upload and display item pictures.
 Teams of 5 additional requirements:
 
-Seller Ratings
-Seller store pages
-Seller search
-Seller can end auction early
-Seller can set "Buy it now" price
-Buyer can use "Buy it now" option to make purchases
+SellerInterface Ratings
+SellerInterface store pages
+SellerInterface search
+SellerInterface can end auction early
+SellerInterface can set "Buy it now" price
+BuyerInterface can use "Buy it now" option to make purchases
 View previously auctioned items
 
 ################
