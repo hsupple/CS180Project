@@ -1,49 +1,93 @@
-# CS180Project
+CS180 Auction House Project
+Note:
+Always pull from the repository before committing changes!
 
-MAKE SURE TO PULL FROM GIT REPO BEFORE COMMITTING CHANGES!!!
-
+sql
+Copy
+Edit
+git pull origin main
 git add .
-git commit -m "##NEW UPDATES MESSAGES##"
+git commit -m "## NEW UPDATE MESSAGE ##"
 git push origin main
+👥 Team Responsibilities
+Feature	Team Member
+Interface Design	Parshawn
+Database Development	Jasmine
+Database Logic	Hayden
+Messaging and Search	Sophie
+Data Persistence & Thread Safety	Adwin
+🧩 Project Overview
+An online Auction House platform that supports buying, selling, and bidding on items.
 
-Auction House:
+✅ Core Functionality
+User account creation (Buyer & Seller)
 
-Interface Design - Parshawn
-Database Dev - Jasmine
-Database Logic - Hayden
-Messaging and Search - Sophie
-Data Persistence and Thread Safety - Adwin
+Password-protected login
 
-- An Auction House
-
-Functionality requirements:
-
-SellerInterface accounts
-BuyerInterface accounts
-New user account creation
-Password protected login
 Account deletion
-Item listing creation
-Item listing deletion
-Item search
-Bidding system
-Auction duration timer
-Users can message an item's SellerInterface - Sellers can respond to messages they receive.
-Extra credit opportunity – Add support to upload and display item pictures.
-Teams of 5 additional requirements:
 
-SellerInterface Ratings
-SellerInterface store pages
-SellerInterface search
-SellerInterface can end auction early
-SellerInterface can set "Buy it now" price
-BuyerInterface can use "Buy it now" option to make purchases
+Create/delete item listings
+
+Item search functionality
+
+Bidding system with auction timers
+
+Messaging system between buyers and sellers
+
+Sellers can respond to buyer messages
+
+🌟 Extra Credit Features
+Support for uploading and displaying item pictures
+
+👥 Additional Features for Teams of 5
+Seller ratings
+
+Dedicated seller store pages
+
+Seller search
+
+Seller can end auction early
+
+Seller can set a "Buy It Now" price
+
+Buyers can purchase via "Buy It Now"
+
 View previously auctioned items
 
-################
-The first phase of the project consists of building the entire database side of the project including interfaces and test cases. Forward thinking is strongly encouraged. Questions such as: What are we storing? How are we accessing it? What are we calculating? All should be addressed during this stage. HW10 covers techniques on how to make the database thread safe. Remember the database will only be interacting with a single server; however, that server will be interacting with multiple clients simultaneously. A README.txt file is required with each phase and should be submitted in the Vocareum workspace alongside any java files. See documentation below.
-################
+🚧 Project Phases
+🧱 Phase 1: Database Design
+Build complete backend database structure
 
-The second phase will be to design and implement the server by linking it to the database and to start work on the client side of the program. Again, forward thinking is strongly encouraged. Remember the team will be required to add a GUI to their client. The client should only communicate with the server, all computation should be handled on the server side of the software. A README.txt file is required with each phase and should be submitted in the Vocareum workspace alongside any java files. See documentation below.
+Define all interfaces and write test cases
 
-The third and final phase will be to design and implement a GUI for the client. This will be the user facing side of your team’s chosen option. This will also be the last chance for the team to make any changes to previously implemented parts of the program. Note: A GUI is not required for the server side of the application. A README.txt file is required with each phase and should be submitted in the Vocareum workspace alongside any java files. See documentation below.
+Focus on:
+
+What data is stored?
+
+How is it accessed?
+
+What is computed?
+
+Ensure thread safety (see HW10)
+
+Submission: Include README.txt and all .java files in Vocareum
+
+🔌 Phase 2: Server Implementation
+Connect server to database
+
+Begin client development
+
+Design architecture for all server-side computation
+
+Client should communicate only with the server
+
+Submission: Include README.txt and all .java files in Vocareum
+
+🖥️ Phase 3: GUI Implementation
+Develop client-side graphical user interface
+
+Final opportunity to revise previous phases
+
+GUI is only required for the client, not the server
+
+Submission: Include README.txt and all .java files in Vocareum
