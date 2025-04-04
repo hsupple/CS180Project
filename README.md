@@ -2,9 +2,7 @@ CS180 Auction House Project
 Note:
 Always pull from the repository before committing changes!
 
-sql
-Copy
-Edit
+
 git pull origin main
 git add .
 git commit -m "## NEW UPDATE MESSAGE ##"
