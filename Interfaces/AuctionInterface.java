@@ -1,18 +1,18 @@
 import java.time.LocalDateTime;
 
-public interface Auction {
+public interface AuctionInterface {
 
     // Basic Auction Info
     int getAuctionId();                      // Unique auction ID
-    Item getItem();                          // The item being auctioned
-    String getSellerUsername();              // Owner of the item
+    ItemInterface getItem(ItemInterface item);                          // The item being auctioned
+    String getSellerUsername(User username);              // Owner of the item
     LocalDateTime getStartTime();            // Start time of the auction
     LocalDateTime getEndTime();              // Scheduled end time
 
     // Bidding
     boolean placeBid(String bidderUsername, double bidAmount);  // Returns true if successful
     double getCurrentHighestBid();                              // Current winning bid
-    String getHighestBidderUsername();                          // User with highest bid
+    String getHighestBidderUsername();                          // UserInterface with highest bid
 
     //Auction Control
     void startAuction();                    // Sets auction to active

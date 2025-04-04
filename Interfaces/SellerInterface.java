@@ -3,10 +3,10 @@ import java.util.List;
 /**
  * Defines seller-specific behaviors on the platform.
  */
-public interface Seller extends User {
+public interface SellerInterface {
 
     // Auction & Listing
-    void createAuction(Item item, double startingPrice, int durationMinutes);
+    void createAuction(ItemInterface item, double startingPrice, int durationMinutes);
     void deleteAuction(int auctionId);
     List<Auction> getActiveAuctions();
     List<Auction> getSoldAuctions();
@@ -16,7 +16,6 @@ public interface Seller extends User {
 
     // Store Display
     String getStorePage(); // Could return HTML, Markdown, or string summary
-    void updateStoreDescription(String newDescription);
 
     // Search / Filter
     String getStoreCategory();

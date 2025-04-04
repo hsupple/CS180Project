@@ -4,7 +4,7 @@ import java.util.List;
  * Defines common user behaviors for all platform users.
  * Shared by both buyers and sellers.
  */
-public interface User {
+public interface UserInterface {
 
     // Identification
     String getUserId();
@@ -42,6 +42,6 @@ public interface User {
 
     // Auction Activity
     List<String> getTransactionHistory();
-    List<Auction> getActiveBids();
-    List<Auction> getWonAuctions();
+    List<AuctionInterface> getActiveBids();
+    List<AuctionInterface> getWonAuctions();
 }

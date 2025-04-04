@@ -1,6 +1,6 @@
 import java.time.LocalDateTime;
 
-public interface Item {
+public interface ItemInterface {
 
     // Identification
     int getItemId();                      // Unique item ID
@@ -19,8 +19,8 @@ public interface Item {
     String getCategory();                 // e.g., "Electronics", "Clothing"
     void setCategory(String category);
 
-    // Seller Info
-    String getSellerUsername();           // Used for linking to Seller profile
+    // SellerInterface Info
+    String getSellerUsername();           // Used for linking to SellerInterface profile
 
     // Timestamps
     LocalDateTime getListingTime();       // When item was posted
