@@ -20,6 +20,40 @@ public class Seller implements SellerInterface{
         this.Password = Password;
 
         Active = true;
+        writeline();
+    }
+
+    private void writeline() {
+        fileLock.lock();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"))) {
+            String line;
+            ArrayList<String> lines = new ArrayList<>();
+            int LineFound = 0;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(this.Username)) {
+                    line = this.Username + "," + this.Password + "," + this.Active;
+                    LineFound = 1;   
+                }
+                lines.add(line);
+                
+            }
+            if (LineFound == 0) {
+                lines.add(this.Username + "," + this.Password);
+            }
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("SellerList.txt", false))) { 
+                for (String newline : lines) {
+                    writer.write(newline); 
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } 
+        } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                fileLock.unlock();
+            }
     }
 
     @Override
@@ -64,6 +98,7 @@ public class Seller implements SellerInterface{
     public void deleteAccount() {
 
         this.Active = false;
+        writeline();
 
     }
 

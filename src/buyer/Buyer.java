@@ -17,19 +17,44 @@ public class Buyer {
     private final ReentrantLock fileLock = new ReentrantLock();
 
     public Buyer(String Username, String Password) {
-        fileLock.lock();
         this.Username = Username;
         this.Password = Password;
 
         this.Active = true;
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("SellerList.txt", true))) { 
-            writer.write(Username + "," + Password + "," + this.Active + "\n"); 
-            writer.newLine();    
+        writeline();
+    }
+
+    private void writeline() {
+        fileLock.lock();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("BuyerList.txt"))) {
+            String line;
+            List<String> lines = new ArrayList<>();
+            int LineFound = 0;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(this.Username)) {
+                    line = this.Username + "," + this.Password + "," + this.Active;
+                    LineFound = 1;   
+                }
+                lines.add(line);
+                
+            }
+            if (LineFound == 0) {
+                lines.add(this.Username + "," + this.Password);
+            }
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("BuyerList.txt", false))) { 
+                for (String newline : lines) {
+                    writer.write(newline); 
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } 
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            fileLock.unlock();
-        }
+                e.printStackTrace();
+            } finally {
+                fileLock.unlock();
+            }
     }
 
     public void sendMessageToSeller(String sellerUsername, String message) {
@@ -42,6 +67,7 @@ public class Buyer {
     public void setPassword(String Password) {
 
         this.Password = Password;
+        writeline();
 
     }
 
@@ -66,7 +92,7 @@ public class Buyer {
            if (itemFound) {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter("AuctionList.txt"))) {
                     for (String updatedLine : lines) {
-                        writer.write(updatedLine + "\n");
+                        writer.write(updatedLine);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -105,7 +131,7 @@ public class Buyer {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("SellerList.txt"))) {
             for (String updatedLine : updatedLines) {
-                writer.write(updatedLine + "\n");
+                writer.write(updatedLine);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -118,6 +144,7 @@ public class Buyer {
     public void deleteAccount() {
 
         this.Active = false;
+        writeline();
 
     }
     
@@ -140,6 +167,15 @@ public class Buyer {
     public ArrayList<String> getMessages(String User) {
 
         return this.messages;
+
+    }
+
+    public static void main(String[] args) {
+        Buyer hello = new Buyer("helloWORLD", "world");
+
+        Buyer hello2 = new Buyer("whatsup", "world2");
+
+        hello2.deleteAccount();
 
     }
 
