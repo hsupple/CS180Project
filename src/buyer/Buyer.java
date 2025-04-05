@@ -139,7 +139,7 @@ public class Buyer {
     }
     public ArrayList<String> getMessages(String User) {
 
-        return messages;
+        return this.messages;
 
     }
 
