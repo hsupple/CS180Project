@@ -18,6 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Seller {
 
+    // Declare all private variables
     private final String username;
     private String password;
     private double rating;
@@ -26,6 +27,7 @@ public class Seller {
     private boolean active;
     private final ReentrantLock fileLock = new ReentrantLock();
 
+    // Public constructor with username and password for new Seller
     public Seller(String username, String password) {
         this.username = username;
         this.password = password;
@@ -36,6 +38,7 @@ public class Seller {
         writeToFile();
     }
 
+    // Private class to write new line to the file
     private void writeToFile() {
         fileLock.lock();
         try {
@@ -80,19 +83,23 @@ public class Seller {
         }
     }
 
+    // Void method to set a new password
     public void setPassword(String newPassword) {
         this.password = newPassword;
         writeToFile();
     }
 
+    // Getter method to return password
     public String getPassword() {
         return this.password;
     }
 
+    // Getter method to return username
     public String getUsername() {
         return this.username;
     }
 
+    // Void method to send a message over the server
     public void sendMessageToBuyer(String buyer, String message) {
         if (this.messages == null) {
             this.messages = new ArrayList<>();
@@ -101,10 +108,12 @@ public class Seller {
         this.messages.add(message);
     }
 
+    // Getter method to return all message logs
     public ArrayList<String> getMessages() {
         return this.messages;
     }
 
+    // Getter method to return messages from buyer
     public ArrayList<String> getMessages(String buyer) {
         ArrayList<String> filtered = new ArrayList<>();
         for (int i = 0; i < messages.size(); i += 2) {
@@ -117,32 +126,23 @@ public class Seller {
         return filtered;
     }
 
-    public void addRating(double newRating) {
-        this.rating = (this.rating * this.ratingCount + newRating) / (++this.ratingCount);
-        writeToFile();
-    }
-
+    // Getter method for seller rating
     public double getRating() {
         return this.rating;
     }
 
-    public int getRatingCount() {
-        return this.ratingCount;
-    }
-
+    // Getter method for Active status
     public boolean isActive() {
         return this.active;
     }
 
-    public void deactivate() {
+    // Void method for deleting account
+    public void deleteAccount() {
         this.active = false;
         writeToFile();
     }
 
-    public void deleteAccount() {
-        deactivate();
-    }
-
+    // Void method to load all values from file
     public void loadFromFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"))) {
             String line;
@@ -161,6 +161,7 @@ public class Seller {
         }
     }
 
+    // Getter method to return all listings from buyer
     public List<String> getListings() {
         List<String> listings = new ArrayList<>();
         File file = new File("AuctionList.txt");

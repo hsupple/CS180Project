@@ -36,16 +36,6 @@ class SellerTest {
     }
 
     @Test
-    void testAddRatingUpdatesFile() throws IOException {
-        Seller seller = new Seller("seller1", "pass123");
-        seller.addRating(5.0);
-
-        List<String> lines = Files.readAllLines(SELLER_FILE);
-        boolean updated = lines.stream().anyMatch(line -> line.contains("5.0"));
-        assertTrue(updated, "Rating should be updated in file.");
-    }
-
-    @Test
     void testSendMessageToBuyer() {
         Seller seller = new Seller("seller2", "pass");
         seller.sendMessageToBuyer("buyer1", "Hi!");
@@ -63,13 +53,6 @@ class SellerTest {
     }
 
     @Test
-    void testDeactivateSetsActiveFalse() {
-        Seller seller = new Seller("seller3", "pass");
-        seller.deactivate();
-        assertFalse(seller.isActive(), "Seller should be inactive after deactivation.");
-    }
-
-    @Test
     void testDeleteAccountCallsDeactivate() {
         Seller seller = new Seller("seller4", "pass");
         seller.deleteAccount();
@@ -81,6 +64,5 @@ class SellerTest {
         Seller seller = new Seller("seller1", "pass123");
         seller.loadFromFile();
         assertEquals(4.5, seller.getRating(), 0.01, "Rating should be fetched from file");
-        assertEquals(3, seller.getRatingCount(), "Rating count should be fetched from file");
     }
 }

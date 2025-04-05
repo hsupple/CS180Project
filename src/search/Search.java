@@ -19,16 +19,19 @@ import java.util.ArrayList;
 
 public class Search {
 
+    // Declare all private variables
     private final String query;
     private final ArrayList<String> users = new ArrayList<>();
     private final ArrayList<String> listings = new ArrayList<>();
-
+    
+    // Public constructor for new query variable.
     public Search(String query) {
         this.query = query;
         this.users.addAll(getUsers());
         this.listings.addAll(getListings());
     }
 
+    // private method to get all matching users to the query
     private ArrayList<String> getUsers() {
         ArrayList<String> userList = new ArrayList<>();
         try {
@@ -48,6 +51,7 @@ public class Search {
 
     }
 
+    // Private method to get all listings matching query
     private ArrayList<String> getListings() {
         ArrayList<String> listingList = new ArrayList<>();
         try {
@@ -70,6 +74,7 @@ public class Search {
 
     }
 
+    // Public method to return all result
     public ArrayList<String> getSearchResults() {
         ArrayList<String> results = new ArrayList<>();
         results.addAll(users);

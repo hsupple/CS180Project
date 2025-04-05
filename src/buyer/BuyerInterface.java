@@ -13,7 +13,8 @@ import java.util.ArrayList;
  * @version April, 2025
  */
 public interface BuyerInterface {
-
+    
+    // Define all public methods within Buyer class
     void sendMessageToSeller(String sellerUsername, String message);
     void setPassword(String password);
     void makeBid(String itemID, double price);

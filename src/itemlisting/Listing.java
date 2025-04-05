@@ -13,6 +13,7 @@ package itemlisting;
  */
 public interface Listing {
 
+    // Interface to house all class methods
     int getItemId();
 
     double getBuyNowItemPrice();

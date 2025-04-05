@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 public interface SellerInterface {
 
+    // Define all Seller public methods
     void sendMessageToBuyer(String buyerUsername, String message);
     void setPassword(String password);
 
