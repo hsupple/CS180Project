@@ -11,6 +11,8 @@ public class Seller implements SellerInterface{
 
     private ArrayList<String> messages;
 
+    private double rating;
+    private int ratingCount = 0;
     private boolean Active;
 
     private final ReentrantLock fileLock = new ReentrantLock();
@@ -18,6 +20,7 @@ public class Seller implements SellerInterface{
     public Seller(String Username, String Password) {
         this.Username = Username;
         this.Password = Password;
+        this.rating = 0;
 
         Active = true;
         writeline();
@@ -32,14 +35,14 @@ public class Seller implements SellerInterface{
             int LineFound = 0;
             while ((line = reader.readLine()) != null) {
                 if (line.contains(this.Username)) {
-                    line = this.Username + "," + this.Password + "," + this.Active;
+                    line = this.Username + "," + this.Password + "," + this.rating + "," + this.ratingCount + "," + this.Active;
                     LineFound = 1;   
                 }
                 lines.add(line);
                 
             }
             if (LineFound == 0) {
-                lines.add(this.Username + "," + this.Password);
+                lines.add(this.Username + "," + this.Password + "," + this.rating + "," + this.ratingCount + "," + this.Active);
             }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("SellerList.txt", false))) { 
                 for (String newline : lines) {

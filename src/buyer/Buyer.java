@@ -113,15 +113,19 @@ public class Buyer {
 
         try (BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"))) {
             String line;
+
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
+
                 if (parts[0].equals(sellerUsername)) {
-                    int currentRatingCount = Integer.parseInt(parts[2]);
+                    double currentRatingCount = Double.parseDouble(parts[2]);
+                    double currentRating = Double.parseDouble(parts[2]) * Double.parseDouble(parts[3]);
+
                     parts[2] = String.valueOf(currentRatingCount + 1);
                     
-                    double currentRating = Double.parseDouble(parts[1]);
-                    double newRating = (currentRating + rating) / 2;
-                    parts[1] = Double.toString(newRating);
+                    parts[3] = String.valueOf(Double.parseDouble(parts[3]) + 1);
+                    double newRating = (currentRating + rating) / (Double.parseDouble(parts[3]));
+                    parts[2] = Double.toString(newRating).substring(0,4);
                 }
                 updatedLines.add(String.join(",", parts));
             }
@@ -132,6 +136,7 @@ public class Buyer {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("SellerList.txt"))) {
             for (String updatedLine : updatedLines) {
                 writer.write(updatedLine);
+                writer.newLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
