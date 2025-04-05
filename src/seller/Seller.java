@@ -1,91 +1,60 @@
-package seller;
-
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Seller implements SellerInterface{
+public class Seller {
 
-    private final String Username;
-    private String Password;
-
-    private ArrayList<String> messages;
-
+    private final String username;
+    private String password;
     private double rating;
-    private int ratingCount = 0;
-    private boolean Active;
-
+    private int ratingCount;
+    private ArrayList<String> messages;
+    private boolean active;
     private final ReentrantLock fileLock = new ReentrantLock();
 
-    public Seller(String Username, String Password) {
-        this.Username = Username;
-        this.Password = Password;
-        this.rating = 0;
-
-        Active = true;
-        writeline();
+    public Seller(String username, String password) {
+        this.username = username;
+        this.password = password;
+        this.rating = 0.0;
+        this.ratingCount = 0;
+        this.messages = new ArrayList<>();
+        this.active = true;
+        writeToFile();
     }
 
-    private void writeline() {
+    private void writeToFile() {
         fileLock.lock();
+        try {
+            File file = new File("SellerList.txt");
+            List<String> lines = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"))) {
-            String line;
-            ArrayList<String> lines = new ArrayList<>();
-            int LineFound = 0;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains(this.Username)) {
-                    line = this.Username + "," + this.Password + "," + this.rating + "," + this.ratingCount + "," + this.Active;
-                    LineFound = 1;   
+            if (file.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    boolean updated = false;
+
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split(",");
+                        if (parts.length >= 5 && parts[0].equals(this.username)) {
+                            line = this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active;
+                            updated = true;
+                        }
+                        lines.add(line);
+                    }
+
+                    if (!updated) {
+                        lines.add(this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active);
+                    }
                 }
-                lines.add(line);
-                
+            } else {
+                lines.add(this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active);
             }
-            if (LineFound == 0) {
-                lines.add(this.Username + "," + this.Password + "," + this.rating + "," + this.ratingCount + "," + this.Active);
-            }
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("SellerList.txt", false))) { 
-                for (String newline : lines) {
-                    writer.write(newline); 
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                for (String line : lines) {
+                    writer.write(line);
                     writer.newLine();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } 
-        } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                fileLock.unlock();
-            }
-    }
-
-    @Override
-    public void sendMessageToBuyer(String buyerUsername, String message) {
-        
-        this.messages.add(buyerUsername);
-        this.messages.add(message);
-
-    }
-
-    @Override
-    public void setPassword(String Password) {
-
-        this.Password = Password;
-
-    }
-
-    @Override
-    public ArrayList<String> getListings() {
-        fileLock.lock();
-        ArrayList<String> myListings = new ArrayList<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader("AuctionList.txt"))) {
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts[4].equals(this.Username)) {
-                    myListings.add(line);
                 }
             }
         } catch (IOException e) {
@@ -93,61 +62,112 @@ public class Seller implements SellerInterface{
         } finally {
             fileLock.unlock();
         }
-
-        return myListings;
     }
 
-    @Override
+    public void setPassword(String newPassword) {
+        this.password = newPassword;
+        writeToFile();
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public String getUsername() {
+        return this.username;
+    }
+
+    public void sendMessageToBuyer(String buyer, String message) {
+        if (this.messages == null) {
+            this.messages = new ArrayList<>();
+        }
+        this.messages.add(buyer);
+        this.messages.add(message);
+    }
+
+    public ArrayList<String> getMessages() {
+        return this.messages;
+    }
+
+    public ArrayList<String> getMessages(String buyer) {
+        ArrayList<String> filtered = new ArrayList<>();
+        for (int i = 0; i < messages.size(); i += 2) {
+            String storedBuyer = messages.get(i);
+            String msg = messages.get(i + 1);
+            if (storedBuyer.equals(buyer)) {
+                filtered.add(msg);
+            }
+        }
+        return filtered;
+    }
+
+    public void addRating(double newRating) {
+        this.rating = (this.rating * this.ratingCount + newRating) / (++this.ratingCount);
+        writeToFile();
+    }
+
+    public double getRating() {
+        return this.rating;
+    }
+
+    public int getRatingCount() {
+        return this.ratingCount;
+    }
+
+    public boolean isActive() {
+        return this.active;
+    }
+
+    public void deactivate() {
+        this.active = false;
+        writeToFile();
+    }
+
     public void deleteAccount() {
-
-        this.Active = false;
-        writeline();
-
+        deactivate();
     }
 
-    @Override
-    public String getRating() {
-        
+    public void loadFromFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts[0].equals(this.Username)) {
-                    return parts[2];
+                if (parts.length >= 5 && parts[0].equals(this.username)) {
+                    this.password = parts[1];
+                    this.rating = Double.parseDouble(parts[2]);
+                    this.ratingCount = Integer.parseInt(parts[3]);
+                    this.active = Boolean.parseBoolean(parts[4]);
+                    return;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
-    @Override
-    public String getUsername() {
+    public List<String> getListings() {
+        List<String> listings = new ArrayList<>();
+        File file = new File("AuctionList.txt");
 
-        return this.Username;
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return listings;
+            }
+        }
 
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(this.username)) {
+                    listings.add(line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return listings;
     }
-
-    @Override
-    public String getPassword() {
-
-        return this.Password;
-
-    }
-
-    @Override
-    public boolean isActive() {
-
-        return this.Active;
-
-    }
-
-    @Override
-    public ArrayList<String> getMessages(String User) {
-
-        return messages;
-
-    }
-
 }
