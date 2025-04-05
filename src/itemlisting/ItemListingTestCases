@@ -1,106 +1,96 @@
-import java.io.*;
+import org.junit.jupiter.api.*;
+
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
 
-public class ItemListingManualTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+class ItemListingTest {
 
     private static final String TEST_AUCTION_FILE = "AuctionList.txt";
 
-    public static void main(String[] args) throws Exception {
-        setup();
-
-        run("CreateItem", ItemListingManualTest::testCreateItemWritesToFile);
-        run("SetItemName", ItemListingManualTest::testSetItemName);
-        run("SetItemDescription", ItemListingManualTest::testSetItemDescription);
-        run("SetBuyNowPrice", ItemListingManualTest::testSetBuyNowItemPrice);
-        run("PlaceValidBid", ItemListingManualTest::testPlaceValidBid);
-        run("PlaceInvalidBid", ItemListingManualTest::testPlaceInvalidBid);
-        run("BuyNowSuccess", ItemListingManualTest::testBuyNowSuccess);
-        run("BuyNowFailIfPriceUnset", ItemListingManualTest::testBuyNowFailsWithoutPrice);
-        run("AuctionEndsAutomatically", ItemListingManualTest::testAuctionEndsAutomatically);
+    @BeforeEach
+    void setup() throws IOException {
+        Files.write(Paths.get(TEST_AUCTION_FILE), new byte[0]); // clear test file
     }
 
-    @FunctionalInterface
-    interface TestCase {
-        void run() throws Exception;
+    @AfterEach
+    void cleanup() throws IOException {
+        Files.deleteIfExists(Paths.get(TEST_AUCTION_FILE));
     }
 
-    static void run(String name, TestCase test) {
-        try {
-            test.run();
-            System.out.println("[PASS] " + name);
-        } catch (Throwable e) {
-            System.out.println("[FAIL] " + name + " – " + e.getMessage());
-        }
-    }
-
-    static void setup() throws IOException {
-        Files.write(Paths.get(TEST_AUCTION_FILE), new byte[0]); // Clear auction file
-    }
-
-    static void testCreateItemWritesToFile() throws IOException {
+    @Test
+    void testCreateItemWritesToFile() throws IOException {
         ItemListing item = new ItemListing("Laptop", "Gaming laptop", 300, "seller1", 2000);
         List<String> lines = Files.readAllLines(Paths.get(TEST_AUCTION_FILE));
-        if (lines.isEmpty() || !lines.get(0).contains("Laptop")) {
-            throw new AssertionError("Item not written to file.");
-        }
+        assertFalse(lines.isEmpty(), "Auction file should not be empty after item creation");
+        assertTrue(lines.get(0).contains("Laptop"), "Item not written correctly to file");
     }
 
-    static void testSetItemName() throws IOException {
+    @Test
+    void testSetItemName() throws IOException {
         ItemListing item = new ItemListing("OldName", "desc", 100, "seller1", 2000);
         item.setItemName("NewName");
         String lastLine = getLastLine(TEST_AUCTION_FILE);
-        if (!lastLine.contains("NewName")) throw new AssertionError("Item name not updated.");
+        assertTrue(lastLine.contains("NewName"), "Item name not updated in file");
     }
 
-    static void testSetItemDescription() throws IOException {
+    @Test
+    void testSetItemDescription() throws IOException {
         ItemListing item = new ItemListing("Item", "Old desc", 100, "seller1", 2000);
         item.setItemDescription("Updated desc");
         String lastLine = getLastLine(TEST_AUCTION_FILE);
-        if (!lastLine.contains("Updated desc")) throw new AssertionError("Description not updated.");
+        assertTrue(lastLine.contains("Updated desc"), "Description not updated in file");
     }
 
-    static void testSetBuyNowItemPrice() throws IOException {
+    @Test
+    void testSetBuyNowItemPrice() throws IOException {
         ItemListing item = new ItemListing("Item", "desc", 100, "seller1", 2000);
         item.setBuyNowItemPrice(500);
         String lastLine = getLastLine(TEST_AUCTION_FILE);
-        if (!lastLine.contains("500.0")) throw new AssertionError("Buy-now price not updated.");
+        assertTrue(lastLine.contains("500.0"), "Buy-now price not updated");
     }
 
-    static void testPlaceValidBid() throws IOException {
+    @Test
+    void testPlaceValidBid() throws IOException {
         ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
         item.placeBid(250, "buyer1");
         String lastLine = getLastLine(TEST_AUCTION_FILE);
-        if (!lastLine.contains("buyer1")) throw new AssertionError("Valid bid not recorded.");
+        assertTrue(lastLine.contains("buyer1"), "Valid bid not recorded in file");
     }
 
-    static void testPlaceInvalidBid() throws IOException {
+    @Test
+    void testPlaceInvalidBid() throws IOException {
         ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
-        item.placeBid(100, "buyer1");  // Invalid bid
+        item.placeBid(100, "buyer1");  // Too low
         String lastLine = getLastLine(TEST_AUCTION_FILE);
-        if (lastLine.contains("buyer1")) throw new AssertionError("Invalid bid was accepted.");
+        assertFalse(lastLine.contains("buyer1"), "Invalid bid should not be accepted");
     }
 
-    static void testBuyNowSuccess() throws IOException {
+    @Test
+    void testBuyNowSuccess() throws IOException {
         ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
         item.setBuyNowItemPrice(400);
         boolean success = item.buyNow("buyer1");
-        if (!success) throw new AssertionError("Buy-now should have succeeded.");
+        assertTrue(success, "Buy-now should succeed with valid price");
     }
 
-    static void testBuyNowFailsWithoutPrice() throws IOException {
+    @Test
+    void testBuyNowFailsWithoutPrice() throws IOException {
         ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
         boolean success = item.buyNow("buyer1");
-        if (success) throw new AssertionError("Buy-now succeeded with no price set.");
+        assertFalse(success, "Buy-now should fail when price is not set");
     }
 
-    static void testAuctionEndsAutomatically() throws Exception {
-        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 500); // 0.5 sec auction
-        Thread.sleep(1000);
-        if (item.isActive()) throw new AssertionError("Auction should have ended automatically.");
+    @Test
+    void testAuctionEndsAutomatically() throws Exception {
+        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 500); // 0.5 second
+        Thread.sleep(1000);  // wait for it to expire
+        assertFalse(item.isActive(), "Auction should automatically end after duration");
     }
 
-    static String getLastLine(String filePath) throws IOException {
+    private String getLastLine(String filePath) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         return lines.get(lines.size() - 1);
     }
