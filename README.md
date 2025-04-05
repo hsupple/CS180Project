@@ -1,91 +1,29 @@
-CS180 Auction House Project
-Note:
-Always pull from the repository before committing changes!
+# CS18000 Auction House Team Project
 
+Program utilizing Java interfaces and classes to ultimately create an interactive Java Application where a user may list auctions and bid on other item listings.
 
-git pull origin main
-git add .
-git commit -m "## NEW UPDATE MESSAGE ##"
-git push origin main
-👥 Team Responsibilities
-Feature	Team Member
-Interface Design	Parshawn
-Database Development	Jasmine
-Database Logic	Hayden
-Messaging and Search	Sophie
-Data Persistence & Thread Safety	Adwin
-🧩 Project Overview
-An online Auction House platform that supports buying, selling, and bidding on items.
+## Features
+- Create Buyer Account
+- Create Seller Account
+- Password protected user accounts
+- Creating auction listings with timers, buy now prices, and bidding options
+- Buyer accounts may bid on auctions or use the buy it now option to purchase an item as a seller-determined price.
+- Database to contain all listings and user accounts
+- Search functionality for both Users and Item listings
+- Messaging between Buyers and Sellers
+- Account deletion && Authorized Password Changes
 
-✅ Core Functionality
-User account creation (Buyer & Seller)
+## Installation
+- Change to desired Directory
+- Clone the Repo
+$ git clone https://github.com/hsupple/CS180Project.git
 
-Password-protected login
+# Roadmap for Future Weeks
+- Link all classes and interfaces to interact through client and server ports.
+- Create a GUI to make the design interactive and functional for a user
 
-Account deletion
-
-Create/delete item listings
-
-Item search functionality
-
-Bidding system with auction timers
-
-Messaging system between buyers and sellers
-
-Sellers can respond to buyer messages
-
-🌟 Extra Credit Features
-Support for uploading and displaying item pictures
-
-👥 Additional Features for Teams of 5
-Seller ratings
-
-Dedicated seller store pages
-
-Seller search
-
-Seller can end auction early
-
-Seller can set a "Buy It Now" price
-
-Buyers can purchase via "Buy It Now"
-
-View previously auctioned items
-
-🚧 Project Phases
-🧱 Phase 1: Database Design
-Build complete backend database structure
-
-Define all interfaces and write test cases
-
-Focus on:
-
-What data is stored?
-
-How is it accessed?
-
-What is computed?
-
-Ensure thread safety (see HW10)
-
-Submission: Include README.txt and all .java files in Vocareum
-
-🔌 Phase 2: Server Implementation
-Connect server to database
-
-Begin client development
-
-Design architecture for all server-side computation
-
-Client should communicate only with the server
-
-Submission: Include README.txt and all .java files in Vocareum
-
-🖥️ Phase 3: GUI Implementation
-Develop client-side graphical user interface
-
-Final opportunity to revise previous phases
-
-GUI is only required for the client, not the server
-
-Submission: Include README.txt and all .java files in Vocareum
+# Authors
+- @Phaynes742
+- @hsupple
+- @jburkett013
+- @addy-ops
