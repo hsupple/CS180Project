@@ -97,7 +97,7 @@ public class ItemListing implements Listing {
     private void addItemToList() {
         String newItem = formatItem();
         items.add(newItem);
-        itemLine = items.size() - 1; // ✅ Set before save
+        itemLine = items.size() - 1; 
         saveToFile();
     }
 
