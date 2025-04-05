@@ -1,0 +1,107 @@
+import java.io.*;
+import java.nio.file.*;
+import java.util.List;
+
+public class ItemListingManualTest {
+
+    private static final String TEST_AUCTION_FILE = "AuctionList.txt";
+
+    public static void main(String[] args) throws Exception {
+        setup();
+
+        run("CreateItem", ItemListingManualTest::testCreateItemWritesToFile);
+        run("SetItemName", ItemListingManualTest::testSetItemName);
+        run("SetItemDescription", ItemListingManualTest::testSetItemDescription);
+        run("SetBuyNowPrice", ItemListingManualTest::testSetBuyNowItemPrice);
+        run("PlaceValidBid", ItemListingManualTest::testPlaceValidBid);
+        run("PlaceInvalidBid", ItemListingManualTest::testPlaceInvalidBid);
+        run("BuyNowSuccess", ItemListingManualTest::testBuyNowSuccess);
+        run("BuyNowFailIfPriceUnset", ItemListingManualTest::testBuyNowFailsWithoutPrice);
+        run("AuctionEndsAutomatically", ItemListingManualTest::testAuctionEndsAutomatically);
+    }
+
+    @FunctionalInterface
+    interface TestCase {
+        void run() throws Exception;
+    }
+
+    static void run(String name, TestCase test) {
+        try {
+            test.run();
+            System.out.println("[PASS] " + name);
+        } catch (Throwable e) {
+            System.out.println("[FAIL] " + name + " – " + e.getMessage());
+        }
+    }
+
+    static void setup() throws IOException {
+        Files.write(Paths.get(TEST_AUCTION_FILE), new byte[0]); // Clear auction file
+    }
+
+    static void testCreateItemWritesToFile() throws IOException {
+        ItemListing item = new ItemListing("Laptop", "Gaming laptop", 300, "seller1", 2000);
+        List<String> lines = Files.readAllLines(Paths.get(TEST_AUCTION_FILE));
+        if (lines.isEmpty() || !lines.get(0).contains("Laptop")) {
+            throw new AssertionError("Item not written to file.");
+        }
+    }
+
+    static void testSetItemName() throws IOException {
+        ItemListing item = new ItemListing("OldName", "desc", 100, "seller1", 2000);
+        item.setItemName("NewName");
+        String lastLine = getLastLine(TEST_AUCTION_FILE);
+        if (!lastLine.contains("NewName")) throw new AssertionError("Item name not updated.");
+    }
+
+    static void testSetItemDescription() throws IOException {
+        ItemListing item = new ItemListing("Item", "Old desc", 100, "seller1", 2000);
+        item.setItemDescription("Updated desc");
+        String lastLine = getLastLine(TEST_AUCTION_FILE);
+        if (!lastLine.contains("Updated desc")) throw new AssertionError("Description not updated.");
+    }
+
+    static void testSetBuyNowItemPrice() throws IOException {
+        ItemListing item = new ItemListing("Item", "desc", 100, "seller1", 2000);
+        item.setBuyNowItemPrice(500);
+        String lastLine = getLastLine(TEST_AUCTION_FILE);
+        if (!lastLine.contains("500.0")) throw new AssertionError("Buy-now price not updated.");
+    }
+
+    static void testPlaceValidBid() throws IOException {
+        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
+        item.placeBid(250, "buyer1");
+        String lastLine = getLastLine(TEST_AUCTION_FILE);
+        if (!lastLine.contains("buyer1")) throw new AssertionError("Valid bid not recorded.");
+    }
+
+    static void testPlaceInvalidBid() throws IOException {
+        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
+        item.placeBid(100, "buyer1");  // Invalid bid
+        String lastLine = getLastLine(TEST_AUCTION_FILE);
+        if (lastLine.contains("buyer1")) throw new AssertionError("Invalid bid was accepted.");
+    }
+
+    static void testBuyNowSuccess() throws IOException {
+        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
+        item.setBuyNowItemPrice(400);
+        boolean success = item.buyNow("buyer1");
+        if (!success) throw new AssertionError("Buy-now should have succeeded.");
+    }
+
+    static void testBuyNowFailsWithoutPrice() throws IOException {
+        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
+        boolean success = item.buyNow("buyer1");
+        if (success) throw new AssertionError("Buy-now succeeded with no price set.");
+    }
+
+    static void testAuctionEndsAutomatically() throws Exception {
+        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 500); // 0.5 sec auction
+        Thread.sleep(1000);
+        if (item.isActive()) throw new AssertionError("Auction should have ended automatically.");
+    }
+
+    static String getLastLine(String filePath) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        return lines.get(lines.size() - 1);
+    }
+}
