@@ -1,27 +1,36 @@
-package buyer;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Buyer class that allows for password protected class with features to make bids on aucutions
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
 public class Buyer {
     // Define all private values
-    private final String Username;
-    private String Password;
+    private final String username;
+    private String password;
 
     private ArrayList<String> messages;
 
-    private boolean Active;
+    private boolean active;
 
     private final ReentrantLock fileLock = new ReentrantLock();
     
     //Constructor for Buyer class, initialize name and password
-    public Buyer(String Username, String Password) {
-        this.Username = Username;
-        this.Password = Password;
+    public Buyer(String username, String password) {
+        this.username = username;
+        this.password = password;
 
-        this.Active = true;
+        this.active = true;
         writeline();
     }
 
@@ -32,17 +41,17 @@ public class Buyer {
         try (BufferedReader reader = new BufferedReader(new FileReader("BuyerList.txt"))) {
             String line;
             List<String> lines = new ArrayList<>();
-            int LineFound = 0;
+            int lineFound = 0;
             while ((line = reader.readLine()) != null) {
-                if (line.contains(this.Username)) {
-                    line = this.Username + "," + this.Password + "," + this.Active;
-                    LineFound = 1;   
+                if (line.contains(this.username)) {
+                    line = this.username + "," + this.password + "," + this.active;
+                    lineFound = 1;   
                 }
                 lines.add(line);
                 
             }
-            if (LineFound == 0) {
-                lines.add(this.Username + "," + this.Password);
+            if (lineFound == 0) {
+                lines.add(this.username + "," + this.password);
             }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("BuyerList.txt", false))) { 
                 for (String newline : lines) {
@@ -53,10 +62,10 @@ public class Buyer {
                 e.printStackTrace();
             } 
         } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                fileLock.unlock();
-            }
+            e.printStackTrace();
+        } finally {
+            fileLock.unlock();
+        }
     }
 
     // method to add messages to array to be sent across server to client
@@ -68,9 +77,9 @@ public class Buyer {
     }
 
     // Setter class to set password for buyer user
-    public void setPassword(String Password) {
+    public void setPassword(String password) {
 
-        this.Password = Password;
+        this.password = password;
         writeline();
 
     }
@@ -86,7 +95,6 @@ public class Buyer {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts[0].equals(itemID)) {
-                    parts[6] = this.Username;  
                     parts[7] = String.valueOf(price);
                     line = String.join(",", parts); 
                     itemFound = true;
@@ -94,7 +102,7 @@ public class Buyer {
                 lines.add(line);
             }
 
-           if (itemFound) {
+            if (itemFound) {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter("AuctionList.txt"))) {
                     for (String updatedLine : lines) {
                         writer.write(updatedLine);
@@ -131,7 +139,7 @@ public class Buyer {
                     
                     parts[3] = String.valueOf(Double.parseDouble(parts[3]) + 1);
                     double newRating = (currentRating + rating) / (Double.parseDouble(parts[3]));
-                    parts[2] = Double.toString(newRating).substring(0,4);
+                    parts[2] = Double.toString(newRating).substring(0,  4);
                 }
                 updatedLines.add(String.join(",", parts));
             }
@@ -162,26 +170,26 @@ public class Buyer {
     // getter method for username
     public String getUsername() {
 
-        return this.Username;
+        return this.username;
 
     }
 
     // Getter password for password
     public String getPassword() {
 
-        return this.Password;
+        return this.password;
 
     }
 
     // Method used to display the status of active
     public boolean isActive() {
 
-        return this.Active;
+        return this.active;
 
     }
 
     // Getter method to get message arraylist
-    public ArrayList<String> getMessages(String User) {
+    public ArrayList<String> getMessages() {
 
         return this.messages;
 

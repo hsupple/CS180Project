@@ -5,6 +5,17 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test for the Seller object, testing to ensure all creations oand functions work.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
 class SellerTest {
 
     private static final Path SELLER_FILE = Paths.get("SellerList.txt");
