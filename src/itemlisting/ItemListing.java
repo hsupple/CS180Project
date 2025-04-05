@@ -1,11 +1,13 @@
 package itemlisting;
 
+
+   
 import java.io.*;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ItemListing implements Listing{
+public class ItemListing implements Listing {
 
     private int itemLine;
 
@@ -24,7 +26,7 @@ public class ItemListing implements Listing{
 
     private final int itemId;
     private final String seller;
-    private static final ReentrantLock fileLock = new ReentrantLock(); 
+    private static final ReentrantLock fileLock = new ReentrantLock();
     private static final List<String> items = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -35,27 +37,21 @@ public class ItemListing implements Listing{
         this.itemDescription = itemDescription;
         this.buyNowItemPrice = -1;
         this.bidItemPrice = bidItemPrice;
+        this.currentBidPrice = 0;
         this.isSold = false;
         this.buyer = "None";
         loadItemsFromFile();
 
-        this.itemId = generateItemId(); 
+        this.itemId = generateItemId();
+        addItemToList();
         startListing();
-        addItemToList(); 
-
     }
 
     private void startListing() {
-        scheduler.schedule(new Runnable() {
-            @Override
-            public void run() {
-                endListing();
-            }
-        }, (long) auctionDuration, TimeUnit.MILLISECONDS);
+        scheduler.schedule(this::endListing, (long) auctionDuration, TimeUnit.MILLISECONDS);
         this.isActive = true;
-
     }
-    
+
     private int generateItemId() {
         int maxId = 0;
         fileLock.lock();
@@ -67,7 +63,8 @@ public class ItemListing implements Listing{
                     try {
                         int id = Integer.parseInt(parts[0]);
                         maxId = Math.max(maxId, id);
-                    } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException ignored) {
+                    }
                 }
             }
         } catch (IOException e) {
@@ -100,7 +97,7 @@ public class ItemListing implements Listing{
     private void addItemToList() {
         String newItem = formatItem();
         items.add(newItem);
-        itemLine = items.size() - 1; 
+        itemLine = items.size() - 1; // ✅ Set before save
         saveToFile();
     }
 
@@ -114,10 +111,8 @@ public class ItemListing implements Listing{
         fileLock.lock();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("AuctionList.txt", false))) {
             for (String line : items) {
-                if (line.substring(line.length() - 5, line.length()).equals("false") || line.substring(0, 4).equals("1001")) {
-                    writer.write(line + "\n");                
-                    }
-                
+                writer.write(line);
+                writer.newLine();  
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -125,6 +120,7 @@ public class ItemListing implements Listing{
             fileLock.unlock();
         }
     }
+
     @Override
     public synchronized void setItemName(String itemName) {
         this.itemName = itemName;
@@ -151,11 +147,11 @@ public class ItemListing implements Listing{
 
     @Override
     public void updateItemLine() {
-        if (itemLine > 0 && itemLine < items.size()) {
+        if (itemLine >= 0 && itemLine < items.size()) {
             items.set(itemLine, formatItem());
             saveToFile();
         } else {
-            System.out.println("Error: Invalid item index.");
+            System.out.println("Error: Invalid item index (" + itemLine + ")");
         }
     }
 
@@ -212,7 +208,4 @@ public class ItemListing implements Listing{
         }
         return false;
     }
-
-
 }
-
