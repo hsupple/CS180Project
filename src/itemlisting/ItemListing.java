@@ -1,11 +1,21 @@
 package itemlisting;
 
-
-   
 import java.io.*;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Class that creates a n item listing with a generated ID, a name, a description, a buyer, a price, and checker values.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
 
 public class ItemListing implements Listing {
 
@@ -26,11 +36,12 @@ public class ItemListing implements Listing {
 
     private final int itemId;
     private final String seller;
-    private static final ReentrantLock fileLock = new ReentrantLock();
-    private static final List<String> items = new CopyOnWriteArrayList<>();
+    private static final ReentrantLock FILELOCK = new ReentrantLock();
+    private static final List<String> ITEMS = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    public ItemListing(String itemName, String itemDescription, double bidItemPrice, String seller, double auctionDuration) {
+    public ItemListing(String itemName, String itemDescription, 
+                       double bidItemPrice, String seller, double auctionDuration) {
         this.auctionDuration = auctionDuration;
         this.seller = seller;
         this.itemName = itemName;
@@ -54,7 +65,7 @@ public class ItemListing implements Listing {
 
     private int generateItemId() {
         int maxId = 0;
-        fileLock.lock();
+        FILELOCK.lock();
         try (BufferedReader reader = new BufferedReader(new FileReader("AuctionList.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -63,61 +74,63 @@ public class ItemListing implements Listing {
                     try {
                         int id = Integer.parseInt(parts[0]);
                         maxId = Math.max(maxId, id);
-                    } catch (NumberFormatException ignored) {
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            fileLock.unlock();
+            FILELOCK.unlock();
         }
         return maxId + 1;
     }
 
     private void loadItemsFromFile() {
-        fileLock.lock();
+        FILELOCK.lock();
         try {
-            items.clear();
+            ITEMS.clear();
             File file = new File("AuctionList.txt");
             if (!file.exists()) return;
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    items.add(line);
+                    ITEMS.add(line);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            fileLock.unlock();
+            FILELOCK.unlock();
         }
     }
 
     private void addItemToList() {
         String newItem = formatItem();
-        items.add(newItem);
-        itemLine = items.size() - 1; 
+        ITEMS.add(newItem);
+        itemLine = ITEMS.size() - 1; 
         saveToFile();
     }
 
     @Override
     public String formatItem() {
-        return itemId + "," + itemName + "," + buyNowItemPrice + "," + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
+        return itemId + "," + itemName + "," + buyNowItemPrice + "," 
+            + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
     }
 
     @Override
     public void saveToFile() {
-        fileLock.lock();
+        FILELOCK.lock();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("AuctionList.txt", false))) {
-            for (String line : items) {
+            for (String line : ITEMS) {
                 writer.write(line);
                 writer.newLine();  
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            fileLock.unlock();
+            FILELOCK.unlock();
         }
     }
 
@@ -147,8 +160,8 @@ public class ItemListing implements Listing {
 
     @Override
     public void updateItemLine() {
-        if (itemLine >= 0 && itemLine < items.size()) {
-            items.set(itemLine, formatItem());
+        if (itemLine >= 0 && itemLine < ITEMS.size()) {
+            ITEMS.set(itemLine, formatItem());
             saveToFile();
         } else {
             System.out.println("Error: Invalid item index (" + itemLine + ")");
@@ -188,10 +201,10 @@ public class ItemListing implements Listing {
     }
 
     @Override
-    public synchronized void placeBid(double bidPrice, String buyer) {
+    public synchronized void placeBid(double bidPrice, String currentBuyer) {
         if (!isSold && bidPrice > currentBidPrice && bidPrice >= bidItemPrice) {
             this.currentBidPrice = bidPrice;
-            this.buyer = buyer;
+            this.buyer = currentBuyer;
             updateItemLine();
         } else {
             System.out.println("Bid not accepted. Please check the conditions.");
@@ -199,10 +212,10 @@ public class ItemListing implements Listing {
     }
 
     @Override
-    public synchronized boolean buyNow(String buyer) {
+    public synchronized boolean buyNow(String currentBuyer) {
         if (!this.isSold && this.buyNowItemPrice > 0) {
             this.isSold = true;
-            this.buyer = buyer;
+            this.buyer = currentBuyer;
             updateItemLine();
             return true;
         }

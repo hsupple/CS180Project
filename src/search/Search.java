@@ -5,6 +5,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Class that creates a search, taking a string query and searching for all users and listings.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
+
 public class Search {
 
     private final String query;
@@ -13,48 +25,48 @@ public class Search {
 
     public Search(String query) {
         this.query = query;
-        this.users.addAll(getUsers(query));
-        this.listings.addAll(getListings(query));
+        this.users.addAll(getUsers());
+        this.listings.addAll(getListings());
     }
 
-    private ArrayList<String> getUsers(String query) {
-        ArrayList<String> users = new ArrayList<>();
+    private ArrayList<String> getUsers() {
+        ArrayList<String> userList = new ArrayList<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"));
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.contains(query)) {
+                if (line.contains(this.query)) {
                     String[] parts = line.split(",");
-                    users.add(parts[0]);
+                    userList.add(parts[0]);
                 }
             }
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return users;
+        return userList;
 
     }
 
-    private ArrayList<String> getListings(String query) {
-        ArrayList<String> Listings = new ArrayList<>();
+    private ArrayList<String> getListings() {
+        ArrayList<String> listingList = new ArrayList<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"));
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.contains(query)) {
+                if (line.contains(this.query)) {
                     String[] parts = line.split(",");
-                    Listings.add(parts[0]);
-                    Listings.add(parts[1]);
-                    Listings.add(parts[2]);
-                    Listings.add(parts[7]);
+                    listingList.add(parts[0]);
+                    listingList.add(parts[1]);
+                    listingList.add(parts[2]);
+                    listingList.add(parts[7]);
                 }
             }
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Listings;
+        return listingList;
 
     }
 
@@ -62,7 +74,7 @@ public class Search {
         ArrayList<String> results = new ArrayList<>();
         results.addAll(users);
         results.addAll(listings); 
-    return results;
-}
+        return results;
+    }
 
 }
