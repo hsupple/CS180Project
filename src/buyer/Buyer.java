@@ -170,13 +170,4 @@ public class Buyer {
 
     }
 
-    public static void main(String[] args) {
-        Buyer hello = new Buyer("helloWORLD", "world");
-
-        Buyer hello2 = new Buyer("whatsup", "world2");
-
-        hello2.deleteAccount();
-
-    }
-
 }
