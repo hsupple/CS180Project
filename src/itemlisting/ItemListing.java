@@ -1,9 +1,11 @@
+package itemlisting;
+
 import java.io.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ItemListing {
+public class ItemListing implements Listing {
 
     private int itemLine;
 
@@ -26,24 +28,24 @@ public class ItemListing {
     private static final ReentrantLock fileLock = new ReentrantLock(); 
     private static final List<String> items = new CopyOnWriteArrayList<>();
 
-public ItemListing(String itemName, String itemDescription, double bidItemPrice, String seller, double auctionDuration) {
-    this.isActive = true;
-    this.auctionStartTime = System.currentTimeMillis() / 1000.0;
-    this.auctionDuration = auctionDuration;
-    this.seller = seller;
-    this.itemName = itemName;
-    this.itemDescription = itemDescription;
-    this.buyNowItemPrice = -1;
-    this.bidItemPrice = bidItemPrice;
-    this.isSold = false;
-    this.buyer = "None";
+    public ItemListing(String itemName, String itemDescription, double bidItemPrice, String seller, double auctionDuration) {
+        this.isActive = true;
+        this.auctionStartTime = System.currentTimeMillis() / 1000.0;
+        this.auctionDuration = auctionDuration;
+        this.seller = seller;
+        this.itemName = itemName;
+        this.itemDescription = itemDescription;
+        this.buyNowItemPrice = -1;
+        this.bidItemPrice = bidItemPrice;
+        this.isSold = false;
+        this.buyer = "None";
 
-    loadItemsFromFile(); // ✅ Load once
+        loadItemsFromFile();
 
-    this.itemId = generateItemId(); 
-    addItemToList(); 
-}
-
+        this.itemId = generateItemId(); 
+        addItemToList(); 
+    }
+    
     private int generateItemId() {
         int maxId = 0;
         fileLock.lock();
@@ -88,14 +90,16 @@ public ItemListing(String itemName, String itemDescription, double bidItemPrice,
     private void addItemToList() {
         String newItem = formatItem();
         items.add(newItem);
-        itemLine = items.size() - 1;  // Set itemLine to last added index
+        itemLine = items.size() - 1; 
         saveToFile();
     }
 
-    private String formatItem() {
-        return itemId + "," + itemName + "," + bidItemPrice + "," + buyNowItemPrice + "," + itemDescription + "," + seller + "," + buyer + "," + isSold;
+    @Override
+    public String formatItem() {
+        return itemId + "," + itemName + "," + buyNowItemPrice + "," + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
     }
 
+    @Override
     public void saveToFile() {
         fileLock.lock();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("AuctionList.txt", false))) {
@@ -111,28 +115,32 @@ public ItemListing(String itemName, String itemDescription, double bidItemPrice,
             fileLock.unlock();
         }
     }
-
+    @Override
     public synchronized void setItemName(String itemName) {
         this.itemName = itemName;
         updateItemLine();
     }
 
+    @Override
     public synchronized void setItemDescription(String itemDescription) {
         this.itemDescription = itemDescription;
         updateItemLine();
     }
 
+    @Override
     public synchronized void setBuyNowItemPrice(double buyNowItemPrice) {
         this.buyNowItemPrice = buyNowItemPrice;
         updateItemLine();
     }
 
+    @Override
     public synchronized void setBidItemPrice(double bidItemPrice) {
         this.bidItemPrice = bidItemPrice;
         updateItemLine();
     }
 
-    private void updateItemLine() {
+    @Override
+    public void updateItemLine() {
         if (itemLine > 0 && itemLine < items.size()) {
             items.set(itemLine, formatItem());
             saveToFile();
@@ -141,25 +149,30 @@ public ItemListing(String itemName, String itemDescription, double bidItemPrice,
         }
     }
 
+    @Override
     public int getItemId() {
         return itemId;
     }
 
+    @Override
     public String getItemName() {
         return itemName;
     }
 
+    @Override
     public String getItemDescription() {
         return itemDescription;
     }
 
+    @Override
     public double getBuyNowItemPrice() {
         return buyNowItemPrice;
     }
 
+    @Override
     public synchronized void placeBid(double bidPrice, String buyer) {
         if (!isSold && bidPrice > currentBidPrice && bidPrice >= bidItemPrice) {
-            currentBidPrice = bidPrice;
+            this.currentBidPrice = bidPrice;
             this.buyer = buyer;
             updateItemLine();
         } else {
@@ -167,16 +180,18 @@ public ItemListing(String itemName, String itemDescription, double bidItemPrice,
         }
     }
 
+    @Override
     public synchronized boolean buyNow(String buyer) {
         if (!this.isSold && this.buyNowItemPrice > 0) {
             this.isSold = true;
-            this.buyer = buyer; // Replace with actual buyer information
+            this.buyer = buyer;
             updateItemLine();
             return true;
         }
         return false;
     }
 
+    @Override
     public boolean isAuctionActive() {
         if (this.isActive) return false;
         long currentTime = System.currentTimeMillis();
