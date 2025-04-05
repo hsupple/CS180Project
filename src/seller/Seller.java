@@ -3,6 +3,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Class that creates a Seller user, which is password protected and 
+ may make listings. Also has a rating from the seller class.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
+
 public class Seller {
 
     private final String username;
@@ -37,18 +50,21 @@ public class Seller {
                     while ((line = reader.readLine()) != null) {
                         String[] parts = line.split(",");
                         if (parts.length >= 5 && parts[0].equals(this.username)) {
-                            line = this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active;
+                            line = this.username + "," + this.password + "," 
+                                + this.rating + "," + this.ratingCount + "," + this.active;
                             updated = true;
                         }
                         lines.add(line);
                     }
 
                     if (!updated) {
-                        lines.add(this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active);
+                        lines.add(this.username + "," + this.password + "," + this.rating 
+                                  + "," + this.ratingCount + "," + this.active);
                     }
                 }
             } else {
-                lines.add(this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active);
+                lines.add(this.username + "," + this.password + "," + this.rating + "," 
+                          + this.ratingCount + "," + this.active);
             }
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {

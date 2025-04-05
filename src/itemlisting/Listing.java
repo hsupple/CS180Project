@@ -1,5 +1,16 @@
 package itemlisting;
 
+/**
+ * Interface for item listing to align item listing class.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
 public interface Listing {
 
     int getItemId();
