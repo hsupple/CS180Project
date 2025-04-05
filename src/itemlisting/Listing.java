@@ -6,6 +6,7 @@ public interface Listing {
 
     double getBuyNowItemPrice();
 
+    void endListing();
     void saveToFile();
     void setItemName(String itemName);
     void setItemDescription(String itemDescription);
@@ -15,8 +16,8 @@ public interface Listing {
     void updateItemLine();
 
     boolean buyNow(String buyer);
-    boolean isAuctionActive();
-
+    boolean isActive();
+    
     String formatItem();
     String getItemName();
     String getItemDescription();

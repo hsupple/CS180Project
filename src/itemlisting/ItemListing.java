@@ -2,10 +2,10 @@ package itemlisting;
 
 import java.io.*;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ItemListing implements Listing {
+public class ItemListing implements Listing{
 
     private int itemLine;
 
@@ -20,17 +20,15 @@ public class ItemListing implements Listing {
     private double bidItemPrice;
     private double currentBidPrice;
 
-    private final double auctionStartTime;
     private final double auctionDuration;
 
     private final int itemId;
     private final String seller;
     private static final ReentrantLock fileLock = new ReentrantLock(); 
     private static final List<String> items = new CopyOnWriteArrayList<>();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public ItemListing(String itemName, String itemDescription, double bidItemPrice, String seller, double auctionDuration) {
-        this.isActive = true;
-        this.auctionStartTime = System.currentTimeMillis() / 1000.0;
         this.auctionDuration = auctionDuration;
         this.seller = seller;
         this.itemName = itemName;
@@ -39,11 +37,23 @@ public class ItemListing implements Listing {
         this.bidItemPrice = bidItemPrice;
         this.isSold = false;
         this.buyer = "None";
-
         loadItemsFromFile();
 
         this.itemId = generateItemId(); 
+        startListing();
         addItemToList(); 
+
+    }
+
+    private void startListing() {
+        scheduler.schedule(new Runnable() {
+            @Override
+            public void run() {
+                endListing();
+            }
+        }, (long) auctionDuration, TimeUnit.MILLISECONDS);
+        this.isActive = true;
+
     }
     
     private int generateItemId() {
@@ -150,6 +160,18 @@ public class ItemListing implements Listing {
     }
 
     @Override
+    public void endListing() {
+        this.isActive = false;
+        this.isSold = true;
+        updateItemLine();
+    }
+
+    @Override
+    public boolean isActive() {
+        return isActive;
+    }
+
+    @Override
     public int getItemId() {
         return itemId;
     }
@@ -191,16 +213,6 @@ public class ItemListing implements Listing {
         return false;
     }
 
-    @Override
-    public boolean isAuctionActive() {
-        if (this.isActive) return false;
-        long currentTime = System.currentTimeMillis();
-        if ((currentTime - auctionStartTime) >= auctionDuration) {
-            this.isActive = true;
-            return false;
-        }
-        return true;
-    }
 
 }
 
