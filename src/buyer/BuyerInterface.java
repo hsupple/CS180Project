@@ -1,3 +1,5 @@
+package buyer;
+
 import java.util.ArrayList;
 /**
  * Interface to align to the Buyer class.
@@ -22,7 +24,7 @@ public interface BuyerInterface {
     String getUsername();
     String getPassword();
 
-    boolean isActive(); 
-    ArrayList<String> getMessages();
+    boolean isActive(String user); 
+    ArrayList<String> getMessages(String buyer);
 
 }

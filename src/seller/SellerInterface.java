@@ -1,3 +1,5 @@
+package seller;
+
 import java.util.ArrayList;
 
 /**
@@ -26,7 +28,7 @@ public interface SellerInterface {
 
     boolean isActive();
 
-    ArrayList<String> getListings();
+    //ArrayList<String> getListings();
     ArrayList<String> getMessages(String user);
 
 }

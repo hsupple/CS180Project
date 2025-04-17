@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import serverclient.AuctionClient;
 
 /**
  * Class that creates a search, taking a string query and searching for all users and listings.
@@ -21,6 +22,7 @@ public class Search {
 
     // Declare all private variables
     private final String query;
+    private AuctionClient client;
     private final ArrayList<String> users = new ArrayList<>();
     private final ArrayList<String> listings = new ArrayList<>();
     
@@ -29,6 +31,11 @@ public class Search {
         this.query = query;
         this.users.addAll(getUsers());
         this.listings.addAll(getListings());
+        try {
+            this.client = new AuctionClient();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // private method to get all matching users to the query

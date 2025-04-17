@@ -1,17 +1,16 @@
+package seller;
+
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReentrantLock;
+import serverclient.AuctionClient;
 
 public class Seller implements SellerInterface {
     private final String username;
     private String password;
     private double rating;
     private int ratingCount;
-    private final CopyOnWriteArrayList<String> messages = new CopyOnWriteArrayList<>();
     private boolean active;
-    private final ReentrantLock fileLock = new ReentrantLock();
+    private AuctionClient client;
 
     public Seller(String username, String password) {
         this.username = username;
@@ -19,60 +18,28 @@ public class Seller implements SellerInterface {
         this.rating = 0.0;
         this.ratingCount = 0;
         this.active = true;
-        writeToFile();
-    }
-
-    private void writeToFile() {
-        fileLock.lock();
         try {
-            File file = new File("SellerList.txt");
-            List<String> lines = new ArrayList<>();
-            boolean updated = false;
-            if (file.exists()) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        String[] parts = line.split(",");
-                        if (parts.length >= 5 && parts[0].equals(this.username)) {
-                            line = this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active;
-                            updated = true;
-                        }
-                        lines.add(line);
-                    }
-                }
-            }
-            if (!updated) {
-                lines.add(this.username + "," + this.password + "," + this.rating + "," + this.ratingCount + "," + this.active);
-            }
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                for (String l : lines) {
-                    writer.write(l);
-                    writer.newLine();
-                }
-            }
+            this.client = new AuctionClient();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            fileLock.unlock();
         }
     }
 
     @Override
     public synchronized void sendMessageToBuyer(String buyer, String message) {
-        messages.add(buyer);
-        messages.add(message);
+        client.sendMessage(this.username, buyer, message);
     }
 
     @Override
     public void setPassword(String password) {
         this.password = password;
-        writeToFile();
+        client.setPassword(this.username, password);
     }
 
     @Override
     public void deleteAccount() {
         this.active = false;
-        writeToFile();
+        client.deleteAccount(this.username, this.password);
     }
 
     @Override
@@ -87,6 +54,7 @@ public class Seller implements SellerInterface {
 
     @Override
     public String getRating() {
+        client.getRating(this.username);
         return String.valueOf(rating);
     }
 
@@ -96,58 +64,26 @@ public class Seller implements SellerInterface {
 
     @Override
     public boolean isActive() {
-        return active;
+        client.isActive(this.username);
+        return active; 
     }
 
-    @Override
+    /*@Override
     public ArrayList<String> getListings() {
-        ArrayList<String> listings = new ArrayList<>();
-        File file = new File("AuctionList.txt");
-        if (!file.exists()) {
-            return listings;
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains(this.username)) {
-                    listings.add(line);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return listings;
-    }
+        /*## IMPLEMENT LOGIC HERE ##*/
+    /*}
+    */
 
     @Override
     public ArrayList<String> getMessages(String buyer) {
-        ArrayList<String> filtered = new ArrayList<>();
-        for (int i = 0; i < messages.size(); i += 2) {
-            if (messages.get(i).equals(buyer)) {
-                filtered.add(messages.get(i + 1));
-            }
-        }
-        return filtered;
-    }
-
-    public void loadFromFile() {
-        fileLock.lock();
-        try (BufferedReader reader = new BufferedReader(new FileReader("SellerList.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 5 && parts[0].equals(this.username)) {
-                    this.password = parts[1];
-                    this.rating = Double.parseDouble(parts[2]);
-                    this.ratingCount = Integer.parseInt(parts[3]);
-                    this.active = Boolean.parseBoolean(parts[4]);
-                    return;
-                }
-            }
+        ArrayList<String> messages = new ArrayList<>();
+        try {
+            messages = client.getMessages(this.username, buyer);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            fileLock.unlock();
         }
+
+        return messages;
     }
+
 }
