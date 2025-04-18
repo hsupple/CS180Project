@@ -1,10 +1,7 @@
-package seller;
-
 import java.io.*;
 import java.util.ArrayList;
-import serverclient.AuctionClient;
 
-public class Seller implements SellerInterface {
+public class Seller {
     private final String username;
     private String password;
     private double rating;
@@ -20,39 +17,40 @@ public class Seller implements SellerInterface {
         this.active = true;
         try {
             this.client = new AuctionClient();
+            client.newSeller(username, password);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
+    //@Override
     public synchronized void sendMessageToBuyer(String buyer, String message) {
         client.sendMessage(this.username, buyer, message);
     }
 
-    @Override
+    //@Override
     public void setPassword(String password) {
         this.password = password;
         client.setPassword(this.username, password);
     }
 
-    @Override
-    public void deleteAccount() {
+    //@Override
+    public void deleteAccount(String username, String password) {
         this.active = false;
-        client.deleteAccount(this.username, this.password);
+        client.deleteAccount(username, password);
     }
 
-    @Override
+    //@Override
     public String getUsername() {
         return username;
     }
 
-    @Override
+    //@Override
     public String getPassword() {
         return password;
     }
 
-    @Override
+    //@Override
     public String getRating() {
         client.getRating(this.username);
         return String.valueOf(rating);
@@ -62,9 +60,9 @@ public class Seller implements SellerInterface {
         return ratingCount;
     }
 
-    @Override
-    public boolean isActive() {
-        client.isActive(this.username);
+    //@Override
+    public boolean isActive(String name) {
+        client.isActive(name);
         return active; 
     }
 
@@ -74,7 +72,7 @@ public class Seller implements SellerInterface {
     /*}
     */
 
-    @Override
+    //@Override
     public ArrayList<String> getMessages(String buyer) {
         ArrayList<String> messages = new ArrayList<>();
         try {
@@ -84,6 +82,18 @@ public class Seller implements SellerInterface {
         }
 
         return messages;
+    }
+
+    public static void main(String[] args)
+    {
+
+        Seller bu = new Seller("Name2", "Password2");
+
+        System.out.println(bu.isActive(bu.getUsername()));
+        bu.setPassword("Yxg0228.");
+        bu.isActive(bu.getUsername());
+
+
     }
 
 }

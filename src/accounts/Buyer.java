@@ -1,10 +1,7 @@
-package buyer;
-
 import java.io.*;
 import java.util.ArrayList;
-import serverclient.AuctionClient;
 
-public class Buyer implements BuyerInterface {
+public class Buyer {
     private final String username;
     private String password;
     private boolean active;
@@ -16,55 +13,56 @@ public class Buyer implements BuyerInterface {
         this.active = true;
         try {
             this.client = new AuctionClient();
+            client.newBuyer(username, password);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
+    //@Override
     public synchronized void sendMessageToSeller(String sellerUsername, String message) {
         client.sendMessage(this.username, message, message);
     }
 
-    @Override
+  // @Override
     public void setPassword(String password) {
         this.password = password;
         client.setPassword(this.username, password);
     }
 
-    @Override
+//    @Override
     public void makeBid(String itemID, double price) {
         client.makeBid(itemID, this.username, price);
     }
 
-    @Override
+//    @Override
     public void rateSeller(String sellerUsername, double rating) {
         client.setRating(sellerUsername, rating);
     }
 
-    @Override
-    public void deleteAccount() {
+//    @Override
+    public void deleteAccount(String username, String password) {
         this.active = false;
-        client.deleteAccount(this.username, this.password);
+        client.deleteAccount(username, password);
     }
 
-    @Override
+//    @Override
     public String getUsername() {
         return this.username;
     }
 
-    @Override
+//    @Override
     public String getPassword() {
         return this.password;
     }
 
-    @Override
+//    @Override
     public boolean isActive(String user) {
         client.isActive(user);
         return this.active;
     }
 
-    @Override
+//    @Override
     public ArrayList<String> getMessages(String buyer) {
         ArrayList<String> messages = new ArrayList<>();
         try {
@@ -74,5 +72,18 @@ public class Buyer implements BuyerInterface {
         }
 
         return messages;
+    }
+
+    public static void main(String[] args)
+    {
+
+        Buyer bu = new Buyer("Name1", "Password1");
+
+        System.out.println(bu.isActive(bu.getUsername()));
+        bu.setPassword("Yxg0228.");
+        bu.isActive(bu.getUsername());
+        bu.rateSeller("Name2", 1.5);
+
+
     }
 }
