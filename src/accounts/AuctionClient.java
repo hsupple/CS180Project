@@ -9,9 +9,9 @@ import java.util.Collections;
  * <p>Purdue University -- CS18000 -- Spring 2025</p>
  *
  * @author @Phaynes742
- @hsupple
- @jburkett013
- @addy-ops
+           @hsupple
+           @jburkett013
+           @addy-ops
   * @version April, 2025
  */
 
@@ -55,7 +55,6 @@ public class AuctionClient implements AuctionClientInterface {
 
     @Override
     public String updateItemListing(int itemId, String itemName, String itemDescription, double buyNowItemPrice, String seller, boolean isSold, String buyer, double bidItemPrice) {
-
         try {
             out.println("UPDATEITEM " + itemId + " " + itemName + " " + itemDescription + " " + buyNowItemPrice + " " + seller + " " + isSold + " " + buyer + " " + bidItemPrice);
             out.flush();
@@ -164,19 +163,8 @@ public class AuctionClient implements AuctionClientInterface {
     }
 
     @Override
-    public String receive() throws IOException {
-        try {
-            return in.readLine();
-        }  catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "Error";
-    }
-
-    @Override
     public String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
         try {
-            // Use "|" as delimiter for joining multi-word strings (item name and description)
             System.out.print(itemDescription);
             String message = "STARTAUCTION "
                     + itemID + " "
@@ -189,8 +177,6 @@ public class AuctionClient implements AuctionClientInterface {
                     + bidItemPrice;
             System.out.print(itemDescription);
 
-            //out.println(message);
-            //out.flush();
             return in.readLine();
         } catch (IOException e) {
             e.printStackTrace();
@@ -208,6 +194,22 @@ public class AuctionClient implements AuctionClientInterface {
             e.printStackTrace();
         }
         return "Error";
+    }
+
+    @Override
+    public ArrayList<String> getMyListings(String user) {
+        try {
+            out.println("GETMYLISTINGS " + user);
+            out.flush();
+            
+            ArrayList<String> listings = new ArrayList<>();
+            Collections.addAll(listings, in.readLine().split("/"));
+            
+            return listings;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 
     @Override

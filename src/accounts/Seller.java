@@ -1,6 +1,18 @@
 import java.io.*;
 import java.util.ArrayList;
 
+/**
+ * Class representing a seller oobject that can create auctions, end auctions, and perform tasks to provide to the buyer.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
+
 public class Seller implements SellerInterface {
     private final String username;
     private String password;
@@ -64,6 +76,20 @@ public class Seller implements SellerInterface {
     public boolean isActive(String name) {
         client.isActive(name);
         return active; 
+    }
+
+    @Override
+    public String endAuction(String itemID) {
+        return client.endListing(itemID);
+    }
+
+    @Override
+    public ArrayList<String> getMyListings() {
+        ArrayList<String> listings;
+        
+        listings = client.getMyListings(this.username);
+        
+        return listings;
     }
 
     @Override

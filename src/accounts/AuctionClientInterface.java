@@ -4,12 +4,12 @@ import java.util.ArrayList;
 /**
  * Interface to align to the Auction client class.
  *
- * <p>Purdue Univerasity -- CS18000 -- Spring 2025</p>
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
  *
  * @author @Phaynes742
- @hsupple
- @jburkett013
- @addy-ops
+           @hsupple
+           @jburkett013
+           @addy-ops
   * @version April, 2025
  */
 
@@ -26,12 +26,12 @@ public interface AuctionClientInterface {
     String isActive(String user);
     String getRating(String user);
     String setRating(String user, double rating);
-    String receive() throws IOException ;
     String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice);
-    String endListing(String itemID);
     String buyNow(String itemID, String user);
     String makeBid(String itemID, String user, double price);
+    String endListing(String itemID);
 
     ArrayList<String> getMessages(String user, String user2) throws IOException;
     ArrayList<String> searchFor(String query);
+    ArrayList<String> getMyListings(String user);
 }

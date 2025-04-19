@@ -6,9 +6,9 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Spring 2025</p>
  *
  * @author @Phaynes742
- @hsupple
- @jburkett013
- @addy-ops
+           @hsupple
+           @jburkett013
+           @addy-ops
   * @version April, 2025
  */
 public interface BuyerInterface {
