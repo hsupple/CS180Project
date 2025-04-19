@@ -164,16 +164,6 @@ public class AuctionClient implements AuctionClientInterface {
     }
 
     @Override
-    public String receive() throws IOException {
-        try {
-            return in.readLine();
-        }  catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "Error";
-    }
-
-    @Override
     public String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
          try {
         // Use "|" as delimiter for joining multi-word strings (item name and description)
@@ -208,6 +198,22 @@ public class AuctionClient implements AuctionClientInterface {
             e.printStackTrace();
         }
         return "Error";
+    }
+
+    @Override
+    public ArrayList<String> getMyListings(String user) {
+        try {
+            out.println("GETMYLISTINGS " + user);
+            out.flush();
+            
+            ArrayList<String> listings = new ArrayList<>();
+            Collections.addAll(listings, in.readLine().split("/"));
+            
+            return listings;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 
     @Override

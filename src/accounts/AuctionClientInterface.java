@@ -26,12 +26,12 @@ public interface AuctionClientInterface {
     String isActive(String user);
     String getRating(String user);
     String setRating(String user, double rating);
-    String receive() throws IOException ;
     String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice);
-    String endListing(String itemID);
     String buyNow(String itemID, String user);
     String makeBid(String itemID, String user, double price);
+    String endListing(String itemID);
 
     ArrayList<String> getMessages(String user, String user2) throws IOException;
     ArrayList<String> searchFor(String query);
+    ArrayList<String> getMyListings(String user);
 }

@@ -1,6 +1,18 @@
 import java.io.*;
 import java.util.ArrayList;
 
+/**
+ * Class representing a buyer object that can bid and buy auctions
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
+
 public class Buyer implements BuyerInterface{
     private final String username;
     private String password;
@@ -87,5 +99,6 @@ public class Buyer implements BuyerInterface{
         buyer.setPassword("newpassword123");
         buyer.makeBid("item1", 100.0);
         buyer.search("seller");
+        
     }
 }

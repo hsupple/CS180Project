@@ -1,3 +1,1 @@
-1001,Example Item, ## DO NOT DELETE THIS LINE ##, false
-1002,item1,-1.0,This/is/a/test/item,Seller1,true,buyer1,100.0
-1003,item2,-1.0,This/is/a/test/item,Seller1,true,None,10.0
+1001,name,buynow$,description,seller,isSold,HighestBid,BidPrice ## DO NOT DELETE LINE ##

@@ -170,6 +170,9 @@ public class ItemListing implements ItemListingInterface {
 
     public static void main(String[] args) {
         ItemListing item = new ItemListing("item2", "This is a test item", 10.0, "Seller1", 10000);
+        ItemListing item2 = new ItemListing("item2", "This is a test item", 10.0, "Seller1", 10000);
+        ItemListing item3 = new ItemListing("item2", "This is a test item", 10.0, "Seller1", 10000);
+
     }
 
 }

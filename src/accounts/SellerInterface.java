@@ -20,12 +20,14 @@ public interface SellerInterface {
 
     void deleteAccount(String username, String password);
 
+    String endAuction(String itemID);
     String getUsername();
     String getPassword();
     String getRating();
 
     boolean isActive(String name);
 
+    ArrayList<String> getMyListings();
     ArrayList<String> getMessages(String buyer);
 
 }
