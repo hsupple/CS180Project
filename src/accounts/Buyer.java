@@ -1,3 +1,4 @@
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -24,7 +25,7 @@ public class Buyer implements BuyerInterface{
         client.sendMessage(this.username, sellerUsername, message.replace(" ", "/"));
     }
 
-   @Override
+    @Override
     public void setPassword(String password) {
         this.password = password;
         client.setPassword(this.username, password);
@@ -81,4 +82,11 @@ public class Buyer implements BuyerInterface{
         return messages;
     }
 
+    public static void main(String[] args) {
+        Buyer buyer = new Buyer("buyer1", "password123");
+        buyer.sendMessageToSeller("seller1", "Hello, I am interested in your item.");
+        buyer.setPassword("newpassword123");
+        buyer.makeBid("item1", 100.0);
+        buyer.search("seller");
+    }
 }
