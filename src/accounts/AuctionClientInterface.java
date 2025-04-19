@@ -4,13 +4,13 @@ import java.util.ArrayList;
 /**
  * Interface to align to the Auction client class.
  *
- * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ * <p>Purdue Univerasity -- CS18000 -- Spring 2025</p>
  *
  * @author @Phaynes742
-           @hsupple
-           @jburkett013
-           @addy-ops
- * @version April, 2025
+ @hsupple
+ @jburkett013
+ @addy-ops
+  * @version April, 2025
  */
 
 public interface AuctionClientInterface {
