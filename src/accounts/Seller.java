@@ -77,11 +77,4 @@ public class Seller implements SellerInterface {
 
         return messages;
     }
-
-    public static void main(String[] args) {
-        // Example usage of the Seller class
-        Seller seller = new Seller("seller1", "password123");
-        seller.setPassword("newpassword123");
-
-    }
 }
