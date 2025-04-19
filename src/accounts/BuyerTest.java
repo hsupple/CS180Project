@@ -5,6 +5,18 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
+/**
+  * Test for the Buyer object, testing to ensure all creations and functions work.
+  *
+  * <p>Purdue University -- CS18000 -- Spring 2025</p>
+  *
+  * @author @Phaynes742
+            @hsupple
+            @jburkett013
+            @addy-ops
+  * @version April, 2025
+  */
+
 public class BuyerTest {
 
     private static final Path BUYER_FILE = Paths.get("BuyerList.txt");
