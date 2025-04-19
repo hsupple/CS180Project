@@ -9,14 +9,14 @@ import java.util.Collections;
  * <p>Purdue University -- CS18000 -- Spring 2025</p>
  *
  * @author @Phaynes742
-           @hsupple
-           @jburkett013
-           @addy-ops
- * @version April, 2025
+ @hsupple
+ @jburkett013
+ @addy-ops
+  * @version April, 2025
  */
 
 public class AuctionClient implements AuctionClientInterface {
- 
+
     private final Socket socket;
     private final PrintWriter out;
     private final BufferedReader in;
@@ -71,7 +71,7 @@ public class AuctionClient implements AuctionClientInterface {
         try {
             out.println("GETITEMID 0 0");
             out.flush();
-            
+
             String response = in.readLine();
             return Integer.parseInt(response.trim());
         } catch (IOException e) {
@@ -96,7 +96,7 @@ public class AuctionClient implements AuctionClientInterface {
     public ArrayList<String> getMessages(String user, String user2) throws IOException {
         out.println("GETMESS " + user + " " + user2);
         out.flush();
-        
+
         ArrayList<String> messages = new ArrayList<>();
         Collections.addAll(messages, in.readLine().split(","));
 
@@ -175,26 +175,26 @@ public class AuctionClient implements AuctionClientInterface {
 
     @Override
     public String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
-         try {
-        // Use "|" as delimiter for joining multi-word strings (item name and description)
-        System.out.print(itemDescription);
-        String message = "STARTAUCTION " 
-                         + itemID + " "
-                         + itemName + " "
-                         + buyNowItemPrice + " "
-                         + itemDescription + " " 
-                         + seller + " "
-                         + isSold + " "
-                         + buyer + " "
-                         + bidItemPrice;
-        System.out.print(itemDescription);
+        try {
+            // Use "|" as delimiter for joining multi-word strings (item name and description)
+            System.out.print(itemDescription);
+            String message = "STARTAUCTION "
+                    + itemID + " "
+                    + itemName + " "
+                    + buyNowItemPrice + " "
+                    + itemDescription + " "
+                    + seller + " "
+                    + isSold + " "
+                    + buyer + " "
+                    + bidItemPrice;
+            System.out.print(itemDescription);
 
-        //out.println(message);
-        //out.flush();
-        return in.readLine();
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
+            //out.println(message);
+            //out.flush();
+            return in.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return "Error";
     }
 
@@ -239,10 +239,10 @@ public class AuctionClient implements AuctionClientInterface {
         try {
             out.println("SEARCH " + query);
             out.flush();
-            
+
             ArrayList<String> results = new ArrayList<>();
             Collections.addAll(results, in.readLine().split(","));
-            
+
             return results;
         } catch (IOException e) {
             e.printStackTrace();
