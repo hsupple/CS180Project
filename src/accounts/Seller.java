@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 
-public class Seller {
+public class Seller implements SellerInterface {
     private final String username;
     private String password;
     private double rating;
@@ -23,34 +23,34 @@ public class Seller {
         }
     }
 
-    //@Override
-    public synchronized void sendMessageToBuyer(String buyer, String message) {
+    @Override
+    public void sendMessageToBuyer(String buyer, String message) {
         client.sendMessage(this.username, buyer, message);
     }
 
-    //@Override
+    @Override
     public void setPassword(String password) {
         this.password = password;
         client.setPassword(this.username, password);
     }
 
-    //@Override
+    @Override
     public void deleteAccount(String username, String password) {
         this.active = false;
         client.deleteAccount(username, password);
     }
 
-    //@Override
+    @Override
     public String getUsername() {
         return username;
     }
 
-    //@Override
+    @Override
     public String getPassword() {
         return password;
     }
 
-    //@Override
+    @Override
     public String getRating() {
         client.getRating(this.username);
         return String.valueOf(rating);
@@ -60,19 +60,13 @@ public class Seller {
         return ratingCount;
     }
 
-    //@Override
+    @Override
     public boolean isActive(String name) {
         client.isActive(name);
         return active; 
     }
 
-    /*@Override
-    public ArrayList<String> getListings() {
-        /*## IMPLEMENT LOGIC HERE ##*/
-    /*}
-    */
-
-    //@Override
+    @Override
     public ArrayList<String> getMessages(String buyer) {
         ArrayList<String> messages = new ArrayList<>();
         try {
@@ -84,16 +78,10 @@ public class Seller {
         return messages;
     }
 
-    public static void main(String[] args)
-    {
-
-        Seller bu = new Seller("Name2", "Password2");
-
-        System.out.println(bu.isActive(bu.getUsername()));
-        bu.setPassword("Yxg0228.");
-        bu.isActive(bu.getUsername());
-
+    public static void main(String[] args) {
+        // Example usage of the Seller class
+        Seller seller = new Seller("seller1", "password123");
+        seller.setPassword("newpassword123");
 
     }
-
 }

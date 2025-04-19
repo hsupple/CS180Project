@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 
-public class Buyer {
+public class Buyer implements BuyerInterface{
     private final String username;
     private String password;
     private boolean active;
@@ -19,50 +19,57 @@ public class Buyer {
         }
     }
 
-    //@Override
+    @Override
     public synchronized void sendMessageToSeller(String sellerUsername, String message) {
-        client.sendMessage(this.username, message, message);
+        client.sendMessage(this.username, sellerUsername, message.replace(" ", "/"));
     }
 
-  // @Override
+   @Override
     public void setPassword(String password) {
         this.password = password;
         client.setPassword(this.username, password);
     }
 
-//    @Override
+    @Override
     public void makeBid(String itemID, double price) {
         client.makeBid(itemID, this.username, price);
     }
 
-//    @Override
+    @Override
     public void rateSeller(String sellerUsername, double rating) {
         client.setRating(sellerUsername, rating);
     }
 
-//    @Override
+    @Override
     public void deleteAccount(String username, String password) {
         this.active = false;
         client.deleteAccount(username, password);
     }
 
-//    @Override
+    @Override
     public String getUsername() {
         return this.username;
     }
 
-//    @Override
+    @Override
     public String getPassword() {
         return this.password;
     }
 
-//    @Override
+    @Override
     public boolean isActive(String user) {
         client.isActive(user);
         return this.active;
     }
 
-//    @Override
+    @Override
+    public ArrayList<String> search(String query) {
+
+        ArrayList<String> results = client.searchFor(query);
+        return results;
+    }
+
+    @Override
     public ArrayList<String> getMessages(String buyer) {
         ArrayList<String> messages = new ArrayList<>();
         try {
@@ -74,16 +81,11 @@ public class Buyer {
         return messages;
     }
 
-    public static void main(String[] args)
-    {
-
-        Buyer bu = new Buyer("Name1", "Password1");
-
-        System.out.println(bu.isActive(bu.getUsername()));
-        bu.setPassword("Yxg0228.");
-        bu.isActive(bu.getUsername());
-        bu.rateSeller("Name2", 1.5);
-
-
+    public static void main(String[] args) {
+        Buyer buyer = new Buyer("buyer1", "password123");
+        buyer.sendMessageToSeller("seller1", "Hello, I am interested in your item.");
+        buyer.setPassword("newpassword123");
+        buyer.makeBid("item1", 100.0);
+        buyer.search("seller");
     }
 }

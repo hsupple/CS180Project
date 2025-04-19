@@ -1,5 +1,3 @@
-package seller;
-
 import java.util.ArrayList;
 
 /**
@@ -20,15 +18,14 @@ public interface SellerInterface {
     void sendMessageToBuyer(String buyerUsername, String message);
     void setPassword(String password);
 
-    void deleteAccount();
+    void deleteAccount(String username, String password);
 
     String getUsername();
     String getPassword();
     String getRating();
 
-    boolean isActive();
+    boolean isActive(String name);
 
-    //ArrayList<String> getListings();
-    ArrayList<String> getMessages(String user);
+    ArrayList<String> getMessages(String buyer);
 
 }

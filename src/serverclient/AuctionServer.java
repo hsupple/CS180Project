@@ -6,13 +6,25 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class AuctionServer  implements Runnable {
+/**
+ * Class to run server for data transfer, interaction, and storage.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
+
+public class AuctionServer implements Runnable {
     private ServerSocket serverSocket;
     private final int port = 3001;
-    private final Set<String> messages = Set.of("NEWBUYER", "NEWSELLER",
+    private final Set<String> messages = Set.of("NEWBUYER", "NEWSELLER", "UPDATEITEM",
     "SETPASSWORD", "SENDMESS", "GETMESS", "DELETE",
     "ISACTIVE", "GETRATING", "SETRATING", "STARTAUCTION",
-    "BIDITEM", "BUYITEM");
+    "MAKEBID", "BUYITEM", "GETITEMID", "SEARCH");
     private static final ReentrantLock FILELOCK = new ReentrantLock();
 
     public AuctionServer() {
@@ -24,6 +36,91 @@ public class AuctionServer  implements Runnable {
         }
     }
 
+    /**
+     * Class to run clients separately from main server socket.
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+             @hsupple
+            @jburkett013
+            @addy-ops
+    * @version April, 2025
+    */
+
+    class ClientHandler implements Runnable {
+        private Socket clientSocket;
+        private BufferedReader in;
+        private PrintWriter out;
+        private Set<String> messages;
+
+        public ClientHandler(Socket socket, Set<String> messages) {
+            this.clientSocket = socket;
+            this.messages = messages;
+            try {
+                this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                this.out = new PrintWriter(clientSocket.getOutputStream(), true);
+            } catch (IOException e) {
+                System.err.println("Error setting up I/O streams: " + e.getMessage());
+            }
+            }
+
+        @Override
+        public void run() {
+            try {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    String[] clientInput = line.split(" ");
+                    String response = "";
+
+                    if (clientInput.length > 1 && messages.contains(clientInput[0])) {
+                        response = handleCommand(clientInput);
+                    } else {
+                        response = "Invalid command";
+                    }
+
+                    out.println(response);
+                    System.out.println("Response sent: " + response);
+                }
+            } catch (IOException e) {
+                System.err.println("Client disconnected: " + e.getMessage());
+            } finally {
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    System.err.println("Error closing client socket: " + e.getMessage());
+                }
+            }
+        }
+
+        private String handleCommand(String[] input) {
+            try {
+
+                return switch (input[0]) {
+                    case "GETITEMID" -> generateID();
+                    case "NEWSELLER" -> newSeller(input[1], input[2]);
+                    case "NEWBUYER" -> newBuyer(input[1], input[2]);
+                    case "UPDATEITEM" -> updateItem(input[1], input[2], input[3], Double.parseDouble(input[4]), input[5], Boolean.parseBoolean(input[6]), input[7], Double.parseDouble(input[8]));
+                    case "SETPASSWORD" -> setPass(input[1], input[2]);
+                    case "DELETE" -> delete(input[1], input[2]);
+                    case "ISACTIVE" -> isActive(input[1]);
+                    case "GETRATING" -> getRating(input[1]);
+                    case "SETRATING" -> setRating(input[1], Double.parseDouble(input[2]));
+                    case "STARTAUCTION" -> startAuction(input[1], input[2], Double.parseDouble(input[3]), input[4], input[5], Boolean.parseBoolean(input[6]), input[7], Double.parseDouble(input[8]));
+                    case "MAKEBID" -> bidItem(input[1], input[2], Double.parseDouble(input[3]));
+                    case "BUYITEM" -> buyItem(input[1], input[2]);
+                    case "SENDMESS" -> sendMess(input[1], input[2], input[3]);
+                    case "GETMESS" -> getMess(input[1], input[2]);
+                    case "SEARCH" -> search(input[1]);
+                    default -> "Invalid";
+                };
+            } catch (Exception e) {
+                return "Error: " + e.getMessage();
+            }
+        }
+
+    }
+
     @Override
     public void run() {
         try {
@@ -33,50 +130,29 @@ public class AuctionServer  implements Runnable {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getInetAddress());
 
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-                String[] clientInput;
-                String Response = "";
-
-                String line;
-                while ((line = in.readLine()) != null) {
-                    clientInput = line.split(" ");
-
-                    if (clientInput.length > 1) {
-                        if (messages.contains(clientInput[0])) {
-                            Response = clientInput[0] + " " + switch (clientInput[0]) {
-                                case "NEWSELLER" -> newSeller(clientInput[1], clientInput[2]);
-                                case "NEWBUYER" -> newBuyer(clientInput[1], clientInput[2]);
-                                case "SETPASSWORD" -> setPass(clientInput[1], clientInput[2]);
-                                case "SENDMESS" -> sendMess(clientInput[1], clientInput[2], clientInput[3]);
-                                case "GETMESS" -> getMess(clientInput[1], clientInput[2]);
-                                case "DELETE" -> delete(clientInput[1], clientInput[2]);
-                                case "ISACTIVE" -> isActive(clientInput[1]);
-                                case "GETRATING" -> getRating(clientInput[1]);
-                                case "SETRATING" -> setRating(clientInput[1], Double.parseDouble(clientInput[2]));
-                                case "STARTAUCTION" -> startAuction(clientInput[1], clientInput[2], Double.parseDouble(clientInput[3]), clientInput[4], clientInput[5], Boolean.parseBoolean(clientInput[6]), clientInput[7], Double.parseDouble(clientInput[8]));
-                                case "BIDITEM" -> bidItem(clientInput[1], clientInput[2], Double.parseDouble(clientInput[3]));
-                                case "BUYITEM" -> buyItem(clientInput[1], clientInput[2]);
-                                default -> "Invalid";
-                            };
-                        } else {
-                            Response = "Invalid command";
-                        }
-                    }
-
-                    out.println(Response);
-                    System.out.println("Response sent: " + Response);
-                }
-
-                clientSocket.close();
+                ClientHandler handler = new ClientHandler(clientSocket, messages);
+                new Thread(handler).start();
             }
-        } catch (SocketException e) {
-            System.err.println("Client disconnected: " + e.getMessage());
-        } catch (EOFException e) {
-            System.err.println("End of file reached: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Server error: " + e.getMessage());
+        }
+    }
+
+    private String generateID() {
+        FILELOCK.lock();
+        try {
+            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            int maxId = 0;
+            for (int i = 0; i < Items.size(); i++) {
+                String[] parts = Items.get(i).split(",");
+                if (parts.length > 0 && parts[0] != null) {
+                    int id = Integer.parseInt(parts[0]);
+                    maxId = Math.max(maxId, id);
+                }
+            }
+            return String.valueOf(maxId + 1);
+        } finally {
+            FILELOCK.unlock();
         }
     }
 
@@ -118,6 +194,37 @@ public class AuctionServer  implements Runnable {
         }
     }
 
+    private String updateItem(String itemID, String itemName, String itemDescription, double buyNowItemPrice, String seller, boolean isSold, String buyer, double bidItemPrice) {
+        FILELOCK.lock();
+        try {
+            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            String[] parts;
+            for (int i = 0; i < Items.size(); i++) {
+                parts = Items.get(i).split(",");
+                if (parts[1].equals(itemName)) {
+                    parts[1] = itemName;
+                    parts[2] = String.valueOf(buyNowItemPrice);
+                    parts[3] = itemDescription;
+                    parts[4] = seller;
+                    parts[5] = String.valueOf(isSold);
+                    parts[6] = buyer;
+                    parts[7] = String.valueOf(bidItemPrice);
+
+                    // Update the item in the list
+                    Items.set(i, String.join(",", parts));
+                    writeFile("txt/AuctionList.txt", Items);
+                    return "Existing item updated successfully: " + itemID;
+                }
+            }
+            String newItem = itemID + "," + itemName + "," + buyNowItemPrice + "," + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
+            Items.add(newItem);
+            writeFile("txt/AuctionList.txt", Items);
+            return "Item added successfully: " + itemID;
+        } finally {
+            FILELOCK.unlock();
+        }
+    }
+
     private ArrayList<String> readFile(String txtFile) {
         FILELOCK.lock();
         try {
@@ -153,7 +260,7 @@ public class AuctionServer  implements Runnable {
         }
     }
 
-        private String setPass(String user, String password) {
+    private String setPass(String user, String password) {
         FILELOCK.lock();
         try {
             ArrayList<String> buyers = readFile("txt/BuyerList.txt");
@@ -347,7 +454,7 @@ public class AuctionServer  implements Runnable {
             String[] parts;
             for (int i = 0; i < Items.size(); i++) {
                 parts = Items.get(i).split(",");
-                if (parts[0].equals(itemID)) {
+                if (parts[1].equals(itemID)) {
                     if (Double.parseDouble(parts[7]) < price) {
                         parts[7] = String.valueOf(price);
                         parts[6] = user;
@@ -368,15 +475,19 @@ public class AuctionServer  implements Runnable {
     private String getMess(String user, String user2) {
         FILELOCK.lock();
         try {
-            ArrayList<String> Messages = readFile("txt/Messages.txt");
-            String[] parts;
-            for (int i = 0; i < Messages.size(); i++) {
-                parts = Messages.get(i).split(",");
-                if (parts[0].equals(user) && parts[1].equals(user2)) {
-                    return "Messages between " + user + " and " + user2 + ": " + parts[2];
-                }
+            if (user.compareTo(user2) < 1) {
+                String temp = user;
+                user = user2;
+                user2 = temp;
             }
-            return "No messages found between " + user + " and " + user2;
+            ArrayList<String> Messages = new ArrayList<>();
+            if (new File("msg/" + user + "_to_" + user2 + ".txt").exists()) {
+                Messages = readFile("msg/" + user + "_to_" + user2 + ".txt");
+                return Messages.toString();
+            } else {
+                return "No messages found between " + user + " and " + user2;
+            }
+            
         } finally {
             FILELOCK.unlock();
         }
@@ -385,16 +496,49 @@ public class AuctionServer  implements Runnable {
     private String sendMess(String user, String user2, String message) {
         FILELOCK.lock();
         try {
-            ArrayList<String> Messages = readFile("txt/Messages.txt");
-            String newMessage = user + "," + user2 + "," + message;
+            if (user.compareTo(user2) < 1) {
+                String temp = user;
+                user = user2;
+                user2 = temp;
+            }
+            ArrayList<String> Messages = new ArrayList<>();
+            if (new File("msg/" + user + "_to_" + user2 + ".txt").exists()) {
+                String line;
+                Messages = readFile("msg/" + user + "_to_" + user2 + ".txt"); 
+            }
+
+            String newMessage = user + ": " + message.replace("/", " ");
             Messages.add(newMessage);
-            writeFile("txt/Messages.txt", Messages);
+            writeFile("msg/" + user + "_to_" + user2 + ".txt", Messages);
             return "Message sent successfully from " + user + " to " + user2;
         } finally {
             FILELOCK.unlock();
         }
     }
 
+    private String search(String query) {
+
+        ArrayList<String> Sellers = readFile("txt/SellerList.txt");
+        ArrayList<String> Items = readFile("txt/AuctionList.txt");
+        ArrayList<String> results = new ArrayList<>();
+        String[] parts;
+        results.add("Sellers");
+        for (int i = 0; i < Sellers.size(); i++) {
+            parts = Sellers.get(i).split(",");
+            if (parts[0].contains(query) && parts[4].equals("true")) {
+                results.add(parts[0]);
+            }
+        }
+
+        results.add("Listings");
+        for (int j = 0; j < Items.size(); j++) {
+            parts = Items.get(j).split(",");
+            if (parts[1].contains(query)) {
+                results.add(parts[1] + " BUY NOW $" + parts[2] + " BID AMT $" + parts[7]);
+            }
+        }
+        return results.toString();
+    }
     public static void main(String[] args) {
         AuctionServer server = new AuctionServer();
         new Thread(server).start();

@@ -1,2 +1,2 @@
 Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE
-Name2,Yxg0228.,1.50,2,true
+seller1,newpassword123,0,0,true

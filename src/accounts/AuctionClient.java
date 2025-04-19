@@ -1,9 +1,21 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
+/**
+ * Class to define client for objects to connect to server.
+ *
+ * <p>Purdue University -- CS18000 -- Spring 2025</p>
+ *
+ * @author @Phaynes742
+           @hsupple
+           @jburkett013
+           @addy-ops
+ * @version April, 2025
+ */
 
-public class AuctionClient {
+public class AuctionClient implements AuctionClientInterface {
  
     private final Socket socket;
     private final PrintWriter out;
@@ -17,6 +29,7 @@ public class AuctionClient {
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
+    @Override
     public String newBuyer(String user, String password) {
         try {
             out.println("NEWBUYER " + user + " " + password);
@@ -28,6 +41,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String newSeller(String user, String password) {
         try {
             out.println("NEWSELLER " + user + " " + password);
@@ -39,6 +53,34 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
+    public String updateItemListing(int itemId, String itemName, String itemDescription, double buyNowItemPrice, String seller, boolean isSold, String buyer, double bidItemPrice) {
+
+        try {
+            out.println("UPDATEITEM " + itemId + " " + itemName + " " + itemDescription + " " + buyNowItemPrice + " " + seller + " " + isSold + " " + buyer + " " + bidItemPrice);
+            out.flush();
+            return in.readLine();
+        }  catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Error";
+    }
+
+    @Override
+    public int getItemID() {
+        try {
+            out.println("GETITEMID 0 0");
+            out.flush();
+            
+            String response = in.readLine();
+            return Integer.parseInt(response.trim());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    @Override
     public String sendMessage(String user, String recipient, String message) {
         try {
             out.println("SENDMESS " + user + " " + recipient + " " + message);
@@ -50,20 +92,18 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public ArrayList<String> getMessages(String user, String user2) throws IOException {
         out.println("GETMESS " + user + " " + user2);
         out.flush();
-        String response = in.readLine();
+        
         ArrayList<String> messages = new ArrayList<>();
-        if (response != null && !response.isEmpty()) {
-            String[] parts = response.split(",");
-            for (String part : parts) {
-                messages.add(part.trim());
-            }
-        }
+        Collections.addAll(messages, in.readLine().split(","));
+
         return messages;
     }
 
+    @Override
     public String setPassword(String user, String password) {
         try {
             out.println("SETPASSWORD " + user + " " + password);
@@ -75,6 +115,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String deleteAccount(String user, String password) {
         try {
             out.println("DELETE " + user + " " + password);
@@ -86,6 +127,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String isActive(String user) {
         try {
             out.println("ISACTIVE " + user);
@@ -97,6 +139,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String getRating(String user) {
         try {
             out.println("GETRATING " + user);
@@ -108,6 +151,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String setRating(String user, double rating) {
         try {
             out.println("SETRATING " + user + " " + rating);
@@ -119,6 +163,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String receive() throws IOException {
         try {
             return in.readLine();
@@ -128,17 +173,32 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
-        try {
-            out.println("STARTAUCTION " + itemID + " " + itemName + " " + buyNowItemPrice + " " + itemDescription + " " + seller + " " + isSold + " " + buyer + " " + bidItemPrice);
-            out.flush();
-            return in.readLine();
-        }  catch (IOException e) {
-            e.printStackTrace();
-        }
+         try {
+        // Use "|" as delimiter for joining multi-word strings (item name and description)
+        System.out.print(itemDescription);
+        String message = "STARTAUCTION " 
+                         + itemID + " "
+                         + itemName + " "
+                         + buyNowItemPrice + " "
+                         + itemDescription + " " 
+                         + seller + " "
+                         + isSold + " "
+                         + buyer + " "
+                         + bidItemPrice;
+        System.out.print(itemDescription);
+
+        //out.println(message);
+        //out.flush();
+        return in.readLine();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
         return "Error";
     }
 
+    @Override
     public String endListing(String itemID) {
         try {
             out.println("ENDLISTING " + itemID);
@@ -150,6 +210,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String buyNow(String itemID, String user) {
         try {
             out.println("BUY " + itemID + " "  + user);
@@ -161,6 +222,7 @@ public class AuctionClient {
         return "Error";
     }
 
+    @Override
     public String makeBid(String itemID, String user, double price) {
         try {
             out.println("MAKEBID " + itemID + " " + user + " " + price);
@@ -170,6 +232,22 @@ public class AuctionClient {
             e.printStackTrace();
         }
         return "Error";
+    }
+
+    @Override
+    public ArrayList<String> searchFor(String query) {
+        try {
+            out.println("SEARCH " + query);
+            out.flush();
+            
+            ArrayList<String> results = new ArrayList<>();
+            Collections.addAll(results, in.readLine().split(","));
+            
+            return results;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 
     public void close() throws IOException {
