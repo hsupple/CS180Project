@@ -1,5 +1,3 @@
-package serverclient;
-
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -178,6 +176,9 @@ public class AuctionServer implements Runnable {
                     int id = Integer.parseInt(parts[0]);
                     maxId = Math.max(maxId, id);
                 }
+                else {
+                    maxId = 1000;
+                }
             }
             return String.valueOf(maxId + 1);
         }
@@ -230,7 +231,6 @@ public class AuctionServer implements Runnable {
                     parts[6] = buyer;
                     parts[7] = String.valueOf(bidItemPrice);
 
-                    // Update the item in the list
                     Items.set(i, String.join(",", parts));
                     writeFile("txt/AuctionList.txt", Items);
                     return "Existing item updated successfully: " + itemID;
@@ -342,11 +342,11 @@ public class AuctionServer implements Runnable {
             String[] parts;
             for (int i = 0; i < Buyers.size(); i++) {
                 parts = Buyers.get(i).split(",");
-                if (parts[0].equals(UserItem)) {
+                if (parts[1].equals(UserItem)) {
                     return "User is active: " + UserItem;
                 } 
             }
-
+ 
             for (int i = 0; i < Sellers.size(); i++) {
                 parts = Sellers.get(i).split(",");
                 if (parts[0].equals(UserItem) && parts[4].equalsIgnoreCase("true")) {
@@ -438,7 +438,7 @@ public class AuctionServer implements Runnable {
             String[] parts;
             for (int i = 0; i < Items.size(); i++) {
                 parts = Items.get(i).split(",");
-                if (parts[0].equals(itemID)) {
+                if (parts[1].equals(itemID)) {
                     double currentBid = Double.parseDouble(parts[7]);
                     if (currentBid < price) {
                         parts[7] = String.valueOf(price);

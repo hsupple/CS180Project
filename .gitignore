@@ -1,5 +1,4 @@
 # Ignore all .class files in any folder
 *.class
-README.md
 /lib
 /.vscode

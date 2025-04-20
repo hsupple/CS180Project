@@ -1,1 +1,1 @@
-1001,name,buynow$,description,seller,isSold,HighestBid,BidPrice ## DO NOT DELETE LINE ##
+1001,example,description,seller

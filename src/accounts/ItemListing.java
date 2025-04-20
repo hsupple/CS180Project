@@ -56,14 +56,15 @@ public class ItemListing implements ItemListingInterface {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        startListing();
         formatItem();
+        startListing();
     }
 
     // Void method used to start a listing with a duration
     private void startListing() {
         scheduler.schedule(this::endListing, (long) auctionDuration, TimeUnit.MILLISECONDS);
         this.isActive = true;
+        formatItem();
     }
 
     // private method used to generate the next ItemID
