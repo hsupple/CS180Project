@@ -1,0 +1,3 @@
+Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE
+seller1,newpassword123,0,0,true
+seller1745109551656,testPassword,0,0,true
