@@ -1,3 +1,4 @@
+package accounts;
 import java.util.ArrayList;
 /**
  * Interface to align to the Buyer class.
