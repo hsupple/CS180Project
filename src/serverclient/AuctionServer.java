@@ -3,6 +3,7 @@ package serverclient;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,6 +36,16 @@ public class AuctionServer implements Runnable {
         } catch (IOException e) {
             System.err.println("Could not start server: " + e.getMessage());
             System.exit(1);
+        }
+    }
+
+    public void stopServer() {
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error closing server: " + e.getMessage());
         }
     }
 
@@ -168,7 +179,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String generateID() {
+    String generateID() {
         synchronized (LOCK) {
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
             int maxId = 0;
@@ -183,7 +194,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String newBuyer(String user, String password) {
+    String newBuyer(String user, String password) {
         synchronized (LOCK) {
             String[] parts;
             ArrayList<String> buyers = readFile("txt/BuyerList.txt");
@@ -199,7 +210,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String newSeller(String user, String password) {
+    String newSeller(String user, String password) {
         synchronized (LOCK) {
             String[] parts;
             ArrayList<String> Sellers = readFile("txt/SellerList.txt");
@@ -215,7 +226,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String updateItem(String itemID, String itemName, String itemDescription, double buyNowItemPrice, String seller, boolean isSold, String buyer, double bidItemPrice) {
+    String updateItem(String itemID, String itemName, String itemDescription, double buyNowItemPrice, String seller, boolean isSold, String buyer, double bidItemPrice) {
         synchronized (LOCK) {
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
             String[] parts;
@@ -243,7 +254,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String setPass(String user, String password) {
+       String setPass(String user, String password) {
         synchronized (LOCK) {
             ArrayList<String> buyers = readFile("txt/BuyerList.txt");
             ArrayList<String> sellers = readFile("txt/SellerList.txt");
@@ -271,7 +282,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String delete(String user, String password) {
+    String delete(String user, String password) {
         synchronized (LOCK) {
             ArrayList<String> Buyers = readFile("txt/BuyerList.txt");
             ArrayList<String> Sellers = readFile("txt/SellerList.txt");
@@ -297,7 +308,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String getRating(String user) {
+    String getRating(String user) {
         synchronized (LOCK) {
             ArrayList<String> Sellers = readFile("txt/SellerList.txt");
             String[] parts;
@@ -311,7 +322,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String setRating(String user, double rating) {
+    String setRating(String user, double rating) {
         synchronized (LOCK) {
             ArrayList<String> Sellers = readFile("txt/SellerList.txt");
             String[] parts;
@@ -366,7 +377,7 @@ public class AuctionServer implements Runnable {
         }
     }
     
-    private String buyItem(String itemID, String buyer) {
+    String buyItem(String itemID, String buyer) {
         synchronized (LOCK) {
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
             String[] parts;
@@ -398,7 +409,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
+    String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
         synchronized (LOCK) {
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
             String[] parts;
@@ -415,7 +426,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String endAuction(String itemID) {
+    String endAuction(String itemID) {
         synchronized (LOCK) {
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
             String[] parts;
@@ -432,7 +443,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String bidItem(String itemID, String user, double price) {
+    String bidItem(String itemID, String user, double price) {
         synchronized (LOCK) {
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
             String[] parts;
@@ -455,7 +466,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String getMess(String user, String user2) {
+    String getMess(String user, String user2) {
         synchronized (LOCK) {
             // Sort users for consistent file naming
             if (user.compareTo(user2) > 0) {
@@ -474,7 +485,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String sendMess(String user, String user2, String message) {
+    String sendMess(String user, String user2, String message) {
         synchronized (LOCK) {
             // Sort users for consistent file naming
             if (user.compareTo(user2) > 0) {
@@ -503,7 +514,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String search(String query) {
+    String search(String query) {
         synchronized (LOCK) {
             ArrayList<String> Sellers = readFile("txt/SellerList.txt");
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
@@ -520,7 +531,7 @@ public class AuctionServer implements Runnable {
             results.add("Listings");
             for (int j = 0; j < Items.size(); j++) {
                 parts = Items.get(j).split(",");
-                if (parts[1].contains(query)) {
+                if (parts[0].contains(query) || parts[1].contains(query)) {
                     results.add(parts[1] + " BUY NOW $" + parts[2] + " BID AMT $" + parts[7]);
                 }
             }
@@ -528,7 +539,7 @@ public class AuctionServer implements Runnable {
         }
     }
     
-    private String getMyListings(String user) {
+    String getMyListings(String user) {
         synchronized (LOCK) {
             ArrayList<String> Items = readFile("txt/AuctionList.txt");
             String[] parts;
