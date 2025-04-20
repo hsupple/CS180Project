@@ -1,2 +1,3 @@
 Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE
-buyer1,newpassword123,true
+testUser,null,true
+testBuyer,testPass,true

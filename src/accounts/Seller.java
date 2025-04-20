@@ -64,8 +64,7 @@ public class Seller implements SellerInterface {
 
     @Override
     public String getRating() {
-        client.getRating(this.username);
-        return String.valueOf(rating);
+        return String.valueOf(client.getRating(this.username));
     }
 
     public int getRatingCount() {
@@ -74,8 +73,7 @@ public class Seller implements SellerInterface {
 
     @Override
     public boolean isActive(String name) {
-        client.isActive(name);
-        return active; 
+        return Boolean.valueOf(client.isActive(name));
     }
 
     @Override

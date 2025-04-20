@@ -47,15 +47,16 @@ public class SellerTest {
     @Test
     void testGetRatingParsesCorrectly() {
         Seller seller = new Seller("testSeller", "testPass");
-        seller.loadFromFile();
-        assertEquals("4.0", seller.getRating());
+        Buyer buyer = new Buyer("testBuyer", "testPass");
+        buyer.rateSeller("testSeller", 4.0);
+        assertEquals("4.00", seller.getRating());
     }
 
     @Test
     void testDeleteAccountDeactivatesSeller() {
         Seller seller = new Seller("testSeller", "testPass");
-        seller.deleteAccount();
-        assertFalse(seller.isActive());
+        seller.deleteAccount("testSeller", "testPass");
+        assertFalse(seller.isActive("testSeller"));
     }
 
     public static void main(String[] args) {

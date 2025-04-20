@@ -13,14 +13,19 @@ Program utilizing Java interfaces and classes to ultimately create an interactiv
 - Messaging between Buyers and Sellers
 - Account deletion && Authorized Password Changes
 
+## Software Architecture
+- Uses Client <-> Server relationship between objects to communicate with and take from database.
+- Clients may interact with each other using messages sent over server which includes solely thread and file safe operations.
+- All data is hard-stored within .txt files only accessible through requests sent through the server.
+
 ## Installation
 - Change to desired Directory
 - Clone the Repo
-$ git clone https://github.com/hsupple/CS180Project.git
+- $ git clone https://github.com/hsupple/CS180Project.git
 
-# Roadmap for Future Weeks
-- Link all classes and interfaces to interact through client and server ports.
+## Roadmap for Future Weeks
 - Create a GUI to make the design interactive and functional for a user
+- Link GUI with stack to ensure inputs can be controlled from the interface.
 
 # Authors
 - @Phaynes742
