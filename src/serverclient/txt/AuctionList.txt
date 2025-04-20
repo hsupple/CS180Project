@@ -1,5 +1,1 @@
 1001,name,buynow$,description,seller,isSold,HighestBid,BidPrice ## DO NOT DELETE LINE ##
-1002,Item4,-1.0,AutoEnd,seller1,true,None,100.0
-1003,Item1,-1.0,Description,seller1,false,None,50.0
-1004,Item2,500.0,Desc,seller1,false,None,100.0
-1005,Item3,-1.0,Desc,seller1,false,None,100.0
