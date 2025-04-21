@@ -16,17 +16,20 @@ import java.util.Set;
  */
 
 public class AuctionServer implements Runnable {
-    
+    // Define all variables for server
     private ServerSocket serverSocket;
     private final int port = 3001;
     private static final Object LOCK = new Object();
 
+    // Define messages for server to handle
     private final Set<String> messages = Set.of("NEWBUYER", "NEWSELLER", "UPDATEITEM",
-    "SETPASSWORD", "SENDMESS", "GETMESS", "DELETE",
-    "ISACTIVE", "GETRATING", "SETRATING", "STARTAUCTION",
-    "MAKEBID", "BUYITEM", "GETITEMID", "SEARCH",
-    "GETMYLISTINGS", "ENDLISTING");
+        "SETPASSWORD", "SENDMESS", "GETMESS", "DELETE",
+        "ISACTIVE", "GETRATING", "SETRATING", "STARTAUCTION",
+        "MAKEBID", "BUYITEM", "GETITEMID", "SEARCH",
+        "GETMYLISTINGS", "ENDLISTING");
 
+    // Constructor to create server socket
+    // and set up the server to listen for connections
     public AuctionServer() {
         try {
             serverSocket = new ServerSocket(port);  
@@ -48,12 +51,15 @@ public class AuctionServer implements Runnable {
     * @version April, 2025
     */
 
-     class ClientHandler implements Runnable {
+    class ClientHandler implements Runnable {
+        // Define all variables for client handler
         private Socket clientSocket;
         private BufferedReader in;
         private PrintWriter out;
         private Set<String> messages;
 
+        // Constructor to set up client handler with socket and messages
+        // to handle incoming requests
         public ClientHandler(Socket socket, Set<String> messages) {
             this.clientSocket = socket;
             this.messages = messages;
@@ -65,6 +71,7 @@ public class AuctionServer implements Runnable {
             }
         }
 
+        // Run method to handle incoming requests from clients
         @Override
         public void run() {
             try {
@@ -91,20 +98,25 @@ public class AuctionServer implements Runnable {
                 }
             }
         }
-
+        // Method to handle commands from clients
+        // and call appropriate methods to process requests
         private String handleCommand(String[] input) {
             try {
                 return switch (input[0]) {
                     case "GETITEMID" -> generateID();
                     case "NEWSELLER" -> newSeller(input[1], input[2]);
                     case "NEWBUYER" -> newBuyer(input[1], input[2]);
-                    case "UPDATEITEM" -> updateItem(input[1], input[2], input[3], Double.parseDouble(input[4]), input[5], Boolean.parseBoolean(input[6]), input[7], Double.parseDouble(input[8]));
+                    case "UPDATEITEM" -> updateItem(input[1], input[2], input[3], Double.parseDouble(input[4]), 
+                                                    input[5], Boolean.parseBoolean(input[6]), input[7], 
+                                                    Double.parseDouble(input[8]));
                     case "SETPASSWORD" -> setPass(input[1], input[2]);
                     case "DELETE" -> delete(input[1], input[2]);
                     case "ISACTIVE" -> isActive(input[1]);
                     case "GETRATING" -> getRating(input[1]);
                     case "SETRATING" -> setRating(input[1], Double.parseDouble(input[2]));
-                    case "STARTAUCTION" -> startAuction(input[1], input[2], Double.parseDouble(input[3]), input[4], input[5], Boolean.parseBoolean(input[6]), input[7], Double.parseDouble(input[8]));
+                    case "STARTAUCTION" -> startAuction(input[1], input[2], Double.parseDouble(input[3]), input[4], 
+                                                        input[5], Boolean.parseBoolean(input[6]), input[7], 
+                                                        Double.parseDouble(input[8]));
                     case "ENDLISTING" -> endAuction(input[1]);
                     case "MAKEBID" -> bidItem(input[1], input[2], Double.parseDouble(input[3]));
                     case "BUYITEM" -> buyItem(input[1], input[2]);
@@ -120,6 +132,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Main method to start the server and listen for incoming connections
     @Override
     public void run() {
         try {
@@ -153,6 +166,7 @@ public class AuctionServer implements Runnable {
         return contentBuilder;
     }
 
+    // Write to file with synchronized access
     private void writeFile(String txtFile, ArrayList<String> content) {
         synchronized (LOCK) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(txtFile))) {
@@ -166,17 +180,17 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Generate a new ID for items
     private String generateID() {
         synchronized (LOCK) {
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             int maxId = 0;
-            for (int i = 0; i < Items.size(); i++) {
-                String[] parts = Items.get(i).split(",");
+            for (int i = 0; i < items.size(); i++) {
+                String[] parts = items.get(i).split(",");
                 if (parts.length > 0 && parts[0] != null) {
                     int id = Integer.parseInt(parts[0]);
                     maxId = Math.max(maxId, id);
-                }
-                else {
+                } else {
                     maxId = 1000;
                 }
             }
@@ -184,6 +198,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Log a new buyer account
     private String newBuyer(String user, String password) {
         synchronized (LOCK) {
             String[] parts;
@@ -200,28 +215,32 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Log a new seller account    
     private String newSeller(String user, String password) {
         synchronized (LOCK) {
             String[] parts;
-            ArrayList<String> Sellers = readFile("txt/SellerList.txt");
-            for (int i = 0; i < Sellers.size(); i++) {
-                parts = Sellers.get(i).split(",");
+            ArrayList<String> sellers = readFile("txt/SellerList.txt");
+            for (int i = 0; i < sellers.size(); i++) {
+                parts = sellers.get(i).split(",");
                 if (parts[0].equals(user)) {
                     return "Username already exists!";
                 }
             }
-            Sellers.add(user + "," + password + ",0,0," + "true");
-            writeFile("txt/SellerList.txt", Sellers);
+            sellers.add(user + "," + password + ",0,0," + "true");
+            writeFile("txt/SellerList.txt", sellers);
             return "Successfully added user: " + user;
         }
     }
 
-    private String updateItem(String itemID, String itemName, String itemDescription, double buyNowItemPrice, String seller, boolean isSold, String buyer, double bidItemPrice) {
+    // Update item listing or add new item if it doesn't exist
+    private String updateItem(String itemID, String itemName, String itemDescription, 
+                              double buyNowItemPrice, String seller, boolean isSold, String buyer, 
+                              double bidItemPrice) {
         synchronized (LOCK) {
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
-            for (int i = 0; i < Items.size(); i++) {
-                parts = Items.get(i).split(",");
+            for (int i = 0; i < items.size(); i++) {
+                parts = items.get(i).split(",");
                 if (parts[1].equals(itemName)) {
                     parts[1] = itemName;
                     parts[2] = String.valueOf(buyNowItemPrice);
@@ -231,18 +250,20 @@ public class AuctionServer implements Runnable {
                     parts[6] = buyer;
                     parts[7] = String.valueOf(bidItemPrice);
 
-                    Items.set(i, String.join(",", parts));
-                    writeFile("txt/AuctionList.txt", Items);
+                    items.set(i, String.join(",", parts));
+                    writeFile("txt/AuctionList.txt", items);
                     return "Existing item updated successfully: " + itemID;
                 }
             }
-            String newItem = itemID + "," + itemName + "," + buyNowItemPrice + "," + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
-            Items.add(newItem);
-            writeFile("txt/AuctionList.txt", Items);
+            String newItem = itemID + "," + itemName + "," + buyNowItemPrice + "," 
+                + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
+            items.add(newItem);
+            writeFile("txt/AuctionList.txt", items);
             return "Item added successfully: " + itemID;
         }
     }
 
+    // Set password for buyer or seller
     private String setPass(String user, String password) {
         synchronized (LOCK) {
             ArrayList<String> buyers = readFile("txt/BuyerList.txt");
@@ -271,25 +292,26 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Delete buyer or seller account by setting isActive to false
     private String delete(String user, String password) {
         synchronized (LOCK) {
-            ArrayList<String> Buyers = readFile("txt/BuyerList.txt");
-            ArrayList<String> Sellers = readFile("txt/SellerList.txt");
+            ArrayList<String> buyers = readFile("txt/BuyerList.txt");
+            ArrayList<String> sellers = readFile("txt/SellerList.txt");
             String[] parts;
-            for (int i = 0; i < Buyers.size(); i++) {
-                parts = Buyers.get(i).split(",");
+            for (int i = 0; i < buyers.size(); i++) {
+                parts = buyers.get(i).split(",");
                 if (parts[0].equals(user) && parts[1].equals(password)) {
-                    Buyers.remove(i);
-                    writeFile("txt/BuyerList.txt", Buyers);
+                    buyers.remove(i);
+                    writeFile("txt/BuyerList.txt", buyers);
                     return "Account deleted successfully for user: " + user;
                 }
             }
 
-            for (int i = 0; i < Sellers.size(); i++) {
-                parts = Sellers.get(i).split(",");
+            for (int i = 0; i < sellers.size(); i++) {
+                parts = sellers.get(i).split(",");
                 if (parts[0].equals(user) && parts[1].equals(password)) {
-                    Sellers.remove(i);
-                    writeFile("txt/SellerList.txt", Sellers);
+                    sellers.remove(i);
+                    writeFile("txt/SellerList.txt", sellers);
                     return "Account deleted successfully for user: " + user;
                 }
             }
@@ -297,12 +319,13 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Get rating of seller
     private String getRating(String user) {
         synchronized (LOCK) {
-            ArrayList<String> Sellers = readFile("txt/SellerList.txt");
+            ArrayList<String> sellers = readFile("txt/SellerList.txt");
             String[] parts;
-            for (int i = 0; i < Sellers.size(); i++) {
-                parts = Sellers.get(i).split(",");
+            for (int i = 0; i < sellers.size(); i++) {
+                parts = sellers.get(i).split(",");
                 if (parts[0].equals(user)) {
                     return parts[2];
                 }
@@ -311,22 +334,24 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Set rating for seller
+    // This method averages the new rating with the existing rating
     private String setRating(String user, double rating) {
         synchronized (LOCK) {
-            ArrayList<String> Sellers = readFile("txt/SellerList.txt");
+            ArrayList<String> sellers = readFile("txt/SellerList.txt");
             String[] parts;
 
-            for (int i = 0; i < Sellers.size(); i++) {
-                parts = Sellers.get(i).split(",");
+            for (int i = 0; i < sellers.size(); i++) {
+                parts = sellers.get(i).split(",");
                 if (parts[0].equals(user)) {
                     double currentRating = Double.parseDouble(parts[2]);
                     double ratingCount = Double.parseDouble(parts[3]);
                     double newRating = ((currentRating * ratingCount) + rating) / (ratingCount + 1);
                     parts[2] = String.format("%.2f", newRating);
                     parts[3] = String.valueOf((int) (ratingCount + 1));
-                    Sellers.set(i, String.join(",", parts));
+                    sellers.set(i, String.join(",", parts));
 
-                    writeFile("txt/SellerList.txt", Sellers);
+                    writeFile("txt/SellerList.txt", sellers);
                     return "Rating set successfully for user: " + user;
                 }
             }
@@ -334,31 +359,32 @@ public class AuctionServer implements Runnable {
         }
     }
     
-    private String isActive(String UserItem) {
+    // Check if user or listing is active
+    private String isActive(String userItem) {
         synchronized (LOCK) {
-            ArrayList<String> Buyers = readFile("txt/BuyerList.txt");
-            ArrayList<String> Sellers = readFile("txt/SellerList.txt");
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> buyers = readFile("txt/BuyerList.txt");
+            ArrayList<String> sellers = readFile("txt/SellerList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
-            for (int i = 0; i < Buyers.size(); i++) {
-                parts = Buyers.get(i).split(",");
-                if (parts[1].equals(UserItem)) {
-                    return "User is active: " + UserItem;
+            for (int i = 0; i < buyers.size(); i++) {
+                parts = buyers.get(i).split(",");
+                if (parts[1].equals(userItem)) {
+                    return "User is active: " + userItem;
                 } 
             }
  
-            for (int i = 0; i < Sellers.size(); i++) {
-                parts = Sellers.get(i).split(",");
-                if (parts[0].equals(UserItem) && parts[4].equalsIgnoreCase("true")) {
-                    return "User is active: " + UserItem;
+            for (int i = 0; i < sellers.size(); i++) {
+                parts = sellers.get(i).split(",");
+                if (parts[0].equals(userItem) && parts[4].equalsIgnoreCase("true")) {
+                    return "User is active: " + userItem;
                 } 
             }
 
-            for (int i = 0; i < Items.size(); i++) {
-                parts = Items.get(i).split(",");
-                if (parts.length > 4){
-                    if (parts[0].equals(UserItem) && parts[5].equalsIgnoreCase("false")) {
-                        return "Listing is active: " + UserItem;
+            for (int i = 0; i < items.size(); i++) {
+                parts = items.get(i).split(",");
+                if (parts.length > 4) {
+                    if (parts[0].equals(userItem) && parts[5].equalsIgnoreCase("false")) {
+                        return "Listing is active: " + userItem;
                     } 
                 }
             }
@@ -366,9 +392,10 @@ public class AuctionServer implements Runnable {
         }
     }
     
+    // Buy item now based on user set price
     private String buyItem(String itemID, String buyer) {
         synchronized (LOCK) {
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
             // Fixed the check to be more reliable
             String activeCheck = isActive(itemID);
@@ -380,16 +407,16 @@ public class AuctionServer implements Runnable {
                 return "Item is not active: " + itemID;
             }
 
-            for (int i = 0; i < Items.size(); i++) {
-                parts = Items.get(i).split(",");
+            for (int i = 0; i < items.size(); i++) {
+                parts = items.get(i).split(",");
                 if (parts[0].equals(itemID)) {
                     if (parts[2].equals("-1")) {
                         return "Item is not \"Buy Now\": " + itemID;
                     } else {
                         parts[5] = "true";
                         parts[6] = buyer;
-                        Items.set(i, String.join(",", parts));
-                        writeFile("txt/AuctionList.txt", Items);
+                        items.set(i, String.join(",", parts));
+                        writeFile("txt/AuctionList.txt", items);
                         return "Item bought successfully: " + itemID;
                     }
                 }
@@ -398,33 +425,38 @@ public class AuctionServer implements Runnable {
         }
     }
 
-    private String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
+    // Start a new auction or add a new item if it doesn't exist
+    private String startAuction(String itemID, String itemName, double buyNowItemPrice, 
+                                String itemDescription, String seller, boolean isSold, String buyer, 
+                                double bidItemPrice) {
         synchronized (LOCK) {
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
-            for (int i = 0; i < Items.size(); i++) {
-                parts = Items.get(i).split(",");
+            for (int i = 0; i < items.size(); i++) {
+                parts = items.get(i).split(",");
                 if (parts[0].equals(itemID)) {
                     return "Item already exists: " + itemID;
                 }
             }
-            String newItem = itemID + "," + itemName + "," + buyNowItemPrice + "," + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
-            Items.add(newItem);
-            writeFile("txt/AuctionList.txt", Items);
+            String newItem = itemID + "," + itemName + "," + buyNowItemPrice + "," + itemDescription + "," 
+                + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
+            items.add(newItem);
+            writeFile("txt/AuctionList.txt", items);
             return "Auction started successfully for item: " + itemID;
         }
     }
 
+    // End a current auction
     private String endAuction(String itemID) {
         synchronized (LOCK) {
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
-            for (int i = 0; i < Items.size(); i++) {
-                parts = Items.get(i).split(",");
+            for (int i = 0; i < items.size(); i++) {
+                parts = items.get(i).split(",");
                 if (parts[0].equals(itemID)) {
                     parts[5] = "true";
-                    Items.set(i, String.join(",", parts));
-                    writeFile("txt/AuctionList.txt", Items);
+                    items.set(i, String.join(",", parts));
+                    writeFile("txt/AuctionList.txt", items);
                     return "Auction ended successfully for item: " + itemID;
                 }
             }
@@ -432,19 +464,20 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Place a bid on an item
     private String bidItem(String itemID, String user, double price) {
         synchronized (LOCK) {
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
-            for (int i = 0; i < Items.size(); i++) {
-                parts = Items.get(i).split(",");
+            for (int i = 0; i < items.size(); i++) {
+                parts = items.get(i).split(",");
                 if (parts[1].equals(itemID)) {
                     double currentBid = Double.parseDouble(parts[7]);
                     if (currentBid < price) {
                         parts[7] = String.valueOf(price);
                         parts[6] = user;
-                        Items.set(i, String.join(",", parts));
-                        writeFile("txt/AuctionList.txt", Items);
+                        items.set(i, String.join(",", parts));
+                        writeFile("txt/AuctionList.txt", items);
                         return "Bid placed successfully for item: " + itemID;
                     } else {
                         return "Bid price is too low for item: " + itemID;
@@ -455,6 +488,7 @@ public class AuctionServer implements Runnable {
         }
     }
 
+    // Get messages between two users
     private String getMess(String user, String user2) {
         synchronized (LOCK) {
             // Sort users for consistent file naming
@@ -466,14 +500,15 @@ public class AuctionServer implements Runnable {
             
             File messageFile = new File("msg/" + user + "_to_" + user2 + ".txt");
             if (messageFile.exists()) {
-                ArrayList<String> Messages = readFile("msg/" + user + "_to_" + user2 + ".txt");
-                return Messages.toString();
+                ArrayList<String> messageList = readFile("msg/" + user + "_to_" + user2 + ".txt");
+                return messageList.toString();
             } else {
                 return "No messages found between " + user + " and " + user2;
             }
         }
     }
 
+    // Send a message from one user to another
     private String sendMess(String user, String user2, String message) {
         synchronized (LOCK) {
             // Sort users for consistent file naming
@@ -482,7 +517,7 @@ public class AuctionServer implements Runnable {
                 user = user2;
                 user2 = temp;
             }
-            
+
             // Ensure directory exists
             File dir = new File("msg");
             if (!dir.exists()) {
@@ -490,36 +525,37 @@ public class AuctionServer implements Runnable {
             }
             
             File messageFile = new File("msg/" + user + "_to_" + user2 + ".txt");
-            ArrayList<String> Messages = new ArrayList<>();
+            ArrayList<String> messageList = new ArrayList<>();
             
             if (messageFile.exists()) {
-                Messages = readFile("msg/" + user + "_to_" + user2 + ".txt"); 
+                messageList = readFile("msg/" + user + "_to_" + user2 + ".txt"); 
             }
 
             String newMessage = user + ": " + message.replace("/", " ");
-            Messages.add(newMessage);
-            writeFile("msg/" + user + "_to_" + user2 + ".txt", Messages);
+            messageList.add(newMessage);
+            writeFile("msg/" + user + "_to_" + user2 + ".txt", messageList);
             return "Message sent successfully from " + user + " to " + user2;
         }
     }
 
+    // Search for sellers or items based on query
     private String search(String query) {
         synchronized (LOCK) {
-            ArrayList<String> Sellers = readFile("txt/SellerList.txt");
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> sellers = readFile("txt/SellerList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             ArrayList<String> results = new ArrayList<>();
             String[] parts;
             results.add("Sellers");
-            for (int i = 0; i < Sellers.size(); i++) {
-                parts = Sellers.get(i).split(",");
+            for (int i = 0; i < sellers.size(); i++) {
+                parts = sellers.get(i).split(",");
                 if (parts[0].contains(query) && parts[4].equalsIgnoreCase("true")) {
                     results.add(parts[0]);
                 }
             }
 
             results.add("Listings");
-            for (int j = 0; j < Items.size(); j++) {
-                parts = Items.get(j).split(",");
+            for (int j = 0; j < items.size(); j++) {
+                parts = items.get(j).split(",");
                 if (parts[1].contains(query)) {
                     results.add(parts[1] + " BUY NOW $" + parts[2] + " BID AMT $" + parts[7]);
                 }
@@ -528,13 +564,14 @@ public class AuctionServer implements Runnable {
         }
     }
     
+    // Get all listings from server
     private String getMyListings(String user) {
         synchronized (LOCK) {
-            ArrayList<String> Items = readFile("txt/AuctionList.txt");
+            ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
             ArrayList<String> results = new ArrayList<>();
-            for (int i = 0; i < Items.size(); i++) {
-                parts = Items.get(i).split(",");
+            for (int i = 0; i < items.size(); i++) {
+                parts = items.get(i).split(",");
                 if (parts.length > 4 && parts[4].equals(user)) {
                     results.add(String.join("/", parts));
                 }

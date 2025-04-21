@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
   * @version April, 2025
   */
 
-  class BuyerTest {
+class BuyerTest {
 
     private static final String TEST_BUYER_FILE = "BuyerList.txt";
     private static final String TEST_AUCTION_FILE = "AuctionList.txt";
@@ -40,7 +40,8 @@ import static org.junit.jupiter.api.Assertions.*;
     @Test
     void testCreateBuyerWritesToFile() throws IOException {
         Buyer buyer = new Buyer("testUser", "testPass");
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_BUYER_FILE));
+        String content = Files.readString(Paths.get(System.getProperty("user.dir") 
+                                                    + "/src/serverclient/txt/" + TEST_BUYER_FILE));
         assertTrue(content.contains("testUser") && content.contains("testPass"), "Buyer info not found");
     }
 
@@ -48,10 +49,12 @@ import static org.junit.jupiter.api.Assertions.*;
     void testSetPasswordUpdatesFile() throws IOException {
         Buyer buyer = new Buyer("testUser2", "oldPass");
         buyer.setPassword("newPass");
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_BUYER_FILE));
+        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                                    + TEST_BUYER_FILE));
         assertTrue(content.contains("testUser2,newPass"), "Password not updated in file");
     }
 
+    // MUST REMOVE THE MSG FILES BEFORE RUNNING THIS TEST
     @Test
     void testSendMessageToSellerStoresMessages() {
         Buyer buyer = new Buyer("buyer1", "pass");
@@ -59,7 +62,8 @@ import static org.junit.jupiter.api.Assertions.*;
         buyer.sendMessageToSeller("seller1", "Hello!");
         ArrayList<String> messages = buyer.getMessages("seller1");
 
-        assertTrue(messages.contains("[buyer1: Hello!]"), "Buyer not found in messages" + messages.toString());
+        assertTrue(messages.contains("[buyer1: Hello!]"), "Buyer not found in messages" 
+                   + messages.toString());
     }
 
     @Test
@@ -67,7 +71,8 @@ import static org.junit.jupiter.api.Assertions.*;
         ItemListing item = new ItemListing("item1", "desc", 10, "seller1", 2000);
         Buyer buyer = new Buyer("buyer1", "pass");
         buyer.makeBid("item1", 99.99);
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_AUCTION_FILE));
+        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                                    + TEST_AUCTION_FILE));
         assertTrue(content.contains("buyer1,99.99"), "Bid not updated" + content);
     }
 
@@ -76,7 +81,8 @@ import static org.junit.jupiter.api.Assertions.*;
         Buyer buyer = new Buyer("buyer1", "pass");
         Seller seller = new Seller("seller1", "password");
         buyer.rateSeller("seller1", 5.0);
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_SELLER_FILE));
+        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                                    + TEST_SELLER_FILE));
         assertTrue(content.contains("1"), "Rating count not updated");
     }
 

@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
   * @version April, 2025
   */
 
-  class SellerTest {
+class SellerTest {
 
     private static final Path SELLER_FILE = Paths.get("SellerList.txt");
     private static final Path AUCTION_FILE = Paths.get("AuctionList.txt");
@@ -39,16 +39,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
     void testSetPasswordUpdatesFile() throws IOException {
-        Seller seller = new Seller("testUser2", "oldPass");
+        Seller seller = new Seller("testUser3", "oldPass");
         seller.setPassword("newPass");
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" + SELLER_FILE));
-        assertTrue(content.contains("testUser2,newPass"), "Password not updated in file");
+        String content = Files.readString(Paths.get(System.getProperty("user.dir") 
+                                                    + "/src/serverclient/txt/" + SELLER_FILE));
+        assertTrue(content.contains("testUser3,newPass"), "Password not updated in file");
     }
 
-
+    // MUST REMOVE THE MSG FILES BEFORE RUNNING THIS TEST
     @Test
     void testSendMessageToBuyer() {
         Seller seller = new Seller("seller2", "pass");
+        Buyer buyer = new Buyer("buyer1", "pass");
         seller.sendMessageToBuyer("buyer1", "Hi!");
 
         List<String> messages = seller.getMessages("buyer1"); 

@@ -3,7 +3,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Class that creates an item listing with a generated ID, a name, a description, a buyer, a price, and checker values.
+ * Class that creates an item listing with a generated ID, a name, 
+ a description, a buyer, a price, and checker values.
  *
  * <p>Purdue University -- CS18000 -- Spring 2025</p>
  *
@@ -74,7 +75,9 @@ public class ItemListing implements ItemListingInterface {
 
     // Public formatter method used to format the line to be written
     private String formatItem() {
-        client.updateItemListing(itemId, itemName.replace(" ", "/"), itemDescription.replace(" ", "/"), buyNowItemPrice, seller, isSold, buyer, bidItemPrice);
+        client.updateItemListing(itemId, itemName.replace(" ", "/"), 
+                                 itemDescription.replace(" ", "/"), buyNowItemPrice, 
+                                 seller, isSold, buyer, bidItemPrice);
         return itemId + "," + itemName + "," + buyNowItemPrice + "," 
             + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
     }

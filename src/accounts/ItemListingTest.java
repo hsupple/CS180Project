@@ -17,15 +17,16 @@ import static org.junit.jupiter.api.Assertions.*;
             @addy-ops
   * @version April, 2025
   */
-  class ItemListingTest {
-
+class ItemListingTest {
+    
     private static final String TEST_AUCTION_FILE = "AuctionList.txt";
 
     @Test
     void testCreateItemWritesToFile() throws IOException {
         ItemListing item = new ItemListing("Laptop", "Gaming laptop", 300, "seller1", 2000);
-        String lines = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_AUCTION_FILE));
-        assertFalse(lines.equals(""),"Auction file should not be empty after item creation");
+        String lines = Files.readString(Paths.get(System.getProperty("user.dir") 
+                                                  + "/src/serverclient/txt/" + TEST_AUCTION_FILE));
+        assertFalse(lines.equals(""), "Auction file should not be empty after item creation");
         assertTrue(lines.indexOf("Laptop") != -1 , "Item not written correctly to file");
     }
 
@@ -86,8 +87,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
     void testAuctionEndsAutomatically() throws Exception {
-        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 500); // 0.5 second
-        Thread.sleep(1000);  // wait for it to expire
+        ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 500);
+        Thread.sleep(1000); 
         assertFalse(item.isActive(), "Auction should automatically end after duration");
     }
 

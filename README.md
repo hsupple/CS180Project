@@ -23,6 +23,12 @@ Program utilizing Java interfaces and classes to ultimately create an interactiv
 - Clone the Repo
 - $ git clone https://github.com/hsupple/CS180Project.git
 
+## Test Cases
+- Ensure you have a JUnit test case extension on your IDE
+- ENSURE ALL TXT FILES ARE EMPTY
+- ENSURE NO MSG FILES ARE IN THE MSG DIRECTORY
+- Ensure Server is running while JUnit tests are activated
+
 ## Roadmap for Future Weeks
 - Create a GUI to make the design interactive and functional for a user
 - Link GUI with stack to ensure inputs can be controlled from the interface.

@@ -1,1 +1,5 @@
 Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE
+seller1,password,5.00,1,true
+testUser3,newPass,0,0,true
+rated1,pass123,4.50,1,true
+seller2,pass,0,0,true

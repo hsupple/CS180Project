@@ -16,19 +16,21 @@ import java.util.Collections;
  */
 
 public class AuctionClient implements AuctionClientInterface {
-
+    //Define all variables for client
     private final Socket socket;
     private final PrintWriter out;
     private final BufferedReader in;
     private final int port = 3001;
     private final String host = "localhost";
 
+    // Auction Client Constructor
     public AuctionClient() throws IOException {
         this.socket = new Socket(this.host, this.port);
         this.out = new PrintWriter(socket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
+    // Auction Client log new buyers
     @Override
     public String newBuyer(String user, String password) {
         try {
@@ -41,6 +43,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Auction Client log new sellers
     @Override
     public String newSeller(String user, String password) {
         try {
@@ -53,10 +56,15 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Auction Client update item listing values
     @Override
-    public String updateItemListing(int itemId, String itemName, String itemDescription, double buyNowItemPrice, String seller, boolean isSold, String buyer, double bidItemPrice) {
+    public String updateItemListing(int itemId, String itemName, 
+                                    String itemDescription, double buyNowItemPrice, 
+                                    String seller, boolean isSold, String buyer, double bidItemPrice) {
         try {
-            out.println("UPDATEITEM " + itemId + " " + itemName + " " + itemDescription + " " + buyNowItemPrice + " " + seller + " " + isSold + " " + buyer + " " + bidItemPrice);
+            out.println("UPDATEITEM " + itemId + " " + itemName 
+                        + " " + itemDescription + " " + buyNowItemPrice + " " 
+                        + seller + " " + isSold + " " + buyer + " " + bidItemPrice);
             out.flush();
             return in.readLine();
         }  catch (IOException e) {
@@ -65,6 +73,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Generate new item ID for new listing
     @Override
     public int getItemID() {
         try {
@@ -79,6 +88,7 @@ public class AuctionClient implements AuctionClientInterface {
         return -1;
     }
 
+    // Send message from one user to another
     @Override
     public String sendMessage(String user, String recipient, String message) {
         try {
@@ -91,6 +101,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Get messages from one user to another
     @Override
     public ArrayList<String> getMessages(String user, String user2) throws IOException {
         out.println("GETMESS " + user + " " + user2);
@@ -102,6 +113,7 @@ public class AuctionClient implements AuctionClientInterface {
         return messages;
     }
 
+    // Log new password for user
     @Override
     public String setPassword(String user, String password) {
         try {
@@ -114,6 +126,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Delete user account with password verification
     @Override
     public String deleteAccount(String user, String password) {
         try {
@@ -126,6 +139,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Return the status of user or listing
     @Override
     public String isActive(String user) {
         try {
@@ -138,6 +152,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Get rating of seller
     @Override
     public String getRating(String user) {
         try {
@@ -150,6 +165,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Set rating of seller, new logs will be averaged
     @Override
     public String setRating(String user, double rating) {
         try {
@@ -162,8 +178,11 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Log new auction
     @Override
-    public String startAuction(String itemID, String itemName, double buyNowItemPrice, String itemDescription, String seller, boolean isSold, String buyer, double bidItemPrice) {
+    public String startAuction(String itemID, String itemName, double buyNowItemPrice, 
+                               String itemDescription, String seller, boolean isSold, String buyer, 
+                               double bidItemPrice) {
         try {
             System.out.print(itemDescription);
             String message = "STARTAUCTION "
@@ -184,6 +203,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // End listing based on buyer
     @Override
     public String endListing(String itemID) {
         try {
@@ -196,6 +216,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Get all listings from server
     @Override
     public ArrayList<String> getMyListings(String user) {
         try {
@@ -212,6 +233,7 @@ public class AuctionClient implements AuctionClientInterface {
         return new ArrayList<>();
     }
 
+    // Buy item now based on user set price
     @Override
     public String buyNow(String itemID, String user) {
         try {
@@ -224,6 +246,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Make a bid on an item based on user set price
     @Override
     public String makeBid(String itemID, String user, double price) {
         try {
@@ -236,6 +259,7 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Search for items or users based on query
     @Override
     public ArrayList<String> searchFor(String query) {
         try {
