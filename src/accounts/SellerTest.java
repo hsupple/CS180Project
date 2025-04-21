@@ -22,15 +22,6 @@ class SellerTest {
     private static final Path SELLER_FILE = Paths.get("SellerList.txt");
     private static final Path AUCTION_FILE = Paths.get("AuctionList.txt");
 
-    @BeforeEach
-    void setup() throws IOException {
-        Files.write(SELLER_FILE,
-                List.of("seller1,pass123,4.5,3,true")); 
-
-        Files.write(AUCTION_FILE,
-                List.of("item1,name,desc,cat,time,price,seller1,0")); 
-    }
-
     @AfterEach
     void cleanup() throws IOException {
         Files.deleteIfExists(Paths.get(System.getProperty("user.dir") 

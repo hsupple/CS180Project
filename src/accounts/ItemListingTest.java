@@ -24,13 +24,8 @@ class ItemListingTest {
     @BeforeEach
     void cleanup() throws IOException {
         Path auctionListPath = Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/AuctionList.txt");
-
-
-        System.out.println("Resetting file at: " + auctionListPath.toAbsolutePath());
-
         String defaultContent = "1001,example,description,seller";
         Files.createDirectories(auctionListPath.getParent());
-
         Files.write(auctionListPath, defaultContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
