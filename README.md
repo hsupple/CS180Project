@@ -25,8 +25,6 @@ Program utilizing Java interfaces and classes to ultimately create an interactiv
 
 ## Test Cases
 - Ensure you have a JUnit test case extension on your IDE
-- ENSURE ALL TXT FILES ARE EMPTY
-- ENSURE NO MSG FILES ARE IN THE MSG DIRECTORY
 - Ensure Server is running while JUnit tests are activated
 
 ## Roadmap for Future Weeks
