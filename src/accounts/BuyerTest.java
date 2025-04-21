@@ -23,18 +23,10 @@ class BuyerTest {
     private static final String TEST_AUCTION_FILE = "AuctionList.txt";
     private static final String TEST_SELLER_FILE = "SellerList.txt";
 
-    @BeforeEach
-    void setup() throws IOException {
-        Files.write(Paths.get(TEST_BUYER_FILE), new byte[0]);
-        Files.write(Paths.get(TEST_AUCTION_FILE), "item1,item,desc,cat,time,price,none,0\n".getBytes());
-        Files.write(Paths.get(TEST_SELLER_FILE), "seller1,4.0,2\n".getBytes());
-    }
-
     @AfterEach
     void cleanup() throws IOException {
-        Files.deleteIfExists(Paths.get(TEST_BUYER_FILE));
-        Files.deleteIfExists(Paths.get(TEST_AUCTION_FILE));
-        Files.deleteIfExists(Paths.get(TEST_SELLER_FILE));
+        Files.deleteIfExists(Paths.get(System.getProperty("user.dir") 
+            + "/src/serverclient/msg/buyer1_to_seller1.txt"));
     }
 
     @Test

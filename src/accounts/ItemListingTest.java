@@ -21,6 +21,19 @@ class ItemListingTest {
     
     private static final String TEST_AUCTION_FILE = "AuctionList.txt";
 
+    @BeforeEach
+    void cleanup() throws IOException {
+        Path auctionListPath = Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/AuctionList.txt");
+
+
+        System.out.println("Resetting file at: " + auctionListPath.toAbsolutePath());
+
+        String defaultContent = "1001,example,description,seller";
+        Files.createDirectories(auctionListPath.getParent());
+
+        Files.write(auctionListPath, defaultContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
     @Test
     void testCreateItemWritesToFile() throws IOException {
         ItemListing item = new ItemListing("Laptop", "Gaming laptop", 300, "seller1", 2000);

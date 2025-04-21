@@ -1,1 +1,2 @@
 1001,example,description,seller
+1002,Item17,500.0,desc,seller1,false,None,100.0

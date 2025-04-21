@@ -33,8 +33,12 @@ class SellerTest {
 
     @AfterEach
     void cleanup() throws IOException {
-        Files.deleteIfExists(SELLER_FILE);
-        Files.deleteIfExists(AUCTION_FILE);
+        Files.deleteIfExists(Paths.get(System.getProperty("user.dir") 
+            + "/src/serverclient/msg/buyer1_to_seller2.txt"));
+            Path sellerListPath = Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/SellerList.txt");
+            String defaultContent = "Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE";
+            Files.createDirectories(sellerListPath.getParent());
+            Files.write(sellerListPath, defaultContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     @Test
