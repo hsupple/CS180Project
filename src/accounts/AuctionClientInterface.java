@@ -1,3 +1,5 @@
+package accounts;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -18,6 +20,8 @@ public interface AuctionClientInterface {
     // Define all methods for client
     int getItemID();
 
+    Boolean isBuyer(String user);
+    String getPassword(String user);
     String newBuyer(String user, String password);
     String newSeller(String user, String password);
     String updateItemListing(int itemId, String itemName, String itemDescription, 

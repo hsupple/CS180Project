@@ -1,3 +1,4 @@
+package accounts;
 import org.junit.jupiter.api.*;
 import java.io.*;
 import java.nio.file.*;
@@ -22,14 +23,28 @@ class SellerTest {
     private static final Path SELLER_FILE = Paths.get("SellerList.txt");
     private static final Path AUCTION_FILE = Paths.get("AuctionList.txt");
 
+    @BeforeEach
+    void clean() throws IOException {
+        Files.deleteIfExists(Paths.get(System.getProperty("user.dir") 
+            + "/src/serverclient/msg/buyer1_to_seller2.txt"));
+        Path sellerListPath = Paths.get(System.getProperty("user.dir") 
+                                        + "/src/serverclient/txt/SellerList.txt");
+        String defaultContent = "Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE";
+        Files.createDirectories(sellerListPath.getParent());
+        Files.write(sellerListPath, defaultContent.getBytes(), 
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
     @AfterEach
     void cleanup() throws IOException {
         Files.deleteIfExists(Paths.get(System.getProperty("user.dir") 
             + "/src/serverclient/msg/buyer1_to_seller2.txt"));
-            Path sellerListPath = Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/SellerList.txt");
-            String defaultContent = "Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE";
-            Files.createDirectories(sellerListPath.getParent());
-            Files.write(sellerListPath, defaultContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Path sellerListPath = Paths.get(System.getProperty("user.dir") 
+                                        + "/src/serverclient/txt/SellerList.txt");
+        String defaultContent = "Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE";
+        Files.createDirectories(sellerListPath.getParent());
+        Files.write(sellerListPath, defaultContent.getBytes(), 
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     @Test
@@ -37,7 +52,8 @@ class SellerTest {
         Seller seller = new Seller("testUser3", "oldPass");
         seller.setPassword("newPass");
         String content = Files.readString(Paths.get(System.getProperty("user.dir") 
-                                                    + "/src/serverclient/txt/" + SELLER_FILE));
+                                                    + "/src/serverclient/txt/" 
+                                                    + SELLER_FILE));
         assertTrue(content.contains("testUser3,newPass"), "Password not updated in file");
     }
 
@@ -49,7 +65,8 @@ class SellerTest {
         seller.sendMessageToBuyer("buyer1", "Hi!");
 
         List<String> messages = seller.getMessages("buyer1"); 
-        assertTrue(messages.contains("[buyer1: Hi!]"), "Message should be stored for buyer." + messages);
+        assertTrue(messages.contains("[buyer1: Hi!]"), "Message should be stored for buyer." 
+                   + messages);
     }
 
     @Test

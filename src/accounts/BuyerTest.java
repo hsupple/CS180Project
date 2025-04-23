@@ -1,3 +1,4 @@
+package accounts;
 import org.junit.jupiter.api.*;
 import java.io.*;
 import java.nio.file.*;
@@ -24,16 +25,36 @@ class BuyerTest {
     private static final String TEST_SELLER_FILE = "SellerList.txt";
 
     @AfterEach
+    void clean() throws IOException {
+        Files.deleteIfExists(Paths.get(System.getProperty("user.dir") 
+            + "/src/serverclient/msg/buyer1_to_seller1.txt"));
+        Path auctionListPath = Paths.get(System.getProperty("user.dir") 
+                                         + "/src/serverclient/txt/BuyerList.txt");
+        String defaultContent = "Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE";
+        Files.createDirectories(auctionListPath.getParent());
+        Files.write(auctionListPath, defaultContent.getBytes(), 
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    
+    }
+
+    @AfterEach
     void cleanup() throws IOException {
         Files.deleteIfExists(Paths.get(System.getProperty("user.dir") 
             + "/src/serverclient/msg/buyer1_to_seller1.txt"));
+        Path auctionListPath = Paths.get(System.getProperty("user.dir") 
+                                         + "/src/serverclient/txt/BuyerList.txt");
+        String defaultContent = "Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE";
+        Files.createDirectories(auctionListPath.getParent());
+        Files.write(auctionListPath, defaultContent.getBytes(), 
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     @Test
     void testCreateBuyerWritesToFile() throws IOException {
         Buyer buyer = new Buyer("testUser", "testPass");
         String content = Files.readString(Paths.get(System.getProperty("user.dir") 
-                                                    + "/src/serverclient/txt/" + TEST_BUYER_FILE));
+                                                    + "/src/serverclient/txt/" 
+                                                    + TEST_BUYER_FILE));
         assertTrue(content.contains("testUser") && content.contains("testPass"), "Buyer info not found");
     }
 
@@ -41,7 +62,8 @@ class BuyerTest {
     void testSetPasswordUpdatesFile() throws IOException {
         Buyer buyer = new Buyer("testUser2", "oldPass");
         buyer.setPassword("newPass");
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+        String content = Files.readString(Paths.get(System.getProperty("user.dir")
+                                                    + "/src/serverclient/txt/" 
                                                     + TEST_BUYER_FILE));
         assertTrue(content.contains("testUser2,newPass"), "Password not updated in file");
     }
@@ -63,7 +85,8 @@ class BuyerTest {
         ItemListing item = new ItemListing("item1", "desc", 10, "seller1", 2000);
         Buyer buyer = new Buyer("buyer1", "pass");
         buyer.makeBid("item1", 99.99);
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+        String content = Files.readString(Paths.get(System.getProperty("user.dir") 
+                                                    + "/src/serverclient/txt/" 
                                                     + TEST_AUCTION_FILE));
         assertTrue(content.contains("buyer1,99.99"), "Bid not updated" + content);
     }
@@ -73,7 +96,8 @@ class BuyerTest {
         Buyer buyer = new Buyer("buyer1", "pass");
         Seller seller = new Seller("seller1", "password");
         buyer.rateSeller("seller1", 5.0);
-        String content = Files.readString(Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+        String content = Files.readString(Paths.get(System.getProperty("user.dir") 
+                                                    + "/src/serverclient/txt/" 
                                                     + TEST_SELLER_FILE));
         assertTrue(content.contains("1"), "Rating count not updated");
     }

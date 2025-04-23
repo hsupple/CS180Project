@@ -1,3 +1,4 @@
+package accounts;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -152,6 +153,31 @@ public class AuctionClient implements AuctionClientInterface {
         return "Error";
     }
 
+    // Check if user is a buyer or seller
+    @Override
+    public Boolean isBuyer(String user) {
+        try {
+            out.println("ISBUYER " + user);
+            out.flush();
+            return Boolean.parseBoolean(in.readLine());
+        }  catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public String getPassword(String user) {
+        try {
+            out.println("GETPASSWORD " + user);
+            out.flush();
+            return in.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "User does not exist";
+    }
+
     // Get rating of seller
     @Override
     public String getRating(String user) {
@@ -224,7 +250,7 @@ public class AuctionClient implements AuctionClientInterface {
             out.flush();
             
             ArrayList<String> listings = new ArrayList<>();
-            Collections.addAll(listings, in.readLine().split("/"));
+            Collections.addAll(listings, in.readLine().split("\\\\"));
             
             return listings;
         } catch (IOException e) {

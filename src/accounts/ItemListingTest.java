@@ -1,3 +1,4 @@
+package accounts;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -22,18 +23,31 @@ class ItemListingTest {
     private static final String TEST_AUCTION_FILE = "AuctionList.txt";
 
     @BeforeEach
-    void cleanup() throws IOException {
-        Path auctionListPath = Paths.get(System.getProperty("user.dir") + "/src/serverclient/txt/AuctionList.txt");
+    void clean() throws IOException {
+        Path auctionListPath = Paths.get(System.getProperty("user.dir") 
+                                         + "/src/serverclient/txt/AuctionList.txt");
         String defaultContent = "1001,example,description,seller";
         Files.createDirectories(auctionListPath.getParent());
-        Files.write(auctionListPath, defaultContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.write(auctionListPath, defaultContent.getBytes(), 
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    @AfterEach
+    void cleanup() throws IOException {
+        Path auctionListPath = Paths.get(System.getProperty("user.dir") 
+                                         + "/src/serverclient/txt/AuctionList.txt");
+        String defaultContent = "1001,example,description,seller";
+        Files.createDirectories(auctionListPath.getParent());
+        Files.write(auctionListPath, defaultContent.getBytes(), 
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     @Test
     void testCreateItemWritesToFile() throws IOException {
         ItemListing item = new ItemListing("Laptop", "Gaming laptop", 300, "seller1", 2000);
         String lines = Files.readString(Paths.get(System.getProperty("user.dir") 
-                                                  + "/src/serverclient/txt/" + TEST_AUCTION_FILE));
+                                                  + "/src/serverclient/txt/" 
+                                                  + TEST_AUCTION_FILE));
         assertFalse(lines.equals(""), "Auction file should not be empty after item creation");
         assertTrue(lines.indexOf("Laptop") != -1 , "Item not written correctly to file");
     }
@@ -42,7 +56,8 @@ class ItemListingTest {
     void testSetItemName() throws IOException {
         ItemListing item = new ItemListing("OldName", "desc", 100, "seller1", 2000);
         item.setItemName("NewName");
-        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_AUCTION_FILE);
+        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                      + TEST_AUCTION_FILE);
         assertTrue(lastLine.contains("NewName"), "Item name not updated in file");
     }
 
@@ -50,7 +65,8 @@ class ItemListingTest {
     void testSetItemDescription() throws IOException {
         ItemListing item = new ItemListing("Item12", "Old desc", 100, "seller1", 2000);
         item.setItemDescription("Updated desc");
-        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_AUCTION_FILE);
+        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                      + TEST_AUCTION_FILE);
         assertTrue(lastLine.contains("Updated/desc"), "Description not updated in file");
     }
 
@@ -58,7 +74,8 @@ class ItemListingTest {
     void testSetBuyNowItemPrice() throws IOException {
         ItemListing item = new ItemListing("Item17", "desc", 100, "seller1", 2000);
         item.setBuyNowItemPrice(500);
-        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_AUCTION_FILE);
+        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                      + TEST_AUCTION_FILE);
         assertTrue(lastLine.contains("500.0"), "Buy-now price not updated");
     }
 
@@ -66,7 +83,8 @@ class ItemListingTest {
     void testPlaceValidBid() throws IOException {
         ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
         item.placeBid(250, "buyer1");
-        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_AUCTION_FILE);
+        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                      + TEST_AUCTION_FILE);
         assertTrue(lastLine.contains("buyer1"), "Valid bid not recorded in file");
     }
 
@@ -74,7 +92,8 @@ class ItemListingTest {
     void testPlaceInvalidBid() throws IOException {
         ItemListing item = new ItemListing("Item", "desc", 200, "seller1", 2000);
         item.placeBid(100, "buyer1");  // Too low
-        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" + TEST_AUCTION_FILE);
+        String lastLine = getLastLine(System.getProperty("user.dir") + "/src/serverclient/txt/" 
+                                      + TEST_AUCTION_FILE);
         assertFalse(lastLine.contains("buyer1"), "Invalid bid should not be accepted");
     }
 

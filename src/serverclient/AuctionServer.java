@@ -26,7 +26,7 @@ public class AuctionServer implements Runnable {
         "SETPASSWORD", "SENDMESS", "GETMESS", "DELETE",
         "ISACTIVE", "GETRATING", "SETRATING", "STARTAUCTION",
         "MAKEBID", "BUYITEM", "GETITEMID", "SEARCH",
-        "GETMYLISTINGS", "ENDLISTING");
+        "GETMYLISTINGS", "ENDLISTING", "GETPASSWORD", "ISBUYER");
 
     // Constructor to create server socket
     // and set up the server to listen for connections
@@ -103,6 +103,7 @@ public class AuctionServer implements Runnable {
         private String handleCommand(String[] input) {
             try {
                 return switch (input[0]) {
+                    case "GETPASSWORD" -> getPass(input[1]);
                     case "GETITEMID" -> generateID();
                     case "NEWSELLER" -> newSeller(input[1], input[2]);
                     case "NEWBUYER" -> newBuyer(input[1], input[2]);
@@ -112,6 +113,7 @@ public class AuctionServer implements Runnable {
                     case "SETPASSWORD" -> setPass(input[1], input[2]);
                     case "DELETE" -> delete(input[1], input[2]);
                     case "ISACTIVE" -> isActive(input[1]);
+                    case "ISBUYER" -> isBuyer(input[1]);
                     case "GETRATING" -> getRating(input[1]);
                     case "SETRATING" -> setRating(input[1], Double.parseDouble(input[2]));
                     case "STARTAUCTION" -> startAuction(input[1], input[2], Double.parseDouble(input[3]), input[4], 
@@ -391,6 +393,43 @@ public class AuctionServer implements Runnable {
             return "User / Listing not found";
         }
     }
+
+    private String isBuyer(String user) {
+        synchronized (LOCK) {
+            ArrayList<String> buyers = readFile("txt/BuyerList.txt");
+            String[] parts;
+            for (int i = 0; i < buyers.size(); i++) {
+                parts = buyers.get(i).split(",");
+                if (parts[0].equals(user)) {
+                    return "true";
+                } 
+            }
+            return "false";
+        }
+    }
+
+    // Get password for user
+    private String getPass(String user) {
+        synchronized (LOCK) {
+            ArrayList<String> buyers = readFile("txt/BuyerList.txt");
+            ArrayList<String> sellers = readFile("txt/SellerList.txt");
+            String[] parts;
+            for (int i = 0; i < buyers.size(); i++) {
+                parts = buyers.get(i).split(",");
+                if (parts[0].equals(user)) {
+                    return parts[1];
+                }
+            }
+
+            for (int i = 0; i < sellers.size(); i++) {
+                parts = sellers.get(i).split(",");
+                if (parts[0].equals(user)) {
+                    return parts[1];
+                }
+            }
+            return "User not found";
+        }
+    }
     
     // Buy item now based on user set price
     private String buyItem(String itemID, String buyer) {
@@ -438,8 +477,8 @@ public class AuctionServer implements Runnable {
                     return "Item already exists: " + itemID;
                 }
             }
-            String newItem = itemID + "," + itemName + "," + buyNowItemPrice + "," + itemDescription + "," 
-                + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
+            String newItem = itemID + " " + itemName + " " + buyNowItemPrice + " " + itemDescription + " " 
+                + seller + " " + isSold + " " + buyer + " " + bidItemPrice;
             items.add(newItem);
             writeFile("txt/AuctionList.txt", items);
             return "Auction started successfully for item: " + itemID;
@@ -573,7 +612,7 @@ public class AuctionServer implements Runnable {
             for (int i = 0; i < items.size(); i++) {
                 parts = items.get(i).split(",");
                 if (parts.length > 4 && parts[4].equals(user)) {
-                    results.add(String.join("/", parts));
+                    results.add(String.join("\\", parts));
                 }
             }
             return results.toString();

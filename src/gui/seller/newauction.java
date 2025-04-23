@@ -1,0 +1,144 @@
+package gui.seller;
+
+import accounts.ItemListing;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
+
+public class newauction {
+
+    private static String user;
+    private static String password;
+
+    public newauction(String user, String password) {
+        this.user = user;
+        this.password = password;
+
+        JFrame frame = new JFrame("New Auction Item");
+        frame.setSize(750, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+
+        // Main panel with null layout for manual positioning
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(null); // Use null layout to set bounds manually
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding around the panel
+
+        // Left panel for image selection (with black border)
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(null);
+        leftPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // Black border
+        leftPanel.setBounds(0, 0, 375, 500); // Left panel occupies half of the frame
+
+        JLabel imageLabel = new JLabel("Drag or Select an Image", SwingConstants.CENTER);
+        imageLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        imageLabel.setBounds(25, 100, 325, 100); // Position the image label
+        leftPanel.add(imageLabel);
+
+        JButton selectImageButton = new JButton("Select Image");
+        selectImageButton.setBounds(125, 230, 125, 30);
+        leftPanel.add(selectImageButton);
+
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(null); 
+        rightPanel.setBounds(375, 0, 375, 500);
+
+        JLabel titleLabel = new JLabel("Title*:");
+        JTextField titleTextField = new JTextField();
+        titleLabel.setBounds(20, 20, 100, 25);
+        titleTextField.setBounds(120, 20, 200, 25);
+
+        JLabel descriptionLabel = new JLabel("Description*:");
+        JTextArea descriptionTextArea = new JTextArea(3, 17);
+        descriptionTextArea.setLineWrap(true);
+        descriptionTextArea.setWrapStyleWord(true);
+        JScrollPane descriptionScrollPane = new JScrollPane(descriptionTextArea);
+        descriptionLabel.setBounds(20, 60, 100, 25);
+        descriptionScrollPane.setBounds(120, 60, 200, 80);
+
+        JLabel buyNowLabel = new JLabel("Buy Now Price ($):");
+        JTextField buyNowTextField = new JTextField();
+        buyNowLabel.setBounds(20, 150, 150, 25);
+        buyNowTextField.setBounds(170, 150, 150, 25);
+
+        JLabel minBidLabel = new JLabel("Minimum Bid Price ($)*:");
+        JTextField minBidTextField = new JTextField();
+        minBidLabel.setBounds(20, 190, 150, 25);
+        minBidTextField.setBounds(170, 190, 150, 25);
+
+        JLabel timerLabel = new JLabel("Auction Time Limit (min)*:");
+        JTextField timerTextField = new JTextField();
+        timerLabel.setBounds(20, 230, 150, 25);
+        timerTextField.setBounds(170, 230, 150, 25);
+
+
+        JButton submitButton = new JButton("Submit Auction Item");
+        submitButton.setBounds(120, 270, 200, 30); 
+
+        rightPanel.add(titleLabel);
+        rightPanel.add(titleTextField);
+        rightPanel.add(descriptionLabel);
+        rightPanel.add(descriptionScrollPane);
+        rightPanel.add(buyNowLabel);
+        rightPanel.add(buyNowTextField);
+        rightPanel.add(minBidLabel);
+        rightPanel.add(minBidTextField);
+        rightPanel.add(submitButton);
+        rightPanel.add(timerLabel);
+        rightPanel.add(timerTextField);
+
+        selectImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Select Image");
+                int result = fileChooser.showOpenDialog(frame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    System.out.println("Image selected: " + fileChooser.getSelectedFile().getPath());
+                }
+            }
+        });
+
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String title = titleTextField.getText();
+                String description = descriptionTextArea.getText().strip();
+                String buyNowPrice = buyNowTextField.getText();
+                String minBidPrice = minBidTextField.getText();
+                String timer = timerTextField.getText();
+
+                int minBid = -1;
+                if (!title.isEmpty() && !description.isEmpty() && !minBidPrice.isEmpty() && !timer.isEmpty()) {
+                    try {
+                        minBid = Integer.parseInt(minBidPrice); 
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(frame, "Please enter a valid number for Minimum Bid Price ( >= 0).", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                        return; 
+                    }   
+
+                    if (minBid >= 0) {
+                        JOptionPane.showConfirmDialog(frame, "Auction item submitted successfully!", "Success", JOptionPane.DEFAULT_OPTION);
+                        ItemListing item = new ItemListing(title, description, Double.parseDouble(minBidPrice), user, (Double.parseDouble(timer) * 60000));
+                        if (!minBidPrice.isEmpty()) {
+                            item.setBuyNowItemPrice(Double.parseDouble(buyNowPrice)); 
+                        }
+                        frame.dispose(); 
+                        new sellergui(user, password);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please fill in all required fields marked with *.", "Missing Information", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        // Add left and right panels to the main panel
+        mainPanel.add(leftPanel);
+        mainPanel.add(rightPanel);
+
+        // Add the main panel to the frame and make it visible
+        frame.add(mainPanel);
+        frame.setVisible(true);
+    }
+}
