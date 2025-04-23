@@ -5,15 +5,14 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
-public class buyergui {
+public class searchgui {
 
     private static String user;
     private static String password;
-    private static AuctionClient client = null; 
-    private static String[] Listings; 
-    private static JFrame frame = null;
+    private static AuctionClient client;
+    private static String[] Listings;
 
-    public buyergui(String user, String password) {
+    public searchgui(String user, String password, String query) {
         this.user = user;
         this.password = password;
 
@@ -23,10 +22,7 @@ public class buyergui {
             e.printStackTrace();
         }
 
-        this.Listings = client.getMyListings("ALL").toString().substring(1, client.getMyListings("ALL").toString().length() - 2).split("9000");
-        for (int i = 0; i < Listings.length; i++) {
-            System.out.println(Listings[i]);
-        }
+        this.Listings = client.searchFor(query).toString().split(",");
 
         JFrame frame = new JFrame("Buyer Interface");
         frame.setSize(1250, 750);
@@ -71,90 +67,32 @@ public class buyergui {
         headerInfoPanel.add(welcomeLabel);
         headerInfoPanel.add(typeLabel);
 
-        // Logout button aligned to the right
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.setPreferredSize(new Dimension(100, 30));
-        logoutButton.setMaximumSize(new Dimension(100, 30));
-
-        // Delete account button
-        JButton deleteButton = new JButton("Delete Account");
-        deleteButton.setPreferredSize(new Dimension(150, 30));
-        deleteButton.setMaximumSize(new Dimension(150, 30));
+        JButton ReturnButton = new JButton("Return");
+        ReturnButton.setPreferredSize(new Dimension(165, 45));
+        ReturnButton.setMaximumSize(new Dimension(165, 45));
 
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-
-        // Create a panel for the buttons with FlowLayout
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setBackground(Color.LIGHT_GRAY);
-
-        // Add buttons to separate panels to stack them vertically
-        JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        logoutPanel.setBackground(Color.LIGHT_GRAY);
-        logoutPanel.add(logoutButton);
+        JPanel returnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        returnPanel.setBackground(Color.LIGHT_GRAY);
+        returnPanel.add(ReturnButton);
         
-        JPanel deletePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        deletePanel.setBackground(Color.LIGHT_GRAY);
-        deletePanel.add(deleteButton);
-        
-        buttonPanel.add(logoutPanel);
-        buttonPanel.add(deletePanel);
-
         // Add button panel to header
         headerPanel.add(headerInfoPanel, BorderLayout.WEST);
-        headerPanel.add(buttonPanel, BorderLayout.EAST);
+        headerPanel.add(returnPanel, BorderLayout.EAST);
 
-        logoutButton.addActionListener(e -> {
+        ReturnButton.addActionListener(e -> {
             frame.dispose();
+            new buyergui(user, password);
         });
         
-        deleteButton.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(frame,
-                "Are you sure you want to delete your account?",
-                "Confirm Account Deletion",
-                JOptionPane.YES_NO_OPTION);
-                
-            if (confirm == JOptionPane.YES_OPTION) {
-                String enterpassword = JOptionPane.showInputDialog(frame, "Enter your password to confirm deletion:");
-                if (enterpassword == null || enterpassword.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Password cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                client.deleteAccount(user, enterpassword);
-                frame.dispose();
-            }
-        });
 
         JPanel formPanel = new JPanel();
         formPanel.setBackground(Color.WHITE);
         formPanel.setPreferredSize(new Dimension(350, 100));
         formPanel.setLayout(null);
-
-        JLabel userLabel = new JLabel("Search:");
-        userLabel.setBounds(50, 50, 80, 25);
-        userLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
-        formPanel.add(userLabel);
-
-        JTextField userText = new JTextField(20);
-        userText.setBounds(250, 25, 750, 75);
-        userText.setFont(new Font("SansSerif", Font.PLAIN, 24)); // 👈 Bigger font
-        formPanel.add(userText);
-
-        JButton searchButton = new JButton("Search Listings");
-        searchButton.setBounds(250, 125, 150, 25);
-        formPanel.add(searchButton);
-
-        searchButton.addActionListener(e -> {
-            String searchQuery = userText.getText();
-            if (!searchQuery.isEmpty()) {
-                new searchgui(user, password, searchQuery);
-                frame.dispose();
-            }
-        });
-
 
         // Button panel
         JPanel formButtonPanel = new JPanel();
@@ -166,17 +104,27 @@ public class buyergui {
         listingsPanel.setLayout(new BoxLayout(listingsPanel, BoxLayout.Y_AXIS));
         listingsPanel.setBackground(Color.WHITE);
         
-        for (int i = 1; i < Listings.length; i++) {
-            if (Listings[i].split(",")[5].strip().equals("false")) {
+        // Check if there are any listings
+        if (Listings.length < 3) {
+            JLabel noListingsLabel = new JLabel("There are no search results!");
+            noListingsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            noListingsLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
+            listingsPanel.add(Box.createVerticalStrut(20));
+            listingsPanel.add(noListingsLabel);
+            frame.dispose();
+        } else {
+            for (int i = 1; i < Listings.length; i++) {
+                
                 JPanel listingPanel = createListingPanel(Listings[i]);
                 listingsPanel.add(listingPanel);
                 listingsPanel.add(Box.createVerticalStrut(10)); 
+                
             }
         }
 
         JScrollPane scrollPane = new JScrollPane(listingsPanel);
-        scrollPane.setPreferredSize(new Dimension(1000, 355)); 
-        scrollPane.setMaximumSize(new Dimension(1000, 355));   
+        scrollPane.setPreferredSize(new Dimension(1000, 500)); 
+        scrollPane.setMaximumSize(new Dimension(1000, 500));   
         scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT); 
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -184,8 +132,8 @@ public class buyergui {
 
         JPanel scrollContainer = new JPanel();
         scrollContainer.setLayout(new BorderLayout());
-        scrollContainer.setMaximumSize(new Dimension(1000, 355));
-        scrollContainer.setPreferredSize(new Dimension(1000, 355));
+        scrollContainer.setMaximumSize(new Dimension(1000, 500));
+        scrollContainer.setPreferredSize(new Dimension(1000, 500));
         scrollContainer.add(scrollPane, BorderLayout.CENTER);
                 
         // Add the content panel to the main panel
@@ -227,3 +175,4 @@ public class buyergui {
         return panel;
     }
 }
+

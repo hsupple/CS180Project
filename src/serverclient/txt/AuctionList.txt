@@ -1,1 +1,3 @@
 900001,example,description,seller
+900002,auction1,12.0,dsiufgh,hsupp,false,None,21.0
+900003,Auction/2,21.0,dsgho,hsupp,false,None,21.0

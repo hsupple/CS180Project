@@ -610,9 +610,18 @@ public class AuctionServer implements Runnable {
             String[] parts;
             ArrayList<String> results = new ArrayList<>();
             for (int i = 0; i < items.size(); i++) {
+                
                 parts = items.get(i).split(",");
-                if (parts.length > 4 && parts[4].equals(user)) {
-                    results.add(String.join("\\", parts));
+                if (parts.length > 4) {
+                    String userCheck = parts[4];
+                
+                    if (user.strip().equals("ALL")) {
+                        userCheck = "ALL";
+                    }
+                    
+                    if (userCheck.equals(user)) {
+                        results.add(String.join("\\", parts));
+                    }
                 }
             }
             return results.toString();

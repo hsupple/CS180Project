@@ -1,1 +1,2 @@
 Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE
+hsupple06,@Maybe32.,true
