@@ -580,6 +580,7 @@ public class AuctionServer implements Runnable {
     // Search for sellers or items based on query
     private String search(String query) {
         synchronized (LOCK) {
+            query = query.strip().toLowerCase();
             ArrayList<String> sellers = readFile("txt/SellerList.txt");
             ArrayList<String> items = readFile("txt/AuctionList.txt");
             ArrayList<String> results = new ArrayList<>();
@@ -587,7 +588,7 @@ public class AuctionServer implements Runnable {
             results.add("Sellers");
             for (int i = 0; i < sellers.size(); i++) {
                 parts = sellers.get(i).split(",");
-                if (parts[0].contains(query) && parts[4].equalsIgnoreCase("true")) {
+                if (parts[0].toLowerCase().contains(query) && parts[4].equalsIgnoreCase("true")) {
                     results.add(parts[0]);
                 }
             }
@@ -595,7 +596,7 @@ public class AuctionServer implements Runnable {
             results.add("Listings");
             for (int j = 0; j < items.size(); j++) {
                 parts = items.get(j).split(",");
-                if (parts[1].contains(query)) {
+                if (parts[1].toLowerCase().contains(query)) {
                     results.add(parts[1] + " BUY NOW $" + parts[2] + " BID AMT $" + parts[7]);
                 }
             }

@@ -109,10 +109,10 @@ public class newauction {
                 String minBidPrice = minBidTextField.getText();
                 String timer = timerTextField.getText();
 
-                int minBid = -1;
+                double minBid = -1;
                 if (!title.isEmpty() && !description.isEmpty() && !minBidPrice.isEmpty() && !timer.isEmpty()) {
                     try {
-                        minBid = Integer.parseInt(minBidPrice); 
+                        minBid = Double.parseDouble(minBidPrice); 
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(frame, "Please enter a valid number for Minimum Bid Price ( >= 0).", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                         return; 

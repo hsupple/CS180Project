@@ -1,3 +1,4 @@
 900001,example,description,seller
-900002,auction1,12.0,dsiufgh,hsupp,true,None,21.0
-900003,Auction/2,21.0,dsgho,hsupp,true,None,21.0
+900002,Penis,12.99,I/LIKE/DICK/ANMD/BALLS,Hsupple06,false,diddy,13.0
+900003,FORTNITE/N/WORDS,5.99,GIVE/ME/THE/SABRIONA/CARPENTER/CSKIN/IN/FORTNITE,Hsupple06,false,None,4.0
+900004,SLAVES,12.0,BLACK/PEOPLE,Hsupple06,false,None,12.99

@@ -170,7 +170,29 @@ public class buyergui {
             if (Listings[i].split(",")[5].strip().equals("false")) {
                 JPanel listingPanel = createListingPanel(Listings[i]);
                 listingsPanel.add(listingPanel);
-                listingsPanel.add(Box.createVerticalStrut(10)); 
+                listingsPanel.add(Box.createVerticalStrut(10));
+                
+                JTextField bidText = new JTextField(20);
+                bidText.setPreferredSize(new Dimension(20, 10));
+                bidText.setMaximumSize(new Dimension(20, 10));
+                bidText.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                bidText.setToolTipText("$ Bid Amount");
+                listingPanel.add(bidText, BorderLayout.NORTH);
+
+                JButton bidButton = new JButton("Make Bid");
+                bidButton.setPreferredSize(new Dimension(100, 25));
+                bidButton.setMaximumSize(new Dimension(100, 25));
+                bidButton.addActionListener(e -> {
+                    Double bid =  Double.parseDouble(bidText.getText());
+                    if (bid < 0) {
+                        JOptionPane.showMessageDialog(frame, "Bid Must be over Current Bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    client.makeBid("Penis", user, bid);
+                    frame.dispose();
+                    new buyergui(user, password);
+                });
+                listingPanel.add(bidButton, BorderLayout.EAST);
             }
         }
 
