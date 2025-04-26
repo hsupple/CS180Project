@@ -4,7 +4,12 @@ import accounts.ItemListing;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class newauction {
 
@@ -72,6 +77,8 @@ public class newauction {
         timerLabel.setBounds(20, 230, 150, 25);
         timerTextField.setBounds(170, 230, 150, 25);
 
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(120, 370, 200, 30);
 
         JButton submitButton = new JButton("Submit Auction Item");
         submitButton.setBounds(120, 270, 200, 30); 
@@ -85,19 +92,42 @@ public class newauction {
         rightPanel.add(minBidLabel);
         rightPanel.add(minBidTextField);
         rightPanel.add(submitButton);
+        rightPanel.add(cancelButton);
         rightPanel.add(timerLabel);
         rightPanel.add(timerTextField);
 
         selectImageButton.addActionListener(new ActionListener() {
+            File imageDir = new File("src/gui/img");
+
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle("Select Image");
-                int result = fileChooser.showOpenDialog(frame);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    System.out.println("Image selected: " + fileChooser.getSelectedFile().getPath());
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Select Image");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "png", "jpg", "jpeg"));
+
+            int result = fileChooser.showOpenDialog(frame);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                System.out.println("Image selected: " + selectedFile.getPath());
+                System.out.println("Absolute path: " + imageDir.getAbsolutePath());
+
+
+
+                File imageDir = new File("src/gui/img");
+                if (!imageDir.exists()) imageDir.mkdirs();
+
+                String uniqueFileName = titleTextField.getText().replaceAll("\\s+", "_") + ".png";
+                File destFile = new File(imageDir, uniqueFileName);
+                try {
+                    Files.copy(selectedFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
+
+                System.out.println("Image copied to: " + destFile.getPath());
+            
             }
+        }
         });
 
         submitButton.addActionListener(new ActionListener() {
@@ -133,11 +163,17 @@ public class newauction {
             }
         });
 
-        // Add left and right panels to the main panel
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                new sellergui(user, password);
+            }
+        });
+
         mainPanel.add(leftPanel);
         mainPanel.add(rightPanel);
 
-        // Add the main panel to the frame and make it visible
         frame.add(mainPanel);
         frame.setVisible(true);
     }

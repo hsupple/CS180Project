@@ -102,6 +102,7 @@ public class AuctionServer implements Runnable {
         // and call appropriate methods to process requests
         private String handleCommand(String[] input) {
             try {
+                System.out.println(input[0]);
                 return switch (input[0]) {
                     case "GETPASSWORD" -> getPass(input[1]);
                     case "GETITEMID" -> generateID();

@@ -2,6 +2,11 @@ package gui.seller;
     
 import accounts.AuctionClient;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -191,48 +196,117 @@ public class sellergui {
         panel.add(contentPanel, BorderLayout.CENTER);
     }
     
-    // Helper method to create a panel for each listing
     private static JPanel createListingPanel(String listing) {
-        JPanel panel = new JPanel(new BorderLayout());
+        String itemName = listing.split(",")[1].strip().replace("/", " ");
+        String description = listing.split(",")[3].strip().replace("/", " ");
+        double buyNowPrice = Double.parseDouble(listing.split(",")[2].strip());
+        double currentBid = Double.parseDouble(listing.split(",")[7].strip());
+    
+        JPanel panel = new JPanel(new BorderLayout(10, 0)); // Add horizontal gap
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(Color.LIGHT_GRAY, 1),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         panel.setMaximumSize(new Dimension(1200, 100));
+
+        // Create a fixed-size panel for the image
+        JPanel imagePanel = new JPanel();
+        imagePanel.setLayout(new BorderLayout());
+        imagePanel.setPreferredSize(new Dimension(170, 160)); // Fixed size
+        imagePanel.setMaximumSize(new Dimension(170, 160));   // Fixed maximum size
+        imagePanel.setBackground(Color.WHITE);
+    
+        // Create a vertical panel for the listing details
+        JPanel detailPanel = new JPanel();
+        detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
+        detailPanel.setBackground(Color.WHITE);
+    
+        JLabel nameLabel = new JLabel("Item: " + itemName);
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        detailPanel.add(nameLabel);
+    
+        JLabel descLabel = new JLabel("Description: " + description);
+        descLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        detailPanel.add(descLabel);
+    
+        JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
+        bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        detailPanel.add(bidLabel);
+    
+        JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
+        buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        detailPanel.add(buyNowLabel);
+
+        File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
+        if (imageDir.exists()) {
+            try {
+                // Load the original image
+                BufferedImage originalImage = ImageIO.read(imageDir);
+                
+                // Create a new image with swapped dimensions for rotation
+                BufferedImage rotatedImage = new BufferedImage(
+                    originalImage.getHeight(), 
+                    originalImage.getWidth(), 
+                    originalImage.getType()
+                );
+                
+                // Get the Graphics2D object and set up rotation transform
+                Graphics2D g2d = rotatedImage.createGraphics();
+                AffineTransform transform = new AffineTransform();
+                
+                // For 90 degrees clockwise rotation:
+                transform.translate(originalImage.getHeight(), 0);
+                transform.rotate(Math.PI/2);
+                
+                // Apply transform and draw
+                g2d.setTransform(transform);
+                g2d.drawImage(originalImage, 0, 0, null);
+                g2d.dispose();
+                
+                // Scale the rotated image
+                Image scaledImage = rotatedImage.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                
+                // Create and set the icon
+                JLabel imageLabel = new JLabel();
+                imageLabel.setIcon(new ImageIcon(scaledImage));
+                imageLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+                imagePanel.add(imageLabel, BorderLayout.EAST);
+            } catch (IOException ex) {
+                System.err.println("Error rotating image: " + ex.getMessage());
+            }
+        }
+
         
-        // Assume listing string has some structure - modify this according to your data format
-        JLabel listingLabel = new JLabel(listing);
-        listingLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        panel.add(listingLabel, BorderLayout.CENTER);
-        
+        panel.add(detailPanel, BorderLayout.WEST);
+        panel.add(imagePanel, BorderLayout.CENTER);
         // Add buttons for listing actions
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actionPanel.setBackground(Color.WHITE);
-        
+    
         JButton viewButton = new JButton("View Details");
         viewButton.setPreferredSize(new Dimension(100, 25));
         actionPanel.add(viewButton);
-        
+    
         JButton deleteButton = new JButton("Delete");
         deleteButton.setPreferredSize(new Dimension(80, 25));
         actionPanel.add(deleteButton);
-
+    
         deleteButton.addActionListener(e -> {
-           int confirm = JOptionPane.showConfirmDialog(panel,
-            "Are you sure you want to delete this listing?",
-            "Confirm Listing Deletion",
-            JOptionPane.YES_NO_OPTION);
-
+            int confirm = JOptionPane.showConfirmDialog(panel,
+                "Are you sure you want to delete this listing?",
+                "Confirm Listing Deletion",
+                JOptionPane.YES_NO_OPTION);
+    
             if (confirm == JOptionPane.YES_OPTION) {
-                client.endListing("9000" + listing.substring(0,2));
+                client.endListing("9000" + listing.substring(0, 2));
                 JOptionPane.showMessageDialog(panel, "Listing deleted successfully.");
                 frame.dispose();
                 new sellergui(user, password);
             }
         });
-        
+    
         panel.add(actionPanel, BorderLayout.EAST);
-        
+    
         return panel;
     }
     

@@ -2,8 +2,11 @@ package gui.buyer;
 
 import accounts.AuctionClient;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 
 public class buyergui {
 
@@ -158,41 +161,141 @@ public class buyergui {
 
         // Button panel
         JPanel formButtonPanel = new JPanel();
-        formButtonPanel.setBackground(Color.WHITE);
         formButtonPanel.setPreferredSize(new Dimension(350, 50));
 
         // Create scrollable panel for listings
         JPanel listingsPanel = new JPanel();
         listingsPanel.setLayout(new BoxLayout(listingsPanel, BoxLayout.Y_AXIS));
-        listingsPanel.setBackground(Color.WHITE);
         
         for (int i = 1; i < Listings.length; i++) {
             if (Listings[i].split(",")[5].strip().equals("false")) {
-                JPanel listingPanel = createListingPanel(Listings[i]);
-                listingsPanel.add(listingPanel);
-                listingsPanel.add(Box.createVerticalStrut(10));
-                
-                JTextField bidText = new JTextField(20);
-                bidText.setPreferredSize(new Dimension(20, 10));
-                bidText.setMaximumSize(new Dimension(20, 10));
+        
+                String itemName = Listings[i].split(",")[1].strip().replace("/", " ");
+                String description = Listings[i].split(",")[3].strip().replace("/", " ");
+                double buyNowPrice = Double.parseDouble(Listings[i].split(",")[2].strip());
+                double currentBid = Double.parseDouble(Listings[i].split(",")[7].strip());
+        
+                JPanel listingPanel = new JPanel();
+                listingPanel.setLayout(new BorderLayout()); // Change to BorderLayout
+                listingPanel.setBackground(new Color(245, 245, 245));
+                listingPanel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+                    BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                ));
+
+                // Item name (aligned to the WEST)
+                JPanel leftPanel = new JPanel();
+                leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+                leftPanel.setBackground(new Color(245, 245, 245));
+
+                JLabel nameLabel = new JLabel("Item: " + itemName);
+                nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+                leftPanel.add(nameLabel);
+
+                // Description (aligned to the WEST)
+                JLabel descLabel = new JLabel("Description: " + description);
+                descLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+                leftPanel.add(descLabel);
+
+                // Current Bid (aligned to the WEST)
+                JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
+                bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+                leftPanel.add(bidLabel);
+
+                if (buyNowPrice > 0) {
+                    JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
+                    buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+                    leftPanel.add(buyNowLabel);
+                }
+
+                // Bid input and button (aligned to the WEST)
+                JPanel bidPanel = new JPanel();
+                bidPanel.setLayout(new BoxLayout(bidPanel, BoxLayout.X_AXIS));
+                bidPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+                JTextField bidText = new JTextField();
+                bidText.setPreferredSize(new Dimension(100, 25));
+                bidText.setMaximumSize(new Dimension(100, 25));
                 bidText.setFont(new Font("SansSerif", Font.PLAIN, 14));
                 bidText.setToolTipText("$ Bid Amount");
-                listingPanel.add(bidText, BorderLayout.NORTH);
 
                 JButton bidButton = new JButton("Make Bid");
                 bidButton.setPreferredSize(new Dimension(100, 25));
                 bidButton.setMaximumSize(new Dimension(100, 25));
+
                 bidButton.addActionListener(e -> {
-                    Double bid =  Double.parseDouble(bidText.getText());
-                    if (bid < 0) {
-                        JOptionPane.showMessageDialog(frame, "Bid Must be over Current Bid.", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
+                    try {
+                        double bid = Double.parseDouble(bidText.getText());
+                        if (bid <= currentBid) {
+                            JOptionPane.showMessageDialog(frame, "Bid must be over current bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        client.makeBid(itemName, user, bid);
+                        frame.dispose();
+                        new buyergui(user, password);
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                    client.makeBid("Penis", user, bid);
-                    frame.dispose();
-                    new buyergui(user, password);
                 });
-                listingPanel.add(bidButton, BorderLayout.EAST);
+
+                // Add bid input and button to bid panel
+                bidPanel.add(bidText);
+                bidPanel.add(Box.createHorizontalStrut(10));
+                bidPanel.add(bidButton);
+
+                // Add bid panel to the left side of the listing panel
+                leftPanel.add(bidPanel);
+
+                // Add left panel to the WEST of the listing panel
+                listingPanel.add(leftPanel, BorderLayout.WEST);
+
+                // Image panel (aligned to the EAST)
+                Panel imagePanel = new Panel();
+                imagePanel.setLayout(new BorderLayout());
+
+                File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
+                if (imageDir.exists()) {
+                    try {
+                        // Load the original image
+                        BufferedImage originalImage = ImageIO.read(imageDir);
+                        
+                        // Create a new image with swapped dimensions for rotation
+                        BufferedImage rotatedImage = new BufferedImage(
+                            originalImage.getHeight(), 
+                            originalImage.getWidth(), 
+                            originalImage.getType()
+                        );
+                        
+                        // Get the Graphics2D object and set up rotation transform
+                        Graphics2D g2d = rotatedImage.createGraphics();
+                        AffineTransform transform = new AffineTransform();
+                        
+                        // For 90 degrees clockwise rotation:
+                        transform.translate(originalImage.getHeight(), 0);
+                        transform.rotate(Math.PI/2);
+                        
+                        // Apply transform and draw
+                        g2d.setTransform(transform);
+                        g2d.drawImage(originalImage, 0, 0, null);
+                        g2d.dispose();
+                        
+                        // Scale the rotated image
+                        Image scaledImage = rotatedImage.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                        
+                        // Create and set the icon
+                        JLabel imageLabel = new JLabel();
+                        imageLabel.setIcon(new ImageIcon(scaledImage));
+                        imageLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+                        imagePanel.add(imageLabel, BorderLayout.EAST);
+                    } catch (IOException ex) {
+                        System.err.println("Error rotating image: " + ex.getMessage());
+                    }
+                }
+
+                listingPanel.add(imagePanel, BorderLayout.EAST);
+
+                listingsPanel.add(listingPanel);
+                listingsPanel.add(Box.createVerticalStrut(10));
             }
         }
 
@@ -221,31 +324,4 @@ public class buyergui {
         panel.add(verticalContent, BorderLayout.CENTER);
     }
 
-    // Helper method to create a panel for each listing
-    private static JPanel createListingPanel(String listing) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(Color.LIGHT_GRAY, 1),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        panel.setMaximumSize(new Dimension(1200, 100));
-        
-        // Assume listing string has some structure - modify this according to your data format
-        JLabel listingLabel = new JLabel(listing);
-        listingLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        panel.add(listingLabel, BorderLayout.CENTER);
-        
-        // Add buttons for listing actions
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        actionPanel.setBackground(Color.WHITE);
-        
-        JButton viewButton = new JButton("View Details");
-        viewButton.setPreferredSize(new Dimension(100, 25));
-        actionPanel.add(viewButton);
-        
-        
-        panel.add(actionPanel, BorderLayout.EAST);
-        
-        return panel;
-    }
 }
