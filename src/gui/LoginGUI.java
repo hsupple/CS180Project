@@ -65,18 +65,17 @@ public class LoginGUI {
                 }
             } else {
             if (accountType == true) {
-                    new gui.buyer.buyergui(user, password); // Open buyer GUI
+                    new gui.buyer.buyergui(user, password); 
                 } else {
-                    new gui.seller.sellergui(user, password); // Open seller GUI
+                    new gui.seller.sellergui(user, password); 
                 }
                 frame.dispose();
             }
         });
 
-        // Make Account Button ActionListener
         makeAccount.addActionListener(e -> {
-            frame.dispose(); // Close the login frame
-            new newacct();   // Open the new account creation window
+            frame.dispose();
+            new newacct();   
         });
     }
 

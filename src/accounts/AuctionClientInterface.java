@@ -26,7 +26,7 @@ public interface AuctionClientInterface {
     String newSeller(String user, String password);
     String updateItemListing(int itemId, String itemName, String itemDescription, 
                              double buyNowItemPrice, String seller, boolean isSold, 
-                             String buyer, double bidItemPrice);
+                             String buyer, double bidItemPrice, String time);
     String sendMessage(String user, String recipient, String message);
     String setPassword(String user, String password);
     String deleteAccount(String user, String password);
@@ -35,7 +35,7 @@ public interface AuctionClientInterface {
     String setRating(String user, double rating);
     String startAuction(String itemID, String itemName, double buyNowItemPrice, 
                         String itemDescription, String seller, boolean isSold, 
-                        String buyer, double bidItemPrice);
+                        String buyer, double bidItemPrice, String time);
     String buyNow(String itemID, String user);
     String makeBid(String itemID, String user, double price);
     String endListing(String itemID);

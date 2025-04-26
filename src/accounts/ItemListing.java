@@ -1,8 +1,9 @@
 package accounts;
 import java.io.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
-
 /**
  * Class that creates an item listing with a generated ID, a name, 
  a description, a buyer, a price, and checker values.
@@ -38,6 +39,8 @@ public class ItemListing implements ItemListingInterface {
     private static final ReentrantLock FILELOCK = new ReentrantLock();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    private static String formattedtime;
+
     // Constructor used to build an itemlisting with name, 
     //description, item prices, seller, and duration
     public ItemListing(String itemName, String itemDescription, 
@@ -52,6 +55,8 @@ public class ItemListing implements ItemListingInterface {
         this.isSold = false;
         this.buyer = "None";
 
+        LocalTime time = LocalTime.now().plusMinutes((long) auctionDuration / 60000);
+        this.formattedtime = time.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         try {
             this.client = new AuctionClient();
             this.itemId = generateItemId();
@@ -78,9 +83,9 @@ public class ItemListing implements ItemListingInterface {
     private String formatItem() {
         client.updateItemListing(itemId, itemName.replace(" ", "/"), 
                                  itemDescription.replace(" ", "/"), buyNowItemPrice, 
-                                 seller, isSold, buyer, bidItemPrice);
+                                 seller, isSold, buyer, bidItemPrice, formattedtime);
         return itemId + "," + itemName + "," + buyNowItemPrice + "," 
-            + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
+            + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice + "," + formattedtime;
     }
 
     // Void method used to set listing name

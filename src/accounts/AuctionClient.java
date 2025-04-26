@@ -61,11 +61,11 @@ public class AuctionClient implements AuctionClientInterface {
     @Override
     public String updateItemListing(int itemId, String itemName, 
                                     String itemDescription, double buyNowItemPrice, 
-                                    String seller, boolean isSold, String buyer, double bidItemPrice) {
+                                    String seller, boolean isSold, String buyer, double bidItemPrice, String time) {
         try {
             out.println("UPDATEITEM " + itemId + " " + itemName 
                         + " " + itemDescription + " " + buyNowItemPrice + " " 
-                        + seller + " " + isSold + " " + buyer + " " + bidItemPrice);
+                        + seller + " " + isSold + " " + buyer + " " + bidItemPrice + " " + time);
             out.flush();
             return in.readLine();
         }  catch (IOException e) {
@@ -93,7 +93,7 @@ public class AuctionClient implements AuctionClientInterface {
     @Override
     public String sendMessage(String user, String recipient, String message) {
         try {
-            out.println("SENDMESS " + user + " " + recipient + " " + message);
+            out.println("SENDMESS " + user + " " + recipient + " " + message.replace(" ", "/"));
             out.flush();
             return in.readLine();
         }  catch (IOException e) {
@@ -208,7 +208,7 @@ public class AuctionClient implements AuctionClientInterface {
     @Override
     public String startAuction(String itemID, String itemName, double buyNowItemPrice, 
                                String itemDescription, String seller, boolean isSold, String buyer, 
-                               double bidItemPrice) {
+                               double bidItemPrice, String time) {
         try {
             System.out.print(itemDescription);
             String message = "STARTAUCTION "
@@ -219,7 +219,7 @@ public class AuctionClient implements AuctionClientInterface {
                     + seller + " "
                     + isSold + " "
                     + buyer + " "
-                    + bidItemPrice;
+                    + bidItemPrice + " " + time;
             System.out.print(itemDescription);
 
             return in.readLine();

@@ -128,6 +128,14 @@ public class sellergui {
         // Add header panel to the main panel at the top
         panel.add(headerPanel, BorderLayout.NORTH);
 
+        JButton Messages = new JButton("Messages");
+        Messages.setBounds(250, 175, 350, 25);
+        Messages.setMinimumSize(new Dimension(350, 25));
+        Messages.addActionListener(e -> {
+            new gui.messages.messagesgui(user, password);
+            frame.dispose();
+        });
+
         // Create content panel for listings with a title panel at the top
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
@@ -137,6 +145,8 @@ public class sellergui {
         JPanel listingsTitlePanel = new JPanel(new BorderLayout());
         listingsTitlePanel.setBackground(Color.WHITE);
         
+        listingsTitlePanel.add(Messages, BorderLayout.NORTH);
+
         JLabel listingsTitle = new JLabel("My Listings");
         listingsTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
         listingsTitlePanel.add(listingsTitle, BorderLayout.WEST);
@@ -189,7 +199,7 @@ public class sellergui {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        
+
         contentPanel.add(scrollPane, BorderLayout.CENTER);
         
         // Add the content panel to the main panel

@@ -59,7 +59,7 @@ public class newacct {
             String accountType = (String) accountSelector.getSelectedItem();
             System.out.println("-" + this.client.isActive(user) + "-");
 
-            if (this.client.isActive(user).equals("User / Listing not found")) {
+            if (this.client.isActive(user).equals("User / Listing not found") && user.contains(" ") == false) {
                 if (accountType.equals("Buyer")) {
                     Buyer buyer = new Buyer(user, password);
                 } else if (accountType.equals("Seller")) {
@@ -67,6 +67,8 @@ public class newacct {
                 }
                 frame.dispose();
                 new LoginGUI();
+            } else if (user.contains(" ")) { 
+                JOptionPane.showMessageDialog(panel, "Username cannot contain spaces!", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(panel, "Username already exists!", "Error", JOptionPane.ERROR_MESSAGE);
             }

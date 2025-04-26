@@ -102,7 +102,6 @@ public class AuctionServer implements Runnable {
         // and call appropriate methods to process requests
         private String handleCommand(String[] input) {
             try {
-                System.out.println(input[0]);
                 return switch (input[0]) {
                     case "GETPASSWORD" -> getPass(input[1]);
                     case "GETITEMID" -> generateID();
@@ -110,7 +109,7 @@ public class AuctionServer implements Runnable {
                     case "NEWBUYER" -> newBuyer(input[1], input[2]);
                     case "UPDATEITEM" -> updateItem(input[1], input[2], input[3], Double.parseDouble(input[4]), 
                                                     input[5], Boolean.parseBoolean(input[6]), input[7], 
-                                                    Double.parseDouble(input[8]));
+                                                    Double.parseDouble(input[8]), input[9]);
                     case "SETPASSWORD" -> setPass(input[1], input[2]);
                     case "DELETE" -> delete(input[1], input[2]);
                     case "ISACTIVE" -> isActive(input[1]);
@@ -119,7 +118,7 @@ public class AuctionServer implements Runnable {
                     case "SETRATING" -> setRating(input[1], Double.parseDouble(input[2]));
                     case "STARTAUCTION" -> startAuction(input[1], input[2], Double.parseDouble(input[3]), input[4], 
                                                         input[5], Boolean.parseBoolean(input[6]), input[7], 
-                                                        Double.parseDouble(input[8]));
+                                                        Double.parseDouble(input[8]), input[9]);
                     case "ENDLISTING" -> endAuction(input[1]);
                     case "MAKEBID" -> bidItem(input[1], input[2], Double.parseDouble(input[3]));
                     case "BUYITEM" -> buyItem(input[1], input[2]);
@@ -238,8 +237,10 @@ public class AuctionServer implements Runnable {
     // Update item listing or add new item if it doesn't exist
     private String updateItem(String itemID, String itemName, String itemDescription, 
                               double buyNowItemPrice, String seller, boolean isSold, String buyer, 
-                              double bidItemPrice) {
+                              double bidItemPrice, String time) {
         synchronized (LOCK) {
+            System.out.println("Updating item: " + itemID + " " + itemName + " " + buyNowItemPrice + " " 
+                + itemDescription + " " + seller + " " + isSold + " " + buyer + " " + bidItemPrice + " " + time);
             ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
             for (int i = 0; i < items.size(); i++) {
@@ -252,6 +253,7 @@ public class AuctionServer implements Runnable {
                     parts[5] = String.valueOf(isSold);
                     parts[6] = buyer;
                     parts[7] = String.valueOf(bidItemPrice);
+                    parts[8] = time;
 
                     items.set(i, String.join(",", parts));
                     writeFile("txt/AuctionList.txt", items);
@@ -259,7 +261,7 @@ public class AuctionServer implements Runnable {
                 }
             }
             String newItem = itemID + "," + itemName + "," + buyNowItemPrice + "," 
-                + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice;
+                + itemDescription + "," + seller + "," + isSold + "," + buyer + "," + bidItemPrice + "," + time;
             items.add(newItem);
             writeFile("txt/AuctionList.txt", items);
             return "Item added successfully: " + itemID;
@@ -468,7 +470,7 @@ public class AuctionServer implements Runnable {
     // Start a new auction or add a new item if it doesn't exist
     private String startAuction(String itemID, String itemName, double buyNowItemPrice, 
                                 String itemDescription, String seller, boolean isSold, String buyer, 
-                                double bidItemPrice) {
+                                double bidItemPrice, String time) {
         synchronized (LOCK) {
             ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
@@ -479,7 +481,7 @@ public class AuctionServer implements Runnable {
                 }
             }
             String newItem = itemID + " " + itemName + " " + buyNowItemPrice + " " + itemDescription + " " 
-                + seller + " " + isSold + " " + buyer + " " + bidItemPrice;
+                + seller + " " + isSold + " " + buyer + " " + bidItemPrice + " " + time;
             items.add(newItem);
             writeFile("txt/AuctionList.txt", items);
             return "Auction started successfully for item: " + itemID;

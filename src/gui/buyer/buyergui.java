@@ -174,6 +174,7 @@ public class buyergui {
                 String description = Listings[i].split(",")[3].strip().replace("/", " ");
                 double buyNowPrice = Double.parseDouble(Listings[i].split(",")[2].strip());
                 double currentBid = Double.parseDouble(Listings[i].split(",")[7].strip());
+                String time = Listings[i].split(",")[8].strip();
         
                 JPanel listingPanel = new JPanel();
                 listingPanel.setLayout(new BorderLayout()); // Change to BorderLayout
@@ -230,7 +231,7 @@ public class buyergui {
                             JOptionPane.showMessageDialog(frame, "Bid must be over current bid.", "Error", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
-                        client.makeBid(itemName, user, bid);
+                        client.makeBid(itemName.replace(" ", "/"), user, bid);
                         frame.dispose();
                         new buyergui(user, password);
                     } catch (NumberFormatException ex) {
@@ -238,10 +239,24 @@ public class buyergui {
                     }
                 });
 
+                JButton sendMess = new JButton("Send Message");
+                sendMess.setPreferredSize(new Dimension(150, 25));
+                sendMess.setMaximumSize(new Dimension(150, 25));
+                String seller = Listings[i].split(",")[4].strip();
+                sendMess.addActionListener(e -> {
+                    try {
+                        new gui.messages.newmessage(user, seller, itemName);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+
                 // Add bid input and button to bid panel
                 bidPanel.add(bidText);
                 bidPanel.add(Box.createHorizontalStrut(10));
                 bidPanel.add(bidButton);
+                bidPanel.add(Box.createHorizontalStrut(10));
+                bidPanel.add(sendMess);
 
                 // Add bid panel to the left side of the listing panel
                 leftPanel.add(bidPanel);
@@ -249,48 +264,46 @@ public class buyergui {
                 // Add left panel to the WEST of the listing panel
                 listingPanel.add(leftPanel, BorderLayout.WEST);
 
-                // Image panel (aligned to the EAST)
-                Panel imagePanel = new Panel();
-                imagePanel.setLayout(new BorderLayout());
+                JPanel imagePanel = new JPanel(new BorderLayout());
+                imagePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10)); // some padding
 
                 File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
                 if (imageDir.exists()) {
                     try {
-                        // Load the original image
                         BufferedImage originalImage = ImageIO.read(imageDir);
-                        
-                        // Create a new image with swapped dimensions for rotation
+
+                        // Rotate image
                         BufferedImage rotatedImage = new BufferedImage(
                             originalImage.getHeight(), 
                             originalImage.getWidth(), 
                             originalImage.getType()
                         );
-                        
-                        // Get the Graphics2D object and set up rotation transform
                         Graphics2D g2d = rotatedImage.createGraphics();
                         AffineTransform transform = new AffineTransform();
-                        
-                        // For 90 degrees clockwise rotation:
                         transform.translate(originalImage.getHeight(), 0);
-                        transform.rotate(Math.PI/2);
-                        
-                        // Apply transform and draw
+                        transform.rotate(Math.PI / 2);
                         g2d.setTransform(transform);
                         g2d.drawImage(originalImage, 0, 0, null);
                         g2d.dispose();
-                        
-                        // Scale the rotated image
+
+                        // Scale and set image
                         Image scaledImage = rotatedImage.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                        JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+                        imagePanel.add(imageLabel, BorderLayout.WEST);
+
+                        // Timer label (bigger and to the right of image)
                         
-                        // Create and set the icon
-                        JLabel imageLabel = new JLabel();
-                        imageLabel.setIcon(new ImageIcon(scaledImage));
-                        imageLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
-                        imagePanel.add(imageLabel, BorderLayout.EAST);
+
                     } catch (IOException ex) {
                         System.err.println("Error rotating image: " + ex.getMessage());
                     }
                 }
+                JLabel timer = new JLabel("Auction Ends at " + time);
+                        timer.setFont(new Font("SansSerif", Font.BOLD, 18));
+                        timer.setHorizontalAlignment(SwingConstants.LEFT);
+                        timer.setVerticalAlignment(SwingConstants.CENTER);
+                        timer.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+                        imagePanel.add(timer, BorderLayout.CENTER);
 
                 listingPanel.add(imagePanel, BorderLayout.EAST);
 
@@ -298,6 +311,15 @@ public class buyergui {
                 listingsPanel.add(Box.createVerticalStrut(10));
             }
         }
+
+        JButton Messages = new JButton("Messages");
+        Messages.setBounds(250, 175, 350, 25);
+        Messages.setMinimumSize(new Dimension(350, 25));
+        formButtonPanel.add(Messages);
+        Messages.addActionListener(e -> {
+            new gui.messages.messagesgui(user, password);
+            frame.dispose();
+        });
 
         JScrollPane scrollPane = new JScrollPane(listingsPanel);
         scrollPane.setPreferredSize(new Dimension(1000, 355)); 
