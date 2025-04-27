@@ -3,23 +3,28 @@ package gui.messages;
 import accounts.AuctionClient;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import javax.swing.*;
 
-public class messagesgui {
+public class messagesgui implements Runnable {
 
-    
-    
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
-    private static ArrayList<String> listingsList = new ArrayList<>(); 
-    private static JFrame frame = null;
+    private ArrayList<String> listingsList = new ArrayList<>(); 
+    private JFrame frame = null;
+    private JPanel messagesListPanel;
 
     public messagesgui(String user, String password) {
-
-        this.user = user;
-        this.password = password;
+        messagesgui.user = user;
+        messagesgui.password = password;
         
         try {
             this.client = new AuctionClient();
@@ -27,19 +32,65 @@ public class messagesgui {
             e.printStackTrace();
         }
 
-    String directoryPath = System.getProperty("user.dir") + "/src/serverclient/msg";
-    File directory = new File(directoryPath);
+        // Load the existing conversations
+        loadConversations();
 
-    File[] files = directory.listFiles();
-    if (directory.exists() && directory.isDirectory()) {
+        // Initialize the GUI
+        initializeGUI();
         
-        for (File file : files) {
-            if (file.isFile() && file.getName().contains(user) && !listingsList.contains(file.getName().replace(".txt", "").replace(user, "").replace("_to_","").strip())) {
-                listingsList.add(file.getName().replace(".txt", "").replace(user, "").replace("_to_","").strip());
+        // Start the file watcher thread
+        Thread watcherThread = new Thread(this);
+        watcherThread.setDaemon(true);
+        watcherThread.start();
+    }
+    
+    private void loadConversations() {
+        // Clear the current list
+        listingsList.clear();
+        
+        // Get all message files
+        String directoryPath = System.getProperty("user.dir") + "/src/serverclient/msg";
+        File directory = new File(directoryPath);
+
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile() && file.getName().contains(user) && file.getName().endsWith(".txt")) {
+                        // Extract the other username from the filename
+                        String fileName = file.getName().replace(".txt", "");
+                        String otherUser;
+                        
+                        if (fileName.startsWith(user + "_to_")) {
+                            otherUser = fileName.substring((user + "_to_").length());
+                        } else if (fileName.endsWith("_to_" + user)) {
+                            otherUser = fileName.substring(0, fileName.length() - ("_to_" + user).length());
+                        } else if (fileName.contains("_to_")) {
+                            String[] parts = fileName.split("_to_");
+                            if (parts.length == 2) {
+                                if (parts[0].equals(user)) {
+                                    otherUser = parts[1];
+                                } else {
+                                    otherUser = parts[0];
+                                }
+                            } else {
+                                continue; // Invalid filename format
+                            }
+                        } else {
+                            continue; // Not a message file we care about
+                        }
+                        
+                        // Add to our list if not already there
+                        if (!listingsList.contains(otherUser)) {
+                            listingsList.add(otherUser);
+                        }
+                    }
+                }
             }
         }
     }
 
+    private void initializeGUI() {
         frame = new JFrame("Messenger Client");
         frame.setSize(1250, 750);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,19 +98,94 @@ public class messagesgui {
 
         JPanel panel = new JPanel();
         frame.add(panel);
-        placeComponents(panel, frame, client);
+        placeComponents(panel);
 
         frame.setVisible(true);
     }
 
-    private static void placeComponents(JPanel panel, JFrame frame, AuctionClient client) {
-        panel.setLayout(new BorderLayout()); // Changed to BorderLayout for main panel
+    public void run() {
+        try {
+            WatchService watcher = FileSystems.getDefault().newWatchService();
+            Path path = Paths.get("src/serverclient/msg");
+            path.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, 
+                         StandardWatchEventKinds.ENTRY_MODIFY);
+            
+            while (true) {
+                WatchKey key = watcher.take();
+                boolean shouldUpdate = false;
+                
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind<?> kind = event.kind();
 
-        // Header Panel with BorderLayout to arrange title and info panel
+                    if (kind == StandardWatchEventKinds.ENTRY_CREATE || 
+                        kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        
+                        Path changedPath = (Path) event.context();
+                        String fileName = changedPath.toString();
+                        
+                        // Only update if it's a message file for this user
+                        if (fileName.contains(user) && fileName.endsWith(".txt")) {
+                            System.out.println("Relevant file changed: " + fileName);
+                            shouldUpdate = true;
+                        }
+                    }
+                }
+                
+                if (shouldUpdate) {
+                    // Update the GUI on the EDT
+                    SwingUtilities.invokeLater(() -> {
+                        // Store current list size
+                        int oldSize = listingsList.size();
+                        
+                        // Reload conversations
+                        loadConversations();
+                        
+                        // If we have new conversations, update the UI
+                        if (oldSize != listingsList.size()) {
+                            updateMessagesPanel();
+                        }
+                    });
+                }
+                
+                // Reset the key to receive further events
+                key.reset();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateMessagesPanel() {
+        if (messagesListPanel != null) {
+            messagesListPanel.removeAll();
+            
+            if (listingsList.isEmpty()) {
+                JLabel noMessagesLabel = new JLabel("You have no messages.");
+                noMessagesLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                messagesListPanel.add(Box.createVerticalGlue());
+                messagesListPanel.add(noMessagesLabel);
+                messagesListPanel.add(Box.createVerticalGlue());
+            } else {
+                for (String user : listingsList) {
+                    JPanel listingPanel = createMessagePanel(user);
+                    messagesListPanel.add(Box.createVerticalStrut(10)); // spacing
+                    messagesListPanel.add(listingPanel);
+                }
+            }
+            
+            messagesListPanel.revalidate();
+            messagesListPanel.repaint();
+        }
+    }
+
+    private void placeComponents(JPanel panel) {
+        panel.setLayout(new BorderLayout());
+
+        // Header Panel with BorderLayout
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.LIGHT_GRAY);
         headerPanel.setPreferredSize(new Dimension(1250, 100));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // padding
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // Title (centered in header)
         JLabel title = new JLabel("Purdue Auction House Messenger Client", SwingConstants.CENTER);
@@ -68,20 +194,21 @@ public class messagesgui {
 
         // Info panel on the left
         JPanel headerInfoPanel = new JPanel();
-        headerInfoPanel.setLayout(new BoxLayout(headerInfoPanel, BoxLayout.Y_AXIS)); // Stack vertically
+        headerInfoPanel.setLayout(new BoxLayout(headerInfoPanel, BoxLayout.Y_AXIS));
         headerInfoPanel.setBackground(Color.LIGHT_GRAY);
-        headerInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0)); // padding
+        headerInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0));
         headerInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel welcomeLabel = new JLabel("Welcome " + user + "!");
-        JLabel typeLabel = new JLabel("Account Type: Seller");
-        typeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        JLabel typeLabel = new JLabel("Account Type: " + 
+                                     (client.isBuyer(user) ? "Buyer" : "Seller"));
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        typeLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
 
         headerInfoPanel.add(welcomeLabel);
         headerInfoPanel.add(typeLabel);
 
-        // Header buttons panel (for logout and delete account)
+        // Header buttons panel
         JPanel headerButtonPanel = new JPanel();
         headerButtonPanel.setLayout(new BoxLayout(headerButtonPanel, BoxLayout.Y_AXIS));
         headerButtonPanel.setBackground(Color.LIGHT_GRAY);
@@ -90,32 +217,30 @@ public class messagesgui {
         logoutButton.setPreferredSize(new Dimension(100, 30));
         logoutButton.setMaximumSize(new Dimension(100, 30));
 
-        // Delete account button
-        JButton deleteButton = new JButton("Return to Home");
-        deleteButton.setPreferredSize(new Dimension(150, 30));
-        deleteButton.setMaximumSize(new Dimension(150, 30));
+        JButton returnButton = new JButton("Return to Home");
+        returnButton.setPreferredSize(new Dimension(150, 30));
+        returnButton.setMaximumSize(new Dimension(150, 30));
         
-        // Add buttons to separate panels to stack them vertically
         JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         logoutPanel.setBackground(Color.LIGHT_GRAY);
         logoutPanel.add(logoutButton);
         
-        JPanel deletePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        deletePanel.setBackground(Color.LIGHT_GRAY);
-        deletePanel.add(deleteButton);
+        JPanel returnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        returnPanel.setBackground(Color.LIGHT_GRAY);
+        returnPanel.add(returnButton);
         
         headerButtonPanel.add(logoutPanel);
-        headerButtonPanel.add(deletePanel);
+        headerButtonPanel.add(returnPanel);
 
-        // Add button panel to header
         headerPanel.add(headerInfoPanel, BorderLayout.WEST);
         headerPanel.add(headerButtonPanel, BorderLayout.EAST);
 
         logoutButton.addActionListener(e -> {
             frame.dispose();
+            // You might want to show a login screen here
         });
         
-        deleteButton.addActionListener(e -> {
+        returnButton.addActionListener(e -> {
             frame.dispose();
             if (client.isBuyer(user)) {
                 new gui.buyer.buyergui(user, password);
@@ -124,15 +249,14 @@ public class messagesgui {
             }
         });
 
-        // Add header panel to the main panel at the top
         panel.add(headerPanel, BorderLayout.NORTH);
 
-        // Create content panel for listings with a title panel at the top
+        // Create content panel for listings
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // Title panel for listings section with New Auction button at right
+        // Title panel for the messages section
         JPanel listingsTitlePanel = new JPanel(new BorderLayout());
         listingsTitlePanel.setBackground(Color.WHITE);
         
@@ -140,19 +264,67 @@ public class messagesgui {
         listingsTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
         listingsTitlePanel.add(listingsTitle, BorderLayout.WEST);
 
-        JPanel messagesListPanel = new JPanel();
+        // Add a search field for finding conversations
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        searchPanel.setBackground(Color.WHITE);
+        
+        JTextField searchField = new JTextField(20);
+        JButton searchButton = new JButton("Search");
+        
+        searchPanel.add(new JLabel("Find user: "));
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        
+        // Button to create a new message thread
+        JButton newMessageButton = new JButton("New Message");
+        searchPanel.add(newMessageButton);
+        
+        newMessageButton.addActionListener(e -> {
+            String recipient = JOptionPane.showInputDialog(frame, 
+                                                         "Enter username to message:", 
+                                                         "New Message", 
+                                                         JOptionPane.QUESTION_MESSAGE);
+            if (recipient != null && !recipient.trim().isEmpty()) {
+                frame.dispose();
+                new messengergui(user, password, recipient.trim());
+            }
+        });
+        
+        searchButton.addActionListener(e -> {
+            String searchText = searchField.getText().trim();
+            if (!searchText.isEmpty()) {
+                for (String otherUser : listingsList) {
+                    if (otherUser.contains(searchText)) {
+                        // Highlight or select this conversation
+                        // For now, just open it
+                        frame.dispose();
+                        new messengergui(user, password, otherUser);
+                        return;
+                    }
+                }
+                JOptionPane.showMessageDialog(frame, 
+                                            "No matching conversations found.", 
+                                            "Search Results", 
+                                            JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        
+        listingsTitlePanel.add(searchPanel, BorderLayout.EAST);
+
+        // Panel for the message list
+        messagesListPanel = new JPanel();
         messagesListPanel.setLayout(new BoxLayout(messagesListPanel, BoxLayout.Y_AXIS));
         messagesListPanel.setBackground(Color.WHITE);
 
-        if (listingsList.size() == 0) {
+        if (listingsList.isEmpty()) {
             JLabel noMessagesLabel = new JLabel("You have no messages.");
             noMessagesLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             messagesListPanel.add(Box.createVerticalGlue());
             messagesListPanel.add(noMessagesLabel);
             messagesListPanel.add(Box.createVerticalGlue());
         } else {
-            for (String listing : listingsList) {
-                JPanel listingPanel = createMessagePanel(listing);
+            for (String otherUser : listingsList) {
+                JPanel listingPanel = createMessagePanel(otherUser);
                 messagesListPanel.add(Box.createVerticalStrut(10)); // spacing
                 messagesListPanel.add(listingPanel);
             }
@@ -163,37 +335,63 @@ public class messagesgui {
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // Now safely add the scrollPane to the main content panel
         contentPanel.add(listingsTitlePanel, BorderLayout.NORTH);
         contentPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Add the content panel to the main panel
         panel.add(contentPanel, BorderLayout.CENTER);
-        
     }
-    String directoryPath = System.getProperty("user.dir") + "/src/serverclient/msg";
 
-    private static JPanel createMessagePanel(String otherUser) {
-        JButton messageButton = new JButton("Messages with " + otherUser);
-        messageButton.setPreferredSize(new Dimension(100, 50));
-        messageButton.setMaximumSize(new Dimension(100, 50));
-        messageButton.addActionListener(e -> {
+    private JPanel createMessagePanel(String otherUser) {
+        JPanel container = new JPanel(new BorderLayout());
+        container.setBackground(Color.WHITE);
+        container.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        container.setMaximumSize(new Dimension(1200, 80));
+        container.setPreferredSize(new Dimension(1200, 80));
+        
+        JLabel userLabel = new JLabel(otherUser);
+        userLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setOpaque(false);
+        
+        JButton viewButton = new JButton("View Conversation");
+        viewButton.addActionListener(e -> {
             frame.dispose();
             new messengergui(user, password, otherUser);
         });
         
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        panel.setPreferredSize(new Dimension(200, 50));
-        panel.add(messageButton, BorderLayout.CENTER);
+        buttonPanel.add(viewButton);
         
-        return panel;
+        container.add(userLabel, BorderLayout.WEST);
+        container.add(buttonPanel, BorderLayout.EAST);
+        
+        // Make it look clickable
+        container.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                container.setBackground(new Color(245, 245, 245));
+            }
+            
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                container.setBackground(Color.WHITE);
+            }
+            
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                frame.dispose();
+                new messengergui(user, password, otherUser);
+            }
+        });
+        
+        return container;
     }
     
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new messagesgui(user, password));
+        SwingUtilities.invokeLater(() -> {
+            // For testing
+            String testUser = "testuser";
+            String testPass = "testpass";
+            new messagesgui(testUser, testPass);
+        });
     }
 }
-
-

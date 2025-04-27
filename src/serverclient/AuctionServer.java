@@ -439,19 +439,10 @@ public class AuctionServer implements Runnable {
         synchronized (LOCK) {
             ArrayList<String> items = readFile("txt/AuctionList.txt");
             String[] parts;
-            // Fixed the check to be more reliable
-            String activeCheck = isActive(itemID);
-            if (activeCheck.contains("not found")) {
-                return "Item not found: " + itemID;
-            }
-            
-            if (!activeCheck.contains("active")) {
-                return "Item is not active: " + itemID;
-            }
 
             for (int i = 0; i < items.size(); i++) {
                 parts = items.get(i).split(",");
-                if (parts[0].equals(itemID)) {
+                if (parts[1].equals(itemID)) {
                     if (parts[2].equals("-1")) {
                         return "Item is not \"Buy Now\": " + itemID;
                     } else {
@@ -553,7 +544,7 @@ public class AuctionServer implements Runnable {
     // Send a message from one user to another
     private String sendMess(String user, String user2, String message) {
         synchronized (LOCK) {
-            // Sort users for consistent file naming
+            String Origuser = user;
             if (user.compareTo(user2) > 0) {
                 String temp = user;
                 user = user2;
@@ -573,7 +564,7 @@ public class AuctionServer implements Runnable {
                 messageList = readFile("msg/" + user + "_to_" + user2 + ".txt"); 
             }
 
-            String newMessage = user + ": " + message.replace("/", " ");
+            String newMessage = Origuser + ": " + message.replace("/", " ");
             messageList.add(newMessage);
             writeFile("msg/" + user + "_to_" + user2 + ".txt", messageList);
             return "Message sent successfully from " + user + " to " + user2;
@@ -600,7 +591,7 @@ public class AuctionServer implements Runnable {
             for (int j = 0; j < items.size(); j++) {
                 parts = items.get(j).split(",");
                 if (parts[1].toLowerCase().contains(query)) {
-                    results.add(parts[1] + " BUY NOW $" + parts[2] + " BID AMT $" + parts[7]);
+                    results.add(String.join("\\", parts));
                 }
             }
             return results.toString();

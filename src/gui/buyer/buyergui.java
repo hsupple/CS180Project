@@ -5,16 +5,29 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
 
-public class buyergui {
+public class buyergui implements Runnable {
 
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
     private static String[] Listings; 
     private static JFrame frame = null;
+    private static Map<String, Timer> auctionTimers = new HashMap<>();
+    private Thread WatchThread;
 
     public buyergui(String user, String password) {
         this.user = user;
@@ -31,7 +44,7 @@ public class buyergui {
             System.out.println(Listings[i]);
         }
 
-        JFrame frame = new JFrame("Buyer Interface");
+        frame = new JFrame("Buyer Interface");
         frame.setSize(1250, 750);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
@@ -41,12 +54,61 @@ public class buyergui {
         placeComponents(panel, frame, client);
 
         frame.setVisible(true);
+        
+        // Add window listener to clean up timers when frame is closed
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                // Stop all timers
+                for (Timer timer : auctionTimers.values()) {
+                    timer.stop();
+                }
+                auctionTimers.clear();
+            }
+        });
+
+        WatchThread = new Thread(this);
+        WatchThread.start();
+    }
+
+    public void run() {
+        try {
+            WatchService watcher = FileSystems.getDefault().newWatchService();
+            Path path = Paths.get("src/serverclient/txt");
+            path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+            while (true) {
+                WatchKey key = watcher.take();
+                for (WatchEvent<?> event : key.pollEvents()) {
+                        WatchEvent.Kind<?> kind = event.kind();
+
+                        if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                            // Optional: Check if it's specifically the file you care about
+                            System.out.println("File changed. Reloading GUI...");
+                            
+                            SwingUtilities.invokeLater(() -> {
+                                // Stop timers
+                                for (Timer timer : auctionTimers.values()) {
+                                    timer.stop();
+                                }
+                                auctionTimers.clear();
+
+                                frame.dispose();
+                                new buyergui(user, password);
+                            });
+                            return; // Exit the thread once reloaded
+                        }
+                    }
+                    key.reset();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     private static void placeComponents(JPanel panel, JFrame frame, AuctionClient client) {
         panel.setLayout(new BorderLayout());
         JPanel verticalContent = new JPanel();
-    verticalContent.setLayout(new BoxLayout(verticalContent, BoxLayout.Y_AXIS));
+        verticalContent.setLayout(new BoxLayout(verticalContent, BoxLayout.Y_AXIS));
         // Header Panel with BorderLayout to arrange title and info panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.LIGHT_GRAY);
@@ -111,6 +173,11 @@ public class buyergui {
         headerPanel.add(buttonPanel, BorderLayout.EAST);
 
         logoutButton.addActionListener(e -> {
+            // Stop all timers before disposing the frame
+            for (Timer timer : auctionTimers.values()) {
+                timer.stop();
+            }
+            auctionTimers.clear();
             frame.dispose();
         });
         
@@ -126,6 +193,11 @@ public class buyergui {
                     JOptionPane.showMessageDialog(frame, "Password cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+                // Stop all timers before disposing the frame
+                for (Timer timer : auctionTimers.values()) {
+                    timer.stop();
+                }
+                auctionTimers.clear();
                 client.deleteAccount(user, enterpassword);
                 frame.dispose();
             }
@@ -153,6 +225,11 @@ public class buyergui {
         searchButton.addActionListener(e -> {
             String searchQuery = userText.getText();
             if (!searchQuery.isEmpty()) {
+                // Stop all timers before disposing the frame
+                for (Timer timer : auctionTimers.values()) {
+                    timer.stop();
+                }
+                auctionTimers.clear();
                 new searchgui(user, password, searchQuery);
                 frame.dispose();
             }
@@ -174,7 +251,7 @@ public class buyergui {
                 String description = Listings[i].split(",")[3].strip().replace("/", " ");
                 double buyNowPrice = Double.parseDouble(Listings[i].split(",")[2].strip());
                 double currentBid = Double.parseDouble(Listings[i].split(",")[7].strip());
-                String time = Listings[i].split(",")[8].strip();
+                String endTime = Listings[i].split(",")[8].strip();
         
                 JPanel listingPanel = new JPanel();
                 listingPanel.setLayout(new BorderLayout()); // Change to BorderLayout
@@ -232,6 +309,13 @@ public class buyergui {
                             return;
                         }
                         client.makeBid(itemName.replace(" ", "/"), user, bid);
+                        
+                        // Stop all timers before disposing the frame
+                        for (Timer timer : auctionTimers.values()) {
+                            timer.stop();
+                        }
+                        auctionTimers.clear();
+                        
                         frame.dispose();
                         new buyergui(user, password);
                     } catch (NumberFormatException ex) {
@@ -242,6 +326,7 @@ public class buyergui {
                 JButton sendMess = new JButton("Send Message");
                 sendMess.setPreferredSize(new Dimension(150, 25));
                 sendMess.setMaximumSize(new Dimension(150, 25));
+                
                 String seller = Listings[i].split(",")[4].strip();
                 sendMess.addActionListener(e -> {
                     try {
@@ -258,10 +343,30 @@ public class buyergui {
                 bidPanel.add(Box.createHorizontalStrut(10));
                 bidPanel.add(sendMess);
 
-                // Add bid panel to the left side of the listing panel
+                if (buyNowPrice > 0) {
+                    JButton buyNowButton = new JButton("Buy Now");
+                    buyNowButton.setPreferredSize(new Dimension(100, 25));
+                    buyNowButton.setMaximumSize(new Dimension(100, 25));
+                    buyNowButton.addActionListener(e -> {
+                        try {
+                            client.buyNow(itemName.replace(" ", "/"), user);
+                            
+                            for (Timer timer : auctionTimers.values()) {
+                                timer.stop();
+                            }
+                            auctionTimers.clear();
+                            
+                            frame.dispose();
+                            new buyergui(user, password);
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(frame, "Failed to buy now: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
+                    bidPanel.add(buyNowButton);
+                }
+
                 leftPanel.add(bidPanel);
 
-                // Add left panel to the WEST of the listing panel
                 listingPanel.add(leftPanel, BorderLayout.WEST);
 
                 JPanel imagePanel = new JPanel(new BorderLayout());
@@ -291,19 +396,22 @@ public class buyergui {
                         JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
                         imagePanel.add(imageLabel, BorderLayout.WEST);
 
-                        // Timer label (bigger and to the right of image)
-                        
-
                     } catch (IOException ex) {
                         System.err.println("Error rotating image: " + ex.getMessage());
                     }
                 }
-                JLabel timer = new JLabel("Auction Ends at " + time);
-                        timer.setFont(new Font("SansSerif", Font.BOLD, 18));
-                        timer.setHorizontalAlignment(SwingConstants.LEFT);
-                        timer.setVerticalAlignment(SwingConstants.CENTER);
-                        timer.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-                        imagePanel.add(timer, BorderLayout.CENTER);
+                
+                // Create a countdown timer label
+                JLabel timerLabel = new JLabel();
+                timerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+                timerLabel.setHorizontalAlignment(SwingConstants.LEFT);
+                timerLabel.setVerticalAlignment(SwingConstants.CENTER);
+                timerLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+                timerLabel.setText("Loading countdown...");
+                imagePanel.add(timerLabel, BorderLayout.CENTER);
+                
+                // Set up the timer with SwingWorker to avoid UI freezing
+                setupCountdownTimer(endTime, timerLabel, itemName);
 
                 listingPanel.add(imagePanel, BorderLayout.EAST);
 
@@ -317,6 +425,11 @@ public class buyergui {
         Messages.setMinimumSize(new Dimension(350, 25));
         formButtonPanel.add(Messages);
         Messages.addActionListener(e -> {
+            // Stop all timers before disposing the frame
+            for (Timer timer : auctionTimers.values()) {
+                timer.stop();
+            }
+            auctionTimers.clear();
             new gui.messages.messagesgui(user, password);
             frame.dispose();
         });
@@ -345,5 +458,79 @@ public class buyergui {
 
         panel.add(verticalContent, BorderLayout.CENTER);
     }
-
+    
+    /**
+     * Sets up a countdown timer for an auction
+     * @param endTimeStr The end time string in HH:MM:SS format
+     * @param timerLabel The JLabel to update with the countdown
+     * @param itemId An identifier for the auction
+     */
+    private static void setupCountdownTimer(String endTimeStr, JLabel timerLabel, String itemId) {
+        try {
+            // Parse the end time
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+            Date endTime = format.parse(endTimeStr);
+            
+            // Calculate initial time difference
+            Calendar cal = Calendar.getInstance();
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(endTime);
+            
+            // Set the end calendar to today with the specified time
+            endCal.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+            endCal.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+            endCal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
+            
+            // If the end time is already past for today, set it to tomorrow
+            if (endCal.before(cal)) {
+                endCal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            
+            // Create and start the timer
+            Timer timer = new Timer(1000, e -> {
+                // Get current time
+                Calendar currentCal = Calendar.getInstance();
+                
+                // Calculate remaining time
+                long diffMillis = endCal.getTimeInMillis() - currentCal.getTimeInMillis();
+                
+                if (diffMillis <= 0) {
+                    // Auction has ended
+                    timerLabel.setText("Auction Ended");
+                    timerLabel.setForeground(Color.RED);
+                    ((Timer)e.getSource()).stop();
+                    auctionTimers.remove(itemId);
+                } else {
+                    // Calculate hours, minutes, seconds
+                    long hours = diffMillis / (60 * 60 * 1000);
+                    diffMillis %= (60 * 60 * 1000);
+                    long minutes = diffMillis / (60 * 1000);
+                    diffMillis %= (60 * 1000);
+                    long seconds = diffMillis / 1000;
+                    
+                    // Format and set the countdown text
+                    String countdownText = String.format("Time left: %02d:%02d:%02d", hours, minutes, seconds);
+                    timerLabel.setText(countdownText);
+                    
+                    // Change color based on time remaining
+                    if (hours == 0 && minutes < 10) {
+                        timerLabel.setForeground(Color.RED);
+                    } else if (hours == 0 && minutes < 30) {
+                        timerLabel.setForeground(new Color(255, 140, 0)); // Orange
+                    } else {
+                        timerLabel.setForeground(Color.BLACK);
+                    }
+                }
+            });
+            
+            // Store the timer for cleanup
+            auctionTimers.put(itemId, timer);
+            timer.start();
+            
+        } catch (ParseException e) {
+            // Handle parsing errors
+            timerLabel.setText("Error: " + endTimeStr);
+            System.err.println("Error parsing end time: " + e.getMessage());
+        }
+    }
 }

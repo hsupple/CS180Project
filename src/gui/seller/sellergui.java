@@ -242,11 +242,60 @@ public class sellergui {
         JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
         bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
         detailPanel.add(bidLabel);
-    
-        JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
-        buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        detailPanel.add(buyNowLabel);
-
+        if (buyNowPrice > 0) {
+            JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
+            buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+            detailPanel.add(buyNowLabel);
+        } else {
+            // Create panel that respects the parent BoxLayout
+            JPanel buyNowPanel = new JPanel();
+            buyNowPanel.setLayout(new BoxLayout(buyNowPanel, BoxLayout.X_AXIS));
+            buyNowPanel.setBackground(Color.WHITE);
+            buyNowPanel.setAlignmentX(Component.LEFT_ALIGNMENT); // Important for proper alignment
+            
+            JLabel buyNowLabel = new JLabel("Set Buy Now Price: $");
+            buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+            
+            JTextField setPrice = new JTextField(8);
+            setPrice.setMaximumSize(new Dimension(80, 25));
+            
+            JButton submitButton = new JButton("Set");
+            submitButton.setPreferredSize(new Dimension(60, 25));
+            submitButton.setMaximumSize(new Dimension(60, 25));
+            
+            submitButton.addActionListener(e -> {
+                try {
+                    String[] listingArr = listing.split(",");
+                    double newPrice = Double.parseDouble(setPrice.getText());
+                    if (newPrice <= 0) {
+                        JOptionPane.showMessageDialog(panel, "Price must be greater than zero", "Invalid Price", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    client.updateItemListing(900000 + Integer.valueOf(listingArr[0]), 
+                                             listingArr[1].strip(), 
+                                             listingArr[3].strip(), 
+                                             newPrice, 
+                                             listingArr[4].strip(), 
+                                             false, 
+                                             listingArr[6].strip(), 
+                                             Double.parseDouble(listingArr[7]), 
+                                             listingArr[8].strip());
+                    
+                    frame.dispose();
+                    new sellergui(user, password);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(panel, "Please enter a valid number", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+        
+            buyNowPanel.add(buyNowLabel);
+            buyNowPanel.add(Box.createRigidArea(new Dimension(5, 0))); // Spacing
+            buyNowPanel.add(setPrice);
+            buyNowPanel.add(Box.createRigidArea(new Dimension(5, 0))); // Spacing
+            buyNowPanel.add(submitButton);
+            
+            detailPanel.add(buyNowPanel);
+        }
         File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
         if (imageDir.exists()) {
             try {
@@ -293,27 +342,25 @@ public class sellergui {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actionPanel.setBackground(Color.WHITE);
     
-        JButton viewButton = new JButton("View Details");
-        viewButton.setPreferredSize(new Dimension(100, 25));
-        actionPanel.add(viewButton);
-    
-        JButton deleteButton = new JButton("Delete");
-        deleteButton.setPreferredSize(new Dimension(80, 25));
-        actionPanel.add(deleteButton);
-    
-        deleteButton.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(panel,
-                "Are you sure you want to delete this listing?",
-                "Confirm Listing Deletion",
-                JOptionPane.YES_NO_OPTION);
-    
-            if (confirm == JOptionPane.YES_OPTION) {
-                client.endListing("9000" + listing.substring(0, 2));
-                JOptionPane.showMessageDialog(panel, "Listing deleted successfully.");
-                frame.dispose();
-                new sellergui(user, password);
-            }
-        });
+        if (listing.split(",")[5].strip().equals("false")) {
+            JButton deleteButton = new JButton("Delete");
+            deleteButton.setPreferredSize(new Dimension(80, 25));
+            actionPanel.add(deleteButton);
+        
+            deleteButton.addActionListener(e -> {
+                int confirm = JOptionPane.showConfirmDialog(panel,
+                    "Are you sure you want to delete this listing?",
+                    "Confirm Listing Deletion",
+                    JOptionPane.YES_NO_OPTION);
+        
+                if (confirm == JOptionPane.YES_OPTION) {
+                    client.endListing("9000" + listing.substring(0, 2));
+                    JOptionPane.showMessageDialog(panel, "Listing deleted successfully.");
+                    frame.dispose();
+                    new sellergui(user, password);
+                }
+            });
+        }
     
         panel.add(actionPanel, BorderLayout.EAST);
     

@@ -136,6 +136,7 @@ public class newauction {
                 String title = titleTextField.getText();
                 String description = descriptionTextArea.getText().strip();
                 String buyNowPrice = buyNowTextField.getText();
+                if (buyNowPrice.isEmpty()){ buyNowPrice = "-1.0"; }
                 String minBidPrice = minBidTextField.getText();
                 String timer = timerTextField.getText();
 

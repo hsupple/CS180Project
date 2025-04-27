@@ -66,6 +66,9 @@ public class AuctionClient implements AuctionClientInterface {
             out.println("UPDATEITEM " + itemId + " " + itemName 
                         + " " + itemDescription + " " + buyNowItemPrice + " " 
                         + seller + " " + isSold + " " + buyer + " " + bidItemPrice + " " + time);
+            System.out.print("UPDATEITEM " + itemId + " " + itemName 
+                        + " " + itemDescription + " " + buyNowItemPrice + " " 
+                        + seller + " " + isSold + " " + buyer + " " + bidItemPrice + " " + time);
             out.flush();
             return in.readLine();
         }  catch (IOException e) {
@@ -263,7 +266,7 @@ public class AuctionClient implements AuctionClientInterface {
     @Override
     public String buyNow(String itemID, String user) {
         try {
-            out.println("BUY " + itemID + " "  + user);
+            out.println("BUYITEM " + itemID + " "  + user);
             out.flush();
             return in.readLine();
         }  catch (IOException e) {
