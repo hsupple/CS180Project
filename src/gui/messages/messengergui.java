@@ -2,26 +2,26 @@ package gui.messages;
 
 import accounts.AuctionClient;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
+import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
+/**
+     * Class to run new gui for messenger suite
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+               @hsupple
+               @addy-ops
+    * @version April, 2025
+    */
 public class messengergui implements Runnable {
-
+    // declare all private fields
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
-    private static ArrayList<String> listingsList = new ArrayList<>(); 
     private static JFrame frame = null;
     private static String user2;
     private JPanel messagePanel;
@@ -38,15 +38,6 @@ public class messengergui implements Runnable {
             e.printStackTrace();
         }
 
-        initializeGUI();
-        
-        // Start the file watching thread
-        Thread watcherThread = new Thread(this);
-        watcherThread.setDaemon(true);
-        watcherThread.start();
-    }
-
-    private void initializeGUI() {
         frame = new JFrame("Messenger Client");
         frame.setSize(1250, 750);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -57,15 +48,20 @@ public class messengergui implements Runnable {
         placeComponents(panel, frame, client, user2);
 
         frame.setVisible(true);
+        
+        // use watcherthread to watch for new modifications to msg
+        Thread watcherThread = new Thread(this);
+        watcherThread.setDaemon(true);
+        watcherThread.start();
     }
 
+    // run thread to ensure messages sent will update gui
     public void run() {
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
             Path path = Paths.get("src/serverclient/msg");
             path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
     
-            // Save the last known number of messages
             int lastMessageCount = getMessageCount();
     
             while (true) {
@@ -75,19 +71,18 @@ public class messengergui implements Runnable {
     
                     if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
                         System.out.println("File changed. Checking for new messages...");
-    
+
+                        // Check that if message count has changed within file
                         int currentMessageCount = getMessageCount();
                         if (currentMessageCount > lastMessageCount) {
                             lastMessageCount = currentMessageCount;
                             
-                            // Update just the message panel instead of recreating the entire GUI
                             SwingUtilities.invokeLater(() -> {
                                 updateMessages();
                             });
                         }
                     }
                 }
-                // Reset is important for continued watching
                 key.reset();
             }
         } catch (Exception e) {
@@ -95,6 +90,7 @@ public class messengergui implements Runnable {
         }
     }
 
+    // remove all messages, get all messages, and revalidate frame
     private void updateMessages() {
         if (messagePanel != null) {
             messagePanel.removeAll();
@@ -102,7 +98,6 @@ public class messengergui implements Runnable {
             messagePanel.revalidate();
             messagePanel.repaint();
             
-            // Auto-scroll to bottom to show new messages
             if (scrollPane != null) {
                 SwingUtilities.invokeLater(() -> {
                     JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
@@ -112,6 +107,7 @@ public class messengergui implements Runnable {
         }
     }
 
+    // place all panels and components properly
     private void placeComponents(JPanel panel, JFrame frame, AuctionClient client, String user2) {
         panel.setLayout(new BorderLayout());
 
@@ -120,6 +116,7 @@ public class messengergui implements Runnable {
         headerPanel.setPreferredSize(new Dimension(1250, 100));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
+        // make new setup for chat with user
         JLabel title = new JLabel("Chat with " + user2, SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
         headerPanel.add(title, BorderLayout.CENTER);
@@ -137,6 +134,7 @@ public class messengergui implements Runnable {
         headerInfoPanel.add(welcomeLabel);
         headerInfoPanel.add(typeLabel);
 
+        // Button to go back to messages 
         JPanel headerButtonPanel = new JPanel();
         headerButtonPanel.setBackground(Color.LIGHT_GRAY);
         JButton backButton = new JButton("Back");
@@ -150,7 +148,7 @@ public class messengergui implements Runnable {
         headerPanel.add(headerButtonPanel, BorderLayout.EAST);
         panel.add(headerPanel, BorderLayout.NORTH);
 
-        // Message list panel
+        // new message panel for user communication
         messagePanel = new JPanel();
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
         messagePanel.setBackground(Color.WHITE);
@@ -162,7 +160,6 @@ public class messengergui implements Runnable {
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        // Auto-scroll to the bottom to show the most recent messages
         SwingUtilities.invokeLater(() -> {
             JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
             verticalBar.setValue(verticalBar.getMaximum());
@@ -172,6 +169,7 @@ public class messengergui implements Runnable {
         inputPanel.setBackground(Color.WHITE);
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JTextField messageField = new JTextField();
+        // Button to send new text contingent on isEmpty
         JButton sendButton = new JButton("Send");
         sendButton.addActionListener(e -> {
             String message = messageField.getText();
@@ -190,6 +188,7 @@ public class messengergui implements Runnable {
         panel.add(inputPanel, BorderLayout.SOUTH);
     }
 
+    // Method used to return all messages between two users and append to messagepanel
     public static JPanel getMessages(String user, String user2, JPanel messagePanel) {
         String u1 = user;
         String u2 = user2;
@@ -198,13 +197,14 @@ public class messengergui implements Runnable {
             u1 = u2;
             u2 = temp;
         }
-
+        // Read file contents
         File messageFile = new File(System.getProperty("user.dir") + "/src/serverclient/msg/" + u1 + "_to_" + u2 + ".txt");
         try (BufferedReader br = new BufferedReader(new FileReader(messageFile))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String sender = line.substring(0, line.indexOf(":"));
                 
+                // Create new panel as text bubble
                 JPanel messageBubble = new JPanel();
                 messageBubble.setLayout(new BorderLayout());
                 messageBubble.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
@@ -212,13 +212,13 @@ public class messengergui implements Runnable {
                 JLabel messageLabel = new JLabel(line);
                 messageLabel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
                 
-                // Style message bubbles differently based on sender
+                // Put message on side contingent on user/sender status
                 if (sender.equals(user)) {
-                    messageBubble.setBackground(new Color(220, 248, 198)); // Light green for own messages
+                    messageBubble.setBackground(new Color(220, 248, 198));
                     messageBubble.setAlignmentX(Component.RIGHT_ALIGNMENT);
                     messageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
                 } else {
-                    messageBubble.setBackground(new Color(240, 240, 240)); // Light gray for received messages
+                    messageBubble.setBackground(new Color(240, 240, 240));
                     messageBubble.setAlignmentX(Component.LEFT_ALIGNMENT);
                 }
                 
@@ -243,12 +243,13 @@ public class messengergui implements Runnable {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new messagesgui(user, password));
     }
-
+    
+    // Count messages in file
     private int getMessageCount() {
         int count = 0;
         try {
             String u1 = user;
-            String u2 = user2; // Fixed: use the actual user2 field
+            String u2 = user2;
             if (u1.compareTo(u2) > 0) {
                 String temp = u1;
                 u1 = u2;

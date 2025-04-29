@@ -2,111 +2,91 @@ package gui.buyer;
 
 import accounts.AuctionClient;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.*;
+import java.text.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+/**
+     * Class to run new gui for search object
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+               @hsupple
+               @addy-ops
+    * @version April, 2025
+    */
 public class searchgui {
 
+    // Define all private fields
     private static String user;
     private static String password;
+    private static String query;
     private static AuctionClient client;
     private static String[] Listings;
     private static String[] Sellers;
     private static Map<String, Timer> auctionTimers = new HashMap<>();
 
+    // Construct new gui for search
     public searchgui(String user, String password, String query) {
         this.user = user;
         this.password = password;
+        this.query = query;
 
         try {
             this.client = new AuctionClient();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Debugging output
-        System.out.println("Raw search results: " + client.searchFor(query).toString());
-        
-        // Fix: properly handle the search results format
+        // get search results with user query
         String searchResults = client.searchFor(query).toString();
-        
-        // Extract sellers and listings
+                
         List<String> listingsData = new ArrayList<>();
         List<String> sellersData = new ArrayList<>();
-        
-        // Check if there are sellers in the results
-        if (searchResults.contains("Sellers, ")) {
-            int sellersStart = searchResults.indexOf("Sellers, ") + 9;
-            int sellersEnd = searchResults.indexOf("Listings, ");
+
+
+        // ensure all formatting is proper then split at Listings and Sellers
+        searchResults = searchResults.replaceAll("\\[\\[", "").replaceAll("\\]\\]", "").trim();
+        String[] majorParts = searchResults.split("Listings,\\s*", 2);
+
+        if (majorParts.length > 0) {
+            String sellerPart = majorParts[0].replace("Sellers,", "").trim();
             
-            if (sellersEnd == -1) {
-                String sellersPart = searchResults.substring(sellersStart);
-                
-                if (sellersPart.endsWith("]")) {
-                    sellersPart = sellersPart.substring(0, sellersPart.length() - 1);
-                }
-                if (sellersPart.endsWith("]")) {
-                    sellersPart = sellersPart.substring(0, sellersPart.length() - 1);
-                }
-                
-                // Split by comma and space
-                String[] sellerArray = sellersPart.split(", ");
+            if (!sellerPart.isEmpty()) {
+                String[] sellerArray = sellerPart.split(",");
                 for (String seller : sellerArray) {
-                    if (!seller.isEmpty() && !seller.trim().equals("Listings")) {
-                        sellersData.add(seller.trim());
-                    }
-                }
-            } else {
-                String sellersPart = searchResults.substring(sellersStart, sellersEnd).trim();
-                
-                if (sellersPart.endsWith(",")) {
-                    sellersPart = sellersPart.substring(0, sellersPart.length() - 1);
-                }
-                
-                String[] sellerArray = sellersPart.split(", ");
-                for (String seller : sellerArray) {
+                    seller = seller.trim();
                     if (!seller.isEmpty()) {
-                        sellersData.add(seller.trim());
+                        sellersData.add(seller);
                     }
                 }
             }
         }
-        
-        // Pattern to match each listing (starts with 9 followed by digits, then data separated by backslashes)
-        Pattern pattern = Pattern.compile("9\\d+\\\\[^,]+(?:\\\\[^,]*){7}");
-        Matcher matcher = pattern.matcher(searchResults);
-        
-        while (matcher.find()) {
-            listingsData.add(matcher.group());
+
+        if (majorParts.length > 1) {
+            String listingsPart = majorParts[1].trim();
+            String[] parts = listingsPart.split(",\\s*(?=9\\d+\\\\)");
+            
+            for (String part : parts) {
+                part = part.trim();
+                
+                if (part.matches("9\\d+\\\\.*")) {
+                    listingsData.add(part);
+                }
+            }
         }
-        
+
+        // append array to private fields
         this.Listings = listingsData.toArray(new String[0]);
         this.Sellers = sellersData.toArray(new String[0]);
-        
-        // Debug the extracted data
-        System.out.println("Found " + Listings.length + " listings:");
-        for (String listing : Listings) {
-            System.out.println("Extracted listing: " + listing);
-        }
-        
-        System.out.println("Found " + Sellers.length + " sellers:");
-        for (String seller : Sellers) {
-            System.out.println("Extracted seller: " + seller);
-        }
 
         JFrame frame = new JFrame("Buyer Interface");
         frame.setSize(1250, 750);
@@ -124,23 +104,21 @@ public class searchgui {
         panel.setLayout(new BorderLayout());
         JPanel verticalContent = new JPanel();
         verticalContent.setLayout(new BoxLayout(verticalContent, BoxLayout.Y_AXIS));
-        // Header Panel with BorderLayout to arrange title and info panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.LIGHT_GRAY);
         headerPanel.setPreferredSize(new Dimension(1250, 100));
         headerPanel.setMaximumSize(new Dimension(1250, 100));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // padding
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Title (centered in header)
+        // Add all header information
         JLabel title = new JLabel("Purdue Auction House", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
         headerPanel.add(title, BorderLayout.CENTER);
 
-        // Info panel on the left
         JPanel headerInfoPanel = new JPanel();
-        headerInfoPanel.setLayout(new BoxLayout(headerInfoPanel, BoxLayout.Y_AXIS)); // Stack vertically
+        headerInfoPanel.setLayout(new BoxLayout(headerInfoPanel, BoxLayout.Y_AXIS));
         headerInfoPanel.setBackground(Color.LIGHT_GRAY);
-        headerInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0)); // padding
+        headerInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0));
         headerInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel welcomeLabel = new JLabel("Welcome " + user + "!");
@@ -151,6 +129,7 @@ public class searchgui {
         headerInfoPanel.add(welcomeLabel);
         headerInfoPanel.add(typeLabel);
 
+        // Return button
         JButton ReturnButton = new JButton("Return");
         ReturnButton.setPreferredSize(new Dimension(165, 45));
         ReturnButton.setMaximumSize(new Dimension(165, 45));
@@ -163,12 +142,11 @@ public class searchgui {
         returnPanel.setBackground(Color.LIGHT_GRAY);
         returnPanel.add(ReturnButton);
         
-        // Add button panel to header
         headerPanel.add(headerInfoPanel, BorderLayout.WEST);
         headerPanel.add(returnPanel, BorderLayout.EAST);
 
+        // Return to buyergui and clear all timers
         ReturnButton.addActionListener(e -> {
-            // Stop all timers before disposing the frame
             for (Timer timer : auctionTimers.values()) {
                 timer.stop();
             }
@@ -183,21 +161,18 @@ public class searchgui {
         formPanel.setPreferredSize(new Dimension(350, 100));
         formPanel.setLayout(null);
 
-        // Button panel
         JPanel formButtonPanel = new JPanel();
         formButtonPanel.setBackground(Color.WHITE);
         formButtonPanel.setPreferredSize(new Dimension(350, 50));
 
-        // Create the main content panel with sections for listings and sellers
         JPanel mainContentPanel = new JPanel();
         mainContentPanel.setLayout(new BoxLayout(mainContentPanel, BoxLayout.Y_AXIS));
         
-        // Create sellers panel first
         JPanel sellersPanel = new JPanel();
         sellersPanel.setLayout(new BoxLayout(sellersPanel, BoxLayout.Y_AXIS));
         sellersPanel.setBackground(Color.WHITE);
         
-        // Create a header for sellers section if there are sellers
+        // Show all sellers
         if (Sellers != null && Sellers.length > 0) {
             JLabel sellersHeader = new JLabel("Sellers");
             sellersHeader.setFont(new Font("SansSerif", Font.BOLD, 18));
@@ -205,7 +180,7 @@ public class searchgui {
             sellersPanel.add(sellersHeader);
             sellersPanel.add(Box.createVerticalStrut(10));
             
-            // Add each seller as a panel
+            // new panel per seller
             for (String seller : Sellers) {
                 JPanel sellerPanel = new JPanel();
                 sellerPanel.setLayout(new BorderLayout());
@@ -216,10 +191,11 @@ public class searchgui {
                 ));
                 sellerPanel.setMaximumSize(new Dimension(1200, 60));
                 
+                // labels for sellers and ratings
                 JLabel sellerLabel = new JLabel("Seller: " + seller);
                 sellerLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 
-                JLabel sellerRating = new JLabel("Rating: " + client.getRating(seller));
+                JLabel sellerRating = new JLabel("       Rating: " + client.getRating(seller));
                 sellerRating.setFont(new Font("SansSerif", Font.PLAIN, 14));
                 
                 JButton messageButton = new JButton("Send Message");
@@ -238,7 +214,8 @@ public class searchgui {
                 });
 
                 setRating.addActionListener(e -> {
-                    new gui.messages.rating(user, sellerName);
+                    frame.dispose();
+                    new gui.messages.rating(user, password, query, sellerName);
                 });
                 
                 JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -254,17 +231,15 @@ public class searchgui {
                 sellersPanel.add(Box.createVerticalStrut(10));
             }
             
-            // Add sellers panel to the main content
             mainContentPanel.add(sellersPanel);
             mainContentPanel.add(Box.createVerticalStrut(20));
         }
         
-        // Create listings panel
         JPanel listingsPanel = new JPanel();
         listingsPanel.setLayout(new BoxLayout(listingsPanel, BoxLayout.Y_AXIS));
         listingsPanel.setBackground(Color.WHITE);
         
-        // Create a header for listings section if there are listings
+        // Show all listings
         if (Listings != null && Listings.length > 0) {
             JLabel listingsHeader = new JLabel("Listings");
             listingsHeader.setFont(new Font("SansSerif", Font.BOLD, 18));
@@ -273,31 +248,26 @@ public class searchgui {
             listingsPanel.add(Box.createVerticalStrut(10));
             
             for (String listing : Listings) {
+                // Per each valid listing, append a new listingpanel
                 try {
-                    // Log for debugging
-                    System.out.println("Processing listing: " + listing);
                     
-                    // Split by backslash - this is the delimiter between fields in each listing
                     String[] listingParts = listing.split("\\\\");
                     
-                    // Ensure we have enough parts
                     if (listingParts.length < 9) {
                         System.out.println("Warning: Listing has too few parts: " + listing);
                         continue;
                     }
                     
-                    // Extract the listing data
                     String itemId = listingParts[0];
                     String itemName = listingParts[1].replace("/", " ");
                     double buyNowPrice = Double.parseDouble(listingParts[2]);
                     String description = listingParts[3].replace("/", " ");
                     String seller = listingParts[4];
                     boolean isSold = Boolean.parseBoolean(listingParts[5]);
-                    // listingParts[6] is "None" or buyer name
                     double currentBid = Double.parseDouble(listingParts[7]);
                     String endTime = listingParts[8];
                     
-                    // Skip sold items
+                    // ensure only active listings
                     if (isSold) {
                         continue;
                     }
@@ -310,37 +280,34 @@ public class searchgui {
                         BorderFactory.createEmptyBorder(10, 10, 10, 10)
                     ));
 
-                    // Item name (aligned to the WEST)
                     JPanel leftPanel = new JPanel();
                     leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
                     leftPanel.setBackground(new Color(245, 245, 245));
 
+                    // Show all information about item
                     JLabel nameLabel = new JLabel("Item: " + itemName);
                     nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
                     leftPanel.add(nameLabel);
 
-                    // Description (aligned to the WEST)
                     JLabel descLabel = new JLabel("Description: " + description);
                     descLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                     leftPanel.add(descLabel);
                     
-                    // Seller (aligned to the WEST)
                     JLabel sellerLabel = new JLabel("Seller: " + seller);
                     sellerLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                     leftPanel.add(sellerLabel);
 
-                    // Current Bid (aligned to the WEST)
                     JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
                     bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                     leftPanel.add(bidLabel);
 
+                    // Add text to show valid buy now price
                     if (buyNowPrice > 0) {
                         JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
                         buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                         leftPanel.add(buyNowLabel);
                     }
 
-                    // Bid input and button (aligned to the WEST)
                     JPanel bidPanel = new JPanel();
                     bidPanel.setLayout(new BoxLayout(bidPanel, BoxLayout.X_AXIS));
                     bidPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -351,6 +318,7 @@ public class searchgui {
                     bidText.setFont(new Font("SansSerif", Font.PLAIN, 14));
                     bidText.setToolTipText("$ Bid Amount");
 
+                    // Add button and text field to make new bid
                     JButton bidButton = new JButton("Make Bid");
                     bidButton.setPreferredSize(new Dimension(100, 25));
                     bidButton.setMaximumSize(new Dimension(100, 25));
@@ -364,7 +332,6 @@ public class searchgui {
                             }
                             client.makeBid(itemName.replace(" ", "/"), user, bid);
                             
-                            // Stop all timers before disposing the frame
                             for (Timer timer : auctionTimers.values()) {
                                 timer.stop();
                             }
@@ -377,6 +344,7 @@ public class searchgui {
                         }
                     });
 
+                    // Make button to send message to seller
                     JButton sendMess = new JButton("Send Message");
                     sendMess.setPreferredSize(new Dimension(150, 25));
                     sendMess.setMaximumSize(new Dimension(150, 25));
@@ -389,13 +357,13 @@ public class searchgui {
                         }
                     });
 
-                    // Add bid input and button to bid panel
                     bidPanel.add(bidText);
                     bidPanel.add(Box.createHorizontalStrut(10));
                     bidPanel.add(bidButton);
                     bidPanel.add(Box.createHorizontalStrut(10));
                     bidPanel.add(sendMess);
 
+                    // Only add buy now button if valid buy now is set
                     if (buyNowPrice > 0) {
                         JButton buyNowButton = new JButton("Buy Now");
                         buyNowButton.setPreferredSize(new Dimension(100, 25));
@@ -423,29 +391,14 @@ public class searchgui {
                     listingPanel.add(leftPanel, BorderLayout.WEST);
 
                     JPanel imagePanel = new JPanel(new BorderLayout());
-                    imagePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10)); // some padding
+                    imagePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
                     File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
                     if (imageDir.exists()) {
                         try {
-                            BufferedImage originalImage = ImageIO.read(imageDir);
+                            BufferedImage Image = ImageIO.read(imageDir);
 
-                            // Rotate image
-                            BufferedImage rotatedImage = new BufferedImage(
-                                originalImage.getHeight(), 
-                                originalImage.getWidth(), 
-                                originalImage.getType()
-                            );
-                            Graphics2D g2d = rotatedImage.createGraphics();
-                            AffineTransform transform = new AffineTransform();
-                            transform.translate(originalImage.getHeight(), 0);
-                            transform.rotate(Math.PI / 2);
-                            g2d.setTransform(transform);
-                            g2d.drawImage(originalImage, 0, 0, null);
-                            g2d.dispose();
-
-                            // Scale and set image
-                            Image scaledImage = rotatedImage.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                            Image scaledImage = Image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                             JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
                             imagePanel.add(imageLabel, BorderLayout.WEST);
 
@@ -454,16 +407,13 @@ public class searchgui {
                         }
                     }
                     
-                    // Create a countdown timer label
                     JLabel timerLabel = new JLabel();
                     timerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
                     timerLabel.setHorizontalAlignment(SwingConstants.LEFT);
                     timerLabel.setVerticalAlignment(SwingConstants.CENTER);
                     timerLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-                    timerLabel.setText("Loading countdown...");
                     imagePanel.add(timerLabel, BorderLayout.CENTER);
                     
-                    // Set up the timer with SwingWorker to avoid UI freezing
                     setupCountdownTimer(endTime, timerLabel, itemId);
 
                     listingPanel.add(imagePanel, BorderLayout.EAST);
@@ -476,11 +426,10 @@ public class searchgui {
                 }
             }
             
-            // Add listings panel to main content
             mainContentPanel.add(listingsPanel);
         }
         
-        // Check if there are no results
+        // If none, show no search results
         if ((Sellers == null || Sellers.length == 0) && (Listings == null || Listings.length == 0)) {
             JLabel noResultsLabel = new JLabel("There are no search results!");
             noResultsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -489,6 +438,7 @@ public class searchgui {
             mainContentPanel.add(noResultsLabel);
         }
 
+        /// Ensure pane may be scrolled if needed
         JScrollPane scrollPane = new JScrollPane(mainContentPanel);
         scrollPane.setPreferredSize(new Dimension(1000, 500)); 
         scrollPane.setMaximumSize(new Dimension(1000, 500));   
@@ -503,7 +453,6 @@ public class searchgui {
         scrollContainer.setPreferredSize(new Dimension(1000, 500));
         scrollContainer.add(scrollPane, BorderLayout.CENTER);
                 
-        // Add the content panel to the main panel
         panel.add(contentPanel, BorderLayout.CENTER);
 
         verticalContent.add(headerPanel);
@@ -514,70 +463,59 @@ public class searchgui {
         panel.add(verticalContent, BorderLayout.CENTER);
     }
     
+    // Setup new countdown concurrent to current time
     private static void setupCountdownTimer(String endTimeStr, JLabel timerLabel, String itemId) {
         try {
-            // Parse the end time
             SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
             Date endTime = format.parse(endTimeStr);
             
-            // Calculate initial time difference
             Calendar cal = Calendar.getInstance();
             Calendar endCal = Calendar.getInstance();
             endCal.setTime(endTime);
             
-            // Set the end calendar to today with the specified time
             endCal.set(Calendar.YEAR, cal.get(Calendar.YEAR));
             endCal.set(Calendar.MONTH, cal.get(Calendar.MONTH));
             endCal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
             
-            // If the end time is already past for today, set it to tomorrow
             if (endCal.before(cal)) {
                 endCal.add(Calendar.DAY_OF_MONTH, 1);
             }
             
-            // Create and start the timer
             Timer timer = new Timer(1000, e -> {
-                // Get current time
                 Calendar currentCal = Calendar.getInstance();
                 
-                // Calculate remaining time
                 long diffMillis = endCal.getTimeInMillis() - currentCal.getTimeInMillis();
                 
                 if (diffMillis <= 0) {
-                    // Auction has ended
                     timerLabel.setText("Auction Ended");
                     timerLabel.setForeground(Color.RED);
                     ((Timer)e.getSource()).stop();
                     auctionTimers.remove(itemId);
                 } else {
-                    // Calculate hours, minutes, seconds
                     long hours = diffMillis / (60 * 60 * 1000);
                     diffMillis %= (60 * 60 * 1000);
                     long minutes = diffMillis / (60 * 1000);
                     diffMillis %= (60 * 1000);
                     long seconds = diffMillis / 1000;
                     
-                    // Format and set the countdown text
                     String countdownText = String.format("Time left: %02d:%02d:%02d", hours, minutes, seconds);
                     timerLabel.setText(countdownText);
                     
-                    // Change color based on time remaining
                     if (hours == 0 && minutes < 10) {
                         timerLabel.setForeground(Color.RED);
                     } else if (hours == 0 && minutes < 30) {
-                        timerLabel.setForeground(new Color(255, 140, 0)); // Orange
+                        timerLabel.setForeground(new Color(255, 140, 0));
                     } else {
                         timerLabel.setForeground(Color.BLACK);
                     }
                 }
             });
             
-            // Store the timer for cleanup
             auctionTimers.put(itemId, timer);
             timer.start();
-            
+            // Start new timer
+
         } catch (ParseException e) {
-            // Handle parsing errors
             timerLabel.setText("Error: " + endTimeStr);
             System.err.println("Error parsing end time: " + e.getMessage());
         }

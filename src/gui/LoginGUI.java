@@ -20,7 +20,7 @@ public class LoginGUI {
 
         JPanel panel = new JPanel();
         frame.add(panel);
-        placeComponents(panel, frame, client); // pass the client to the placeComponents method
+        placeComponents(panel, frame, client);
 
         frame.setVisible(true);
     }

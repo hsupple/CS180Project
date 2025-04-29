@@ -10,14 +10,25 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
 
-public class sellergui {
+/**
+     * Gui for seller object login
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+               @hsupple
+               @addy-ops
+    * @version April, 2025
+    */
 
+public class sellergui {
+    //Define all private fields
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
     private static String[] Listings; 
     private static JFrame frame = null;
-
+    // Constructor for sellergui
     public sellergui(String user, String password) {
 
         this.user = user;
@@ -29,6 +40,7 @@ public class sellergui {
             e.printStackTrace();
         }
 
+        // Get user listings
         this.Listings = client.getMyListings(user).toString().substring(1, client.getMyListings(user).toString().length() - 2).split("9000");
         for (int i = 0; i < Listings.length; i++) {
             System.out.println(Listings[i]);
@@ -45,25 +57,23 @@ public class sellergui {
         frame.setVisible(true);
     }
 
+    // Place components into seller gui frame
     private static void placeComponents(JPanel panel, JFrame frame, AuctionClient client) {
-        panel.setLayout(new BorderLayout()); // Changed to BorderLayout for main panel
+        panel.setLayout(new BorderLayout());
 
-        // Header Panel with BorderLayout to arrange title and info panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.LIGHT_GRAY);
         headerPanel.setPreferredSize(new Dimension(1250, 100));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // padding
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Title (centered in header)
         JLabel title = new JLabel("Purdue Auction House", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
         headerPanel.add(title, BorderLayout.CENTER);
 
-        // Info panel on the left
         JPanel headerInfoPanel = new JPanel();
-        headerInfoPanel.setLayout(new BoxLayout(headerInfoPanel, BoxLayout.Y_AXIS)); // Stack vertically
+        headerInfoPanel.setLayout(new BoxLayout(headerInfoPanel, BoxLayout.Y_AXIS)); 
         headerInfoPanel.setBackground(Color.LIGHT_GRAY);
-        headerInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0)); // padding
+        headerInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0)); 
         headerInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel welcomeLabel = new JLabel("Welcome " + user + "!");
@@ -74,21 +84,19 @@ public class sellergui {
         headerInfoPanel.add(welcomeLabel);
         headerInfoPanel.add(typeLabel);
 
-        // Header buttons panel (for logout and delete account)
         JPanel headerButtonPanel = new JPanel();
         headerButtonPanel.setLayout(new BoxLayout(headerButtonPanel, BoxLayout.Y_AXIS));
         headerButtonPanel.setBackground(Color.LIGHT_GRAY);
 
+        // Main panel buttons for logout and delete
         JButton logoutButton = new JButton("Logout");
         logoutButton.setPreferredSize(new Dimension(100, 30));
         logoutButton.setMaximumSize(new Dimension(100, 30));
 
-        // Delete account button
         JButton deleteButton = new JButton("Delete Account");
         deleteButton.setPreferredSize(new Dimension(150, 30));
         deleteButton.setMaximumSize(new Dimension(150, 30));
         
-        // Add buttons to separate panels to stack them vertically
         JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         logoutPanel.setBackground(Color.LIGHT_GRAY);
         logoutPanel.add(logoutButton);
@@ -100,7 +108,6 @@ public class sellergui {
         headerButtonPanel.add(logoutPanel);
         headerButtonPanel.add(deletePanel);
 
-        // Add button panel to header
         headerPanel.add(headerInfoPanel, BorderLayout.WEST);
         headerPanel.add(headerButtonPanel, BorderLayout.EAST);
 
@@ -125,7 +132,6 @@ public class sellergui {
             }
         });
 
-        // Add header panel to the main panel at the top
         panel.add(headerPanel, BorderLayout.NORTH);
 
         JButton Messages = new JButton("Messages");
@@ -136,12 +142,10 @@ public class sellergui {
             frame.dispose();
         });
 
-        // Create content panel for listings with a title panel at the top
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // Title panel for listings section with New Auction button at right
         JPanel listingsTitlePanel = new JPanel(new BorderLayout());
         listingsTitlePanel.setBackground(Color.WHITE);
         
@@ -151,6 +155,7 @@ public class sellergui {
         listingsTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
         listingsTitlePanel.add(listingsTitle, BorderLayout.WEST);
         
+        // New auction button
         JButton auctionButton = new JButton("New Auction");
         auctionButton.setPreferredSize(new Dimension(120, 30));
         auctionButton.addActionListener(e -> {
@@ -165,12 +170,12 @@ public class sellergui {
         
         contentPanel.add(listingsTitlePanel, BorderLayout.NORTH);
         
-        // Create scrollable panel for listings
+        // Panel for listing panel objects
         JPanel listingsPanel = new JPanel();
         listingsPanel.setLayout(new BoxLayout(listingsPanel, BoxLayout.Y_AXIS));
         listingsPanel.setBackground(Color.WHITE);
         
-        // Check if there are any listings
+        // If no listings new No Listing panel
         if (Listings.length == 0) {
             JLabel noListingsLabel = new JLabel("You don't have any active listings.");
             noListingsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -178,6 +183,7 @@ public class sellergui {
             listingsPanel.add(Box.createVerticalStrut(20));
             listingsPanel.add(noListingsLabel);
         } else {
+            // Else create a new panel first for active listingss than for not active ones
             for (int i = 1; i < Listings.length; i++) {
                 if (Listings[i].split(",")[5].strip().equals("false")) {
                     JPanel listingPanel = createListingPanel(Listings[i]);
@@ -194,7 +200,6 @@ public class sellergui {
             }
         }
         
-        // Make listings panel scrollable
         JScrollPane scrollPane = new JScrollPane(listingsPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -202,35 +207,35 @@ public class sellergui {
 
         contentPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Add the content panel to the main panel
         panel.add(contentPanel, BorderLayout.CENTER);
     }
-    
+
+    // create new panel for item listings
     private static JPanel createListingPanel(String listing) {
+        // Get listing identifiers
         String itemName = listing.split(",")[1].strip().replace("/", " ");
         String description = listing.split(",")[3].strip().replace("/", " ");
         double buyNowPrice = Double.parseDouble(listing.split(",")[2].strip());
         double currentBid = Double.parseDouble(listing.split(",")[7].strip());
     
-        JPanel panel = new JPanel(new BorderLayout(10, 0)); // Add horizontal gap
+        JPanel panel = new JPanel(new BorderLayout(10, 0));
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(Color.LIGHT_GRAY, 1),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         panel.setMaximumSize(new Dimension(1200, 100));
 
-        // Create a fixed-size panel for the image
         JPanel imagePanel = new JPanel();
         imagePanel.setLayout(new BorderLayout());
-        imagePanel.setPreferredSize(new Dimension(170, 160)); // Fixed size
-        imagePanel.setMaximumSize(new Dimension(170, 160));   // Fixed maximum size
+        imagePanel.setPreferredSize(new Dimension(170, 160)); 
+        imagePanel.setMaximumSize(new Dimension(170, 160));   
         imagePanel.setBackground(Color.WHITE);
     
-        // Create a vertical panel for the listing details
         JPanel detailPanel = new JPanel();
         detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
         detailPanel.setBackground(Color.WHITE);
     
+        // Listing identifiers
         JLabel nameLabel = new JLabel("Item: " + itemName);
         nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         detailPanel.add(nameLabel);
@@ -247,12 +252,12 @@ public class sellergui {
             buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
             detailPanel.add(buyNowLabel);
         } else {
-            // Create panel that respects the parent BoxLayout
             JPanel buyNowPanel = new JPanel();
             buyNowPanel.setLayout(new BoxLayout(buyNowPanel, BoxLayout.X_AXIS));
             buyNowPanel.setBackground(Color.WHITE);
-            buyNowPanel.setAlignmentX(Component.LEFT_ALIGNMENT); // Important for proper alignment
+            buyNowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             
+            // Set new buy now price if not already set
             JLabel buyNowLabel = new JLabel("Set Buy Now Price: $");
             buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
             
@@ -287,7 +292,8 @@ public class sellergui {
                     JOptionPane.showMessageDialog(panel, "Please enter a valid number", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                 }
             });
-        
+            
+            // ADD ALL PANELS
             buyNowPanel.add(buyNowLabel);
             buyNowPanel.add(Box.createRigidArea(new Dimension(5, 0))); // Spacing
             buyNowPanel.add(setPrice);
@@ -296,36 +302,17 @@ public class sellergui {
             
             detailPanel.add(buyNowPanel);
         }
+
+        // Find file directory and store with underlines
         File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
         if (imageDir.exists()) {
-            try {
-                // Load the original image
-                BufferedImage originalImage = ImageIO.read(imageDir);
+            try 
+                {
+                    // Image is proportioned 90 degrees wrongly, correct with AffineTransform
+                BufferedImage Image = ImageIO.read(imageDir);
+        
+                Image scaledImage = Image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 
-                // Create a new image with swapped dimensions for rotation
-                BufferedImage rotatedImage = new BufferedImage(
-                    originalImage.getHeight(), 
-                    originalImage.getWidth(), 
-                    originalImage.getType()
-                );
-                
-                // Get the Graphics2D object and set up rotation transform
-                Graphics2D g2d = rotatedImage.createGraphics();
-                AffineTransform transform = new AffineTransform();
-                
-                // For 90 degrees clockwise rotation:
-                transform.translate(originalImage.getHeight(), 0);
-                transform.rotate(Math.PI/2);
-                
-                // Apply transform and draw
-                g2d.setTransform(transform);
-                g2d.drawImage(originalImage, 0, 0, null);
-                g2d.dispose();
-                
-                // Scale the rotated image
-                Image scaledImage = rotatedImage.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-                
-                // Create and set the icon
                 JLabel imageLabel = new JLabel();
                 imageLabel.setIcon(new ImageIcon(scaledImage));
                 imageLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
@@ -338,7 +325,6 @@ public class sellergui {
         
         panel.add(detailPanel, BorderLayout.WEST);
         panel.add(imagePanel, BorderLayout.CENTER);
-        // Add buttons for listing actions
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actionPanel.setBackground(Color.WHITE);
     
@@ -346,7 +332,8 @@ public class sellergui {
             JButton deleteButton = new JButton("Delete");
             deleteButton.setPreferredSize(new Dimension(80, 25));
             actionPanel.add(deleteButton);
-        
+            
+            // Delet button logic
             deleteButton.addActionListener(e -> {
                 int confirm = JOptionPane.showConfirmDialog(panel,
                     "Are you sure you want to delete this listing?",
@@ -363,7 +350,7 @@ public class sellergui {
         }
     
         panel.add(actionPanel, BorderLayout.EAST);
-    
+        // Return new panel
         return panel;
     }
     

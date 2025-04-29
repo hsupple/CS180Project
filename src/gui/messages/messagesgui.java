@@ -3,18 +3,23 @@ package gui.messages;
 import accounts.AuctionClient;
 import java.awt.*;
 import java.io.File;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
+import java.nio.file.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
-public class messagesgui implements Runnable {
+/**
+     * Class to run new gui for messages from users recieved
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+               @hsupple
+               @addy-ops
+    * @version April, 2025
+    */
 
+public class messagesgui implements Runnable {
+    // Define all private fields
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
@@ -22,6 +27,7 @@ public class messagesgui implements Runnable {
     private JFrame frame = null;
     private JPanel messagesListPanel;
 
+    // construct new gui for messages
     public messagesgui(String user, String password) {
         messagesgui.user = user;
         messagesgui.password = password;
@@ -32,23 +38,29 @@ public class messagesgui implements Runnable {
             e.printStackTrace();
         }
 
-        // Load the existing conversations
         loadConversations();
 
-        // Initialize the GUI
-        initializeGUI();
+        frame = new JFrame("Messenger Client");
+        frame.setSize(1250, 750);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        frame.add(panel);
+        placeComponents(panel);
+
+        frame.setVisible(true);
         
-        // Start the file watcher thread
+        // Watch on thread to find new messages
         Thread watcherThread = new Thread(this);
         watcherThread.setDaemon(true);
         watcherThread.start();
     }
-    
+
+    // Check for all conversations (files with matching user names) and append to list
     private void loadConversations() {
-        // Clear the current list
         listingsList.clear();
         
-        // Get all message files
         String directoryPath = System.getProperty("user.dir") + "/src/serverclient/msg";
         File directory = new File(directoryPath);
 
@@ -57,7 +69,6 @@ public class messagesgui implements Runnable {
             if (files != null) {
                 for (File file : files) {
                     if (file.isFile() && file.getName().contains(user) && file.getName().endsWith(".txt")) {
-                        // Extract the other username from the filename
                         String fileName = file.getName().replace(".txt", "");
                         String otherUser;
                         
@@ -74,13 +85,12 @@ public class messagesgui implements Runnable {
                                     otherUser = parts[0];
                                 }
                             } else {
-                                continue; // Invalid filename format
+                                continue;
                             }
                         } else {
-                            continue; // Not a message file we care about
+                            continue;
                         }
                         
-                        // Add to our list if not already there
                         if (!listingsList.contains(otherUser)) {
                             listingsList.add(otherUser);
                         }
@@ -90,19 +100,7 @@ public class messagesgui implements Runnable {
         }
     }
 
-    private void initializeGUI() {
-        frame = new JFrame("Messenger Client");
-        frame.setSize(1250, 750);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-
-        JPanel panel = new JPanel();
-        frame.add(panel);
-        placeComponents(panel);
-
-        frame.setVisible(true);
-    }
-
+    // Run watcher to find when new message is sent
     public void run() {
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
@@ -123,7 +121,6 @@ public class messagesgui implements Runnable {
                         Path changedPath = (Path) event.context();
                         String fileName = changedPath.toString();
                         
-                        // Only update if it's a message file for this user
                         if (fileName.contains(user) && fileName.endsWith(".txt")) {
                             System.out.println("Relevant file changed: " + fileName);
                             shouldUpdate = true;
@@ -132,22 +129,17 @@ public class messagesgui implements Runnable {
                 }
                 
                 if (shouldUpdate) {
-                    // Update the GUI on the EDT
                     SwingUtilities.invokeLater(() -> {
-                        // Store current list size
                         int oldSize = listingsList.size();
                         
-                        // Reload conversations
                         loadConversations();
                         
-                        // If we have new conversations, update the UI
                         if (oldSize != listingsList.size()) {
                             updateMessagesPanel();
                         }
                     });
                 }
                 
-                // Reset the key to receive further events
                 key.reset();
             }
         } catch (Exception e) {
@@ -155,6 +147,7 @@ public class messagesgui implements Runnable {
         }
     }
 
+    // Create new messages panel with message panel per user messaged
     private void updateMessagesPanel() {
         if (messagesListPanel != null) {
             messagesListPanel.removeAll();
@@ -168,7 +161,7 @@ public class messagesgui implements Runnable {
             } else {
                 for (String user : listingsList) {
                     JPanel listingPanel = createMessagePanel(user);
-                    messagesListPanel.add(Box.createVerticalStrut(10)); // spacing
+                    messagesListPanel.add(Box.createVerticalStrut(10));
                     messagesListPanel.add(listingPanel);
                 }
             }
@@ -178,21 +171,20 @@ public class messagesgui implements Runnable {
         }
     }
 
+    // Place components into frame and layout properly
     private void placeComponents(JPanel panel) {
         panel.setLayout(new BorderLayout());
 
-        // Header Panel with BorderLayout
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.LIGHT_GRAY);
         headerPanel.setPreferredSize(new Dimension(1250, 100));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Title (centered in header)
+        // All title works
         JLabel title = new JLabel("Purdue Auction House Messenger Client", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
         headerPanel.add(title, BorderLayout.CENTER);
 
-        // Info panel on the left
         JPanel headerInfoPanel = new JPanel();
         headerInfoPanel.setLayout(new BoxLayout(headerInfoPanel, BoxLayout.Y_AXIS));
         headerInfoPanel.setBackground(Color.LIGHT_GRAY);
@@ -208,11 +200,11 @@ public class messagesgui implements Runnable {
         headerInfoPanel.add(welcomeLabel);
         headerInfoPanel.add(typeLabel);
 
-        // Header buttons panel
         JPanel headerButtonPanel = new JPanel();
         headerButtonPanel.setLayout(new BoxLayout(headerButtonPanel, BoxLayout.Y_AXIS));
         headerButtonPanel.setBackground(Color.LIGHT_GRAY);
 
+        // Logout and return buttons
         JButton logoutButton = new JButton("Logout");
         logoutButton.setPreferredSize(new Dimension(100, 30));
         logoutButton.setMaximumSize(new Dimension(100, 30));
@@ -237,7 +229,6 @@ public class messagesgui implements Runnable {
 
         logoutButton.addActionListener(e -> {
             frame.dispose();
-            // You might want to show a login screen here
         });
         
         returnButton.addActionListener(e -> {
@@ -251,12 +242,10 @@ public class messagesgui implements Runnable {
 
         panel.add(headerPanel, BorderLayout.NORTH);
 
-        // Create content panel for listings
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // Title panel for the messages section
         JPanel listingsTitlePanel = new JPanel(new BorderLayout());
         listingsTitlePanel.setBackground(Color.WHITE);
         
@@ -264,18 +253,18 @@ public class messagesgui implements Runnable {
         listingsTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
         listingsTitlePanel.add(listingsTitle, BorderLayout.WEST);
 
-        // Add a search field for finding conversations
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         searchPanel.setBackground(Color.WHITE);
         
         JTextField searchField = new JTextField(20);
         JButton searchButton = new JButton("Search");
         
+        // Search user function
         searchPanel.add(new JLabel("Find user: "));
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
         
-        // Button to create a new message thread
+        // Create new message to user
         JButton newMessageButton = new JButton("New Message");
         searchPanel.add(newMessageButton);
         
@@ -295,8 +284,6 @@ public class messagesgui implements Runnable {
             if (!searchText.isEmpty()) {
                 for (String otherUser : listingsList) {
                     if (otherUser.contains(searchText)) {
-                        // Highlight or select this conversation
-                        // For now, just open it
                         frame.dispose();
                         new messengergui(user, password, otherUser);
                         return;
@@ -311,7 +298,6 @@ public class messagesgui implements Runnable {
         
         listingsTitlePanel.add(searchPanel, BorderLayout.EAST);
 
-        // Panel for the message list
         messagesListPanel = new JPanel();
         messagesListPanel.setLayout(new BoxLayout(messagesListPanel, BoxLayout.Y_AXIS));
         messagesListPanel.setBackground(Color.WHITE);
@@ -325,7 +311,7 @@ public class messagesgui implements Runnable {
         } else {
             for (String otherUser : listingsList) {
                 JPanel listingPanel = createMessagePanel(otherUser);
-                messagesListPanel.add(Box.createVerticalStrut(10)); // spacing
+                messagesListPanel.add(Box.createVerticalStrut(10));
                 messagesListPanel.add(listingPanel);
             }
         }
@@ -341,6 +327,7 @@ public class messagesgui implements Runnable {
         panel.add(contentPanel, BorderLayout.CENTER);
     }
 
+    // create new panel with all users that have messaged client
     private JPanel createMessagePanel(String otherUser) {
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(Color.WHITE);
@@ -367,28 +354,12 @@ public class messagesgui implements Runnable {
         container.add(userLabel, BorderLayout.WEST);
         container.add(buttonPanel, BorderLayout.EAST);
         
-        // Make it look clickable
-        container.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                container.setBackground(new Color(245, 245, 245));
-            }
-            
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                container.setBackground(Color.WHITE);
-            }
-            
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                frame.dispose();
-                new messengergui(user, password, otherUser);
-            }
-        });
-        
         return container;
     }
     
     public static void main(String[] args) {
+        // invoke with dummy args
         SwingUtilities.invokeLater(() -> {
-            // For testing
             String testUser = "testuser";
             String testPass = "testpass";
             new messagesgui(testUser, testPass);

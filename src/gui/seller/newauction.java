@@ -10,7 +10,16 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+/**
+     * Class to run new auction gui for Seller input
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+               @hsupple
+               @addy-ops
+    * @version April, 2025
+    */
 public class newauction {
 
     private static String user;
@@ -20,35 +29,37 @@ public class newauction {
         this.user = user;
         this.password = password;
 
+        // Define new auction frame
         JFrame frame = new JFrame("New Auction Item");
         frame.setSize(750, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
-        // Main panel with null layout for manual positioning
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(null); // Use null layout to set bounds manually
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding around the panel
+        mainPanel.setLayout(null);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Left panel for image selection (with black border)
+        // Left panel for image selection
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(null);
-        leftPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // Black border
-        leftPanel.setBounds(0, 0, 375, 500); // Left panel occupies half of the frame
+        leftPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        leftPanel.setBounds(0, 0, 375, 500);
 
         JLabel imageLabel = new JLabel("Drag or Select an Image", SwingConstants.CENTER);
         imageLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        imageLabel.setBounds(25, 100, 325, 100); // Position the image label
+        imageLabel.setBounds(25, 100, 325, 100);
         leftPanel.add(imageLabel);
 
         JButton selectImageButton = new JButton("Select Image");
         selectImageButton.setBounds(125, 230, 125, 30);
         leftPanel.add(selectImageButton);
 
+        // Right panel for user input
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(null); 
         rightPanel.setBounds(375, 0, 375, 500);
 
+        // Take all text input
         JLabel titleLabel = new JLabel("Title*:");
         JTextField titleTextField = new JTextField();
         titleLabel.setBounds(20, 20, 100, 25);
@@ -83,6 +94,7 @@ public class newauction {
         JButton submitButton = new JButton("Submit Auction Item");
         submitButton.setBounds(120, 270, 200, 30); 
 
+        // Add all to right panel
         rightPanel.add(titleLabel);
         rightPanel.add(titleTextField);
         rightPanel.add(descriptionLabel);
@@ -96,6 +108,7 @@ public class newauction {
         rightPanel.add(timerLabel);
         rightPanel.add(timerTextField);
 
+        // New filechooser for image selection
         selectImageButton.addActionListener(new ActionListener() {
             File imageDir = new File("src/gui/img");
 
@@ -110,8 +123,6 @@ public class newauction {
                 File selectedFile = fileChooser.getSelectedFile();
                 System.out.println("Image selected: " + selectedFile.getPath());
                 System.out.println("Absolute path: " + imageDir.getAbsolutePath());
-
-
 
                 File imageDir = new File("src/gui/img");
                 if (!imageDir.exists()) imageDir.mkdirs();
@@ -130,9 +141,11 @@ public class newauction {
         }
         });
 
+        // Submit
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Get all variables
                 String title = titleTextField.getText();
                 String description = descriptionTextArea.getText().strip();
                 String buyNowPrice = buyNowTextField.getText();
@@ -141,13 +154,18 @@ public class newauction {
                 String timer = timerTextField.getText();
 
                 double minBid = -1;
+                // Ensure all text fields have values
                 if (!title.isEmpty() && !description.isEmpty() && !minBidPrice.isEmpty() && !timer.isEmpty()) {
                     try {
                         minBid = Double.parseDouble(minBidPrice); 
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(frame, "Please enter a valid number for Minimum Bid Price ( >= 0).", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                         return; 
-                    }   
+                    }
+                    
+                    if (Double.parseDouble(timer) < 1) {
+                        timer = "1";
+                    }
 
                     if (minBid >= 0) {
                         JOptionPane.showConfirmDialog(frame, "Auction item submitted successfully!", "Success", JOptionPane.DEFAULT_OPTION);
@@ -164,6 +182,7 @@ public class newauction {
             }
         });
 
+        // Cancel go to sellergui
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
