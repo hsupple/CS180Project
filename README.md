@@ -27,13 +27,8 @@ Program utilizing Java interfaces and classes to ultimately create an interactiv
 - Ensure you have a JUnit test case extension on your IDE
 - Ensure Server is running while JUnit tests are activated
 
-## Roadmap for Future Weeks
-- Create a GUI to make the design interactive and functional for a user
-- Link GUI with stack to ensure inputs can be controlled from the interface.
-  How to Compile and Run the Project
-
 ## How to run the application
-Open a terminal in your project directory.
+Open a terminal and navigate to preferred Directory (dir).
 
 First run:
 $ git clone https://github.com/hsupple/CS180Project.git
@@ -44,6 +39,11 @@ $ cd src/serverclient && java AuctionServer
 
 Then in a second terminal in the CS180Project dir run:
 $ cd src/gui && java LoginGUI
+
+To Create an Account:
+Press "Create Account" and add details such as username, password, and user type.
+
+Click "Submit" and log in with saved details
 
 ## Submission Responsibility
 
