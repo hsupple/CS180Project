@@ -30,6 +30,44 @@ Program utilizing Java interfaces and classes to ultimately create an interactiv
 ## Roadmap for Future Weeks
 - Create a GUI to make the design interactive and functional for a user
 - Link GUI with stack to ensure inputs can be controlled from the interface.
+  How to Compile and Run the Project
+
+## How to run the application
+Open a terminal in your project directory.
+
+Compile the program:
+
+javac -d bin src/**/*.java
+
+Run the application:
+
+java -cp bin gui.LoginGUI
+
+## Submission Responsibility
+
+Hayden Supple – Submitted final project to Vocareum.
+
+Hayden Supple – Submitted project report to Brightspace.
+
+## Class Descriptions
+
+AuctionClient – Handles all server communication via Network IO. Allows clients to query listings, make bids, send messages, etc.
+
+Buyer / Seller – Represents a user account with persistent login credentials. Methods for messaging, bidding, and account management.
+
+buyergui – Main GUI for buyers. Displays live auctions, search interface, bid and buy-now functionality, logout/delete account.
+
+searchgui – Display filtered listings based on user search query, enables messaging sellers and rating them.
+
+messagesgui – Displays list of conversations. Users can search, open, and start new conversations.
+
+newmessage – Popup window for composing and sending a message to a seller.
+
+rating – Allows buyers to rate sellers from 0.0 to 5.0.
+
+LoginGUI – Login screen to access buyer or seller interface.
+
+newacct – GUI for creating new accounts with input validation.
 
 # Authors
 - @Phaynes742
