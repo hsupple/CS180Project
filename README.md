@@ -30,20 +30,20 @@ Program utilizing Java interfaces and classes to ultimately create an interactiv
 ## How to run the application
 Open a terminal and navigate to preferred Directory (dir).
 
-First run:
-$ git clone https://github.com/hsupple/CS180Project.git
-This will copy the Git repository into your current dir
+- First run:
+- $ git clone https://github.com/hsupple/CS180Project.git
+- This will copy the Git repository into your current dir
 
-To start the application, navigate to the CS180Project dir, then run:
-$ cd src/serverclient && java AuctionServer
+- To start the application, navigate to the CS180Project dir, then run:
+- $ cd src/serverclient && java AuctionServer
 
-Then in a second terminal in the CS180Project dir run:
-$ cd src/gui && java LoginGUI
+- Then in a second terminal in the CS180Project dir run:
+- $ cd src/gui && java LoginGUI
 
-To Create an Account:
-Press "Create Account" and add details such as username, password, and user type.
+- To Create an Account:
+- Press "Create Account" and add details such as username, password, and user type.
 
-Click "Submit" and log in with saved details
+- Click "Submit" and log in with saved details
 
 ## Submission Responsibility
 
