@@ -1,29 +1,49 @@
-# CS18000 Auction House Team Project
+# CS180Project
 
-Program utilizing Java interfaces and classes to ultimately create an interactive Java Application where a user may list auctions and bid on other item listings.
+MAKE SURE TO PULL FROM GIT REPO BEFORE COMMITTING CHANGES!!!
 
-## Features
-- Create Buyer Account
-- Create Seller Account
-- Password protected user accounts
-- Creating auction listings with timers, buy now prices, and bidding options
-- Buyer accounts may bid on auctions or use the buy it now option to purchase an item as a seller-determined price.
-- Database to contain all listings and user accounts
-- Search functionality for both Users and Item listings
-- Messaging between Buyers and Sellers
-- Account deletion && Authorized Password Changes
+git add .
+git commit -m "##NEW UPDATES MESSAGES##"
+git push origin main
 
-## Installation
-- Change to desired Directory
-- Clone the Repo
-$ git clone https://github.com/hsupple/CS180Project.git
+Auction House:
 
-# Roadmap for Future Weeks
-- Link all classes and interfaces to interact through client and server ports.
-- Create a GUI to make the design interactive and functional for a user
+Interface Design - Parshawn
+Database Dev - Jasmine
+Database Logic - Hayden
+Messaging and Search - Sophie
+Data Persistence and Thread Safety - Adwin
 
-# Authors
-- @Phaynes742
-- @hsupple
-- @jburkett013
-- @addy-ops
+- An Auction House
+
+Functionality requirements:
+
+SellerInterface accounts
+BuyerInterface accounts
+New user account creation
+Password protected login
+Account deletion
+Item listing creation
+Item listing deletion
+Item search
+Bidding system
+Auction duration timer
+Users can message an item's SellerInterface - Sellers can respond to messages they receive.
+Extra credit opportunity – Add support to upload and display item pictures.
+Teams of 5 additional requirements:
+
+SellerInterface Ratings
+SellerInterface store pages
+SellerInterface search
+SellerInterface can end auction early
+SellerInterface can set "Buy it now" price
+BuyerInterface can use "Buy it now" option to make purchases
+View previously auctioned items
+
+################
+The first phase of the project consists of building the entire database side of the project including interfaces and test cases. Forward thinking is strongly encouraged. Questions such as: What are we storing? How are we accessing it? What are we calculating? All should be addressed during this stage. HW10 covers techniques on how to make the database thread safe. Remember the database will only be interacting with a single server; however, that server will be interacting with multiple clients simultaneously. A README.txt file is required with each phase and should be submitted in the Vocareum workspace alongside any java files. See documentation below.
+################
+
+The second phase will be to design and implement the server by linking it to the database and to start work on the client side of the program. Again, forward thinking is strongly encouraged. Remember the team will be required to add a GUI to their client. The client should only communicate with the server, all computation should be handled on the server side of the software. A README.txt file is required with each phase and should be submitted in the Vocareum workspace alongside any java files. See documentation below.
+
+The third and final phase will be to design and implement a GUI for the client. This will be the user facing side of your team’s chosen option. This will also be the last chance for the team to make any changes to previously implemented parts of the program. Note: A GUI is not required for the server side of the application. A README.txt file is required with each phase and should be submitted in the Vocareum workspace alongside any java files. See documentation below.
