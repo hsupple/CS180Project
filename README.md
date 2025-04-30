@@ -35,13 +35,15 @@ Program utilizing Java interfaces and classes to ultimately create an interactiv
 ## How to run the application
 Open a terminal in your project directory.
 
-Compile the program:
+First run:
+$ git clone https://github.com/hsupple/CS180Project.git
+This will copy the Git repository into your current dir
 
-javac -d bin src/**/*.java
+To start the application, navigate to the CS180Project dir, then run:
+$ cd src/serverclient && java AuctionServer
 
-Run the application:
-
-java -cp bin gui.LoginGUI
+Then in a second terminal in the CS180Project dir run:
+$ cd src/gui && java LoginGUI
 
 ## Submission Responsibility
 
