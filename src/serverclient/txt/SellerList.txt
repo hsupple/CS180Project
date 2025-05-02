@@ -1,1 +1,2 @@
 Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE
+dfs,1234,0,0,true

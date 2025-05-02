@@ -4,7 +4,6 @@ import accounts.AuctionClient;
 import java.awt.*;
 import java.io.*;
 import java.nio.file.*;
-import java.util.ArrayList;
 import javax.swing.*;
 
 /**
@@ -59,7 +58,7 @@ public class messengergui implements Runnable {
     public void run() {
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
-            Path path = Paths.get("src/serverclient/msg");
+            Path path = Paths.get(System.getProperty("user.dir") + "/../src/serverclient/msg");
             path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
     
             int lastMessageCount = getMessageCount();
@@ -70,40 +69,15 @@ public class messengergui implements Runnable {
                     WatchEvent.Kind<?> kind = event.kind();
     
                     if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                        System.out.println("File changed. Checking for new messages...");
 
-                        // Check that if message count has changed within file
-                        int currentMessageCount = getMessageCount();
-                        if (currentMessageCount > lastMessageCount) {
-                            lastMessageCount = currentMessageCount;
-                            
-                            SwingUtilities.invokeLater(() -> {
-                                updateMessages();
-                            });
-                        }
+                        frame.dispose();
+                        new messengergui(user, password, user2);
                     }
                 }
                 key.reset();
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    // remove all messages, get all messages, and revalidate frame
-    private void updateMessages() {
-        if (messagePanel != null) {
-            messagePanel.removeAll();
-            messagePanel = getMessages(user, user2, messagePanel);
-            messagePanel.revalidate();
-            messagePanel.repaint();
-            
-            if (scrollPane != null) {
-                SwingUtilities.invokeLater(() -> {
-                    JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
-                    verticalBar.setValue(verticalBar.getMaximum());
-                });
-            }
         }
     }
 
@@ -198,7 +172,7 @@ public class messengergui implements Runnable {
             u2 = temp;
         }
         // Read file contents
-        File messageFile = new File(System.getProperty("user.dir") + "/src/serverclient/msg/" + u1 + "_to_" + u2 + ".txt");
+        File messageFile = new File(System.getProperty("user.dir") + "/../src/serverclient/msg/" + u1 + "_to_" + u2 + ".txt");
         try (BufferedReader br = new BufferedReader(new FileReader(messageFile))) {
             String line;
             while ((line = br.readLine()) != null) {

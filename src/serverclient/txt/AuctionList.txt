@@ -1,1 +1,2 @@
 900001,example,description,seller
+900002,Auction1,123.0,dsfgvsdf,dfs,false,NewAccount,1234.0,23:37:55

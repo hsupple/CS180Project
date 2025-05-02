@@ -61,7 +61,7 @@ public class messagesgui implements Runnable {
     private void loadConversations() {
         listingsList.clear();
         
-        String directoryPath = System.getProperty("user.dir") + "/src/serverclient/msg";
+        String directoryPath = System.getProperty("user.dir") + "/../src/serverclient/msg";
         File directory = new File(directoryPath);
 
         if (directory.exists() && directory.isDirectory()) {
@@ -104,7 +104,8 @@ public class messagesgui implements Runnable {
     public void run() {
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
-            Path path = Paths.get("src/serverclient/msg");
+            Path path = Paths.get(System.getProperty("user.dir") + "/../src/serverclient/msg");
+            System.out.println("Watching directory: " + path.toString());
             path.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, 
                          StandardWatchEventKinds.ENTRY_MODIFY);
             
