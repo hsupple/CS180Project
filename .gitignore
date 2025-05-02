@@ -1,4 +1,3 @@
 # Ignore all .class files in any folder
-*.class
 /lib
 /.vscode
