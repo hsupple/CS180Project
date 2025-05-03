@@ -2,7 +2,6 @@ package gui.seller;
     
 import accounts.AuctionClient;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +16,7 @@ import javax.swing.border.*;
      *
      * @author @Phaynes742
                @hsupple
-               @addy-ops
-    * @version April, 2025
+    * @version May, 2025
     */
 
 public class sellergui {

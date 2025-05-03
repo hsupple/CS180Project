@@ -17,8 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
      *
      * @author @Phaynes742
                @hsupple
-               @addy-ops
-    * @version April, 2025
+    * @version May, 2025
     */
 public class newauction {
 

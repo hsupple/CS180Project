@@ -17,8 +17,7 @@ import javax.swing.Timer;
      *
      * @author @Phaynes742
                @hsupple
-               @addy-ops
-    * @version April, 2025
+    * @version May, 2025
     */
 public class buyergui implements Runnable {
     // define all private fields
@@ -76,7 +75,7 @@ public class buyergui implements Runnable {
     public void run() {
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
-            Path path = Paths.get("src/serverclient/txt");
+            Path path = Paths.get(System.getProperty("user.dir") + "/../src/serverclient/txt");
             path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 
             while (true) {
@@ -331,13 +330,26 @@ public class buyergui implements Runnable {
                 sendMess.setPreferredSize(new Dimension(150, 25));
                 sendMess.setMaximumSize(new Dimension(150, 25));
                 
+                JButton SeeSeller = new JButton("See Seller Info");
+                SeeSeller.setPreferredSize(new Dimension(150, 25));
+                SeeSeller.setMaximumSize(new Dimension(150, 25));
+
                 // ensure valid message
                 String seller = Listings[i].split(",")[4].strip();
                 sendMess.addActionListener(e -> {
                     try {
-                        new gui.messages.newmessage(user, seller, itemName);
+                        new gui.messages.newmessage(user, seller);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+
+                SeeSeller.addActionListener(e -> {
+                    try {
+                        new selleracct(user, password, seller);
+                        frame.dispose();
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, "Failed to view seller: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
 
@@ -347,6 +359,9 @@ public class buyergui implements Runnable {
                 bidPanel.add(bidButton);
                 bidPanel.add(Box.createHorizontalStrut(10));
                 bidPanel.add(sendMess);
+                bidPanel.add(Box.createHorizontalStrut(10));
+                bidPanel.add(SeeSeller);
+                bidPanel.add(Box.createHorizontalStrut(10));
 
                 // Ensure buy now is properly setup and displayed
                 if (buyNowPrice > 0) {

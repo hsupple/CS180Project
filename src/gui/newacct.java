@@ -2,7 +2,15 @@ package gui;
 
 import accounts.*;
 import javax.swing.*;
-
+/**
+     * Class to run new account gui to create a new buyer or seller account with password protected logins
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+               @hsupple
+    * @version May, 2025
+    */
 public class newacct {
     private AuctionClient client = null;
     private JFrame frame = null;

@@ -21,8 +21,7 @@ import javax.swing.*;
      *
      * @author @Phaynes742
                @hsupple
-               @addy-ops
-    * @version April, 2025
+    * @version May, 2025
     */
 public class searchgui {
 
@@ -207,7 +206,7 @@ public class searchgui {
                 final String sellerName = seller;
                 messageButton.addActionListener(e -> {
                     try {
-                        new gui.messages.newmessage(user, sellerName, "");
+                        new gui.messages.newmessage(user, sellerName);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
@@ -215,7 +214,7 @@ public class searchgui {
 
                 setRating.addActionListener(e -> {
                     frame.dispose();
-                    new gui.messages.rating(user, password, query, sellerName);
+                    new gui.messages.rating(user, password, query, sellerName, "search");
                 });
                 
                 JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -341,7 +340,7 @@ public class searchgui {
                             new buyergui(user, password);
                         } catch (NumberFormatException ex) {
                             JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", "Error", JOptionPane.ERROR_MESSAGE);
-                        }
+                        } 
                     });
 
                     // Make button to send message to seller
@@ -351,7 +350,7 @@ public class searchgui {
                     
                     sendMess.addActionListener(e -> {
                         try {
-                            new gui.messages.newmessage(user, seller, itemName);
+                            new gui.messages.newmessage(user, seller);
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }

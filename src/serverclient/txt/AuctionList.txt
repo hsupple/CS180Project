@@ -1,1 +1,10 @@
 900001,example,description,seller
+900002,New/Auction,12343.0,New/Auction1,Seller,true,Buyer1,122.0,20:01:14
+900003,Auctioon2sdfasgd,123.0,asdgsd,Seller,true,Buyer1,123.0,03:43:53
+900004,How/about/this/one,213.0,asdfhasdfg,Seller,true,Buyer1,321.0,20:33:03
+900005,FUCKKK,312433.0,sdgasdfgsdfg,Seller,true,Buyer1,4243.0,20:41:12
+900006,asdgasgd,313.0,ewrawdsfvawe,newSell,false,None,1234.0,20:41:59
+900007,asdfhbadsfh,231331.0,eDFASDFGA,newSell,false,None,12.0,23:42:07
+900008,dsfsdf,4321.0,sgfdsadfg,Seller,false,None,312.0,16:38:29
+900009,fdhgasdfh,321323.0,asdfgdrf,Seller,false,None,23523.0,02:00:21
+900010,sdfjhsdhg,31234.0,adfhsdfh,Seller,false,None,3456243.0,09:52:28

@@ -2,7 +2,7 @@ package gui.messages;
 
 import accounts.AuctionClient;
 import gui.buyer.searchgui;
-
+import gui.buyer.selleracct;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
@@ -19,24 +19,25 @@ import javax.swing.JTextField;
      *
      * @author @Phaynes742
                @hsupple
-               @addy-ops
-    * @version April, 2025
+    * @version May, 2025
     */
 public class rating {
     // define all private vals
     private static String user;
     private static String user2;
     private static String password;
+    private static String past;
     
     private static String query;
     private static AuctionClient client = null;
 
     // new rating gui constructor
-    public rating(String user, String password, String query, String user2) {
+    public rating(String user, String password, String query, String user2, String past) {
         this.user = user;
         this.user2 = user2;
         this.password = password;
         this.query = query;
+        this.past = past;
 
         try {
             this.client = new AuctionClient();
@@ -93,8 +94,13 @@ public class rating {
                             // Send client signal
                             client.setRating(user2, Double.parseDouble(message));
                             JOptionPane.showMessageDialog(frame, "Message sent successfully!");
-                            new searchgui(user, password, query);
-                            frame.dispose();
+                            if (past.equals("search")) {
+                                new searchgui(user, password, query);
+                                frame.dispose();
+                            } else {
+                                new selleracct(user, password, user2);
+                                frame.dispose();
+                            }
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
@@ -109,9 +115,13 @@ public class rating {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new searchgui(user, password, query);
-                frame.dispose();
-
+                if (past.equals("search")) {
+                    new searchgui(user, password, query);
+                    frame.dispose();
+                } else {
+                    new selleracct(user, password, user2);
+                    frame.dispose();
+                }
             }
         });
 

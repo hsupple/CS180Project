@@ -2,7 +2,15 @@ package gui;
 
 import accounts.AuctionClient;
 import javax.swing.*;
-
+/**
+     * Class to run new login gui to access Auction client
+     *
+     * <p>Purdue University -- CS18000 -- Spring 2025</p>
+     *
+     * @author @Phaynes742
+               @hsupple
+    * @version May, 2025
+    */
 public class LoginGUI {
     private AuctionClient client = null; 
 

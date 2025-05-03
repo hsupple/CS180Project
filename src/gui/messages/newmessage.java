@@ -12,18 +12,16 @@ import javax.swing.*;
      *
      * @author @Phaynes742
                @hsupple
-               @addy-ops
-    * @version April, 2025
+    * @version May, 2025
     */
 public class newmessage {
     // Define all private fields
     private static String user;
     private static String user2;
-    private static String Auction;
     private static AuctionClient client = null;
 
     // Constructor for new message gui
-    public newmessage(String user, String user2, String Auction) {
+    public newmessage(String user, String user2) {
         this.user = user;
         this.user2 = user2;
 
