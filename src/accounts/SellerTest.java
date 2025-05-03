@@ -65,7 +65,7 @@ class SellerTest {
         seller.sendMessageToBuyer("buyer1", "Hi!");
 
         List<String> messages = seller.getMessages("buyer1"); 
-        assertTrue(messages.contains("[buyer1: Hi!]"), "Message should be stored for buyer." 
+        assertTrue(messages.contains("[seller2: Hi!]"), "Message should be stored for buyer." 
                    + messages);
     }
 
