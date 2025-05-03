@@ -162,7 +162,8 @@ public class NewAuction {
                         minBid = Double.parseDouble(minBidPrice); 
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(frame, 
-                            "Please enter a valid number for Minimum Bid Price ( >= 0).", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                            "Please enter a valid number for Minimum Bid Price ( >= 0).", 
+                            "Invalid Input", JOptionPane.ERROR_MESSAGE);
                         return; 
                     }
                     
@@ -171,8 +172,10 @@ public class NewAuction {
                     }
 
                     if (minBid >= 0) {
-                        JOptionPane.showConfirmDialog(frame, "Auction item submitted successfully!", "Success", JOptionPane.DEFAULT_OPTION);
-                        ItemListing item = new ItemListing(title, description, Double.parseDouble(minBidPrice), user, (Double.parseDouble(timer) * 60000));
+                        JOptionPane.showConfirmDialog(frame, "Auction item submitted successfully!", 
+                            "Success", JOptionPane.DEFAULT_OPTION);
+                        ItemListing item = new ItemListing(title, description, Double.parseDouble(minBidPrice), 
+                            user, (Double.parseDouble(timer) * 60000));
                         if (!minBidPrice.isEmpty()) {
                             item.setBuyNowItemPrice(Double.parseDouble(buyNowPrice)); 
                         }

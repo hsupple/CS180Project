@@ -72,12 +72,12 @@ public class LoginGUI {
                     JOptionPane.showMessageDialog(null, "Invalid Password.");
                 }
             } else {
-            if (accountType == true) {
-                new gui.buyer.BuyerGui(user, password); 
-            } else {
-                new gui.seller.SellerGui(user, password); 
-            }
-            frame.dispose();
+                if (accountType == true) {
+                    new gui.buyer.BuyerGui(user, password); 
+                } else {
+                    new gui.seller.SellerGui(user, password); 
+                }
+                frame.dispose();
             }
         });
 

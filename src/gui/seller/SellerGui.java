@@ -123,7 +123,8 @@ public class SellerGui {
                 JOptionPane.YES_NO_OPTION);
                 
             if (confirm == JOptionPane.YES_OPTION) {
-                String enterpassword = JOptionPane.showInputDialog(newFrame, "Enter your password to confirm deletion:");
+                String enterpassword = JOptionPane.showInputDialog(newFrame, 
+                    "Enter your password to confirm deletion:");
                 if (enterpassword == null || enterpassword.isEmpty()) {
                     JOptionPane.showMessageDialog(newFrame, "Password cannot be empty.", 
                         "Error", JOptionPane.ERROR_MESSAGE);

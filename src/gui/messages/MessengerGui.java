@@ -81,7 +81,7 @@ public class MessengerGui implements Runnable {
     }
 
     // place all panels and components properly
-    private void placeComponents(JPanel panel, AuctionClient AuClient, String secUser) {
+    private void placeComponents(JPanel panel, AuctionClient auClient, String secUser) {
         panel.setLayout(new BorderLayout());
 
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -148,7 +148,7 @@ public class MessengerGui implements Runnable {
             String message = messageField.getText();
             if (!message.isEmpty()) {
                 try {
-                    AuClient.sendMessage(user, secUser, message);
+                    auClient.sendMessage(user, secUser, message);
                     messageField.setText("");
 
                 } catch (Exception ex) {
