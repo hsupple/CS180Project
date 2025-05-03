@@ -15,7 +15,7 @@ import javax.swing.*;
                @hsupple
     * @version May, 2025
     */
-public class messengergui implements Runnable {
+public class MessengerGui implements Runnable {
     // declare all private fields
     private static String user;
     private static String password;
@@ -25,10 +25,10 @@ public class messengergui implements Runnable {
     private JPanel messagePanel;
     private JScrollPane scrollPane;
 
-    public messengergui(String user, String password, String user2) {
-        messengergui.user = user;
-        messengergui.user2 = user2;
-        messengergui.password = password;
+    public MessengerGui(String user, String password, String user2) {
+        MessengerGui.user = user;
+        MessengerGui.user2 = user2;
+        MessengerGui.password = password;
         
         try {
             this.client = new AuctionClient();
@@ -43,7 +43,7 @@ public class messengergui implements Runnable {
 
         JPanel panel = new JPanel();
         frame.add(panel);
-        placeComponents(panel, frame, client, user2);
+        placeComponents(panel, client, user2);
 
         frame.setVisible(true);
         
@@ -70,7 +70,7 @@ public class messengergui implements Runnable {
                     if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
 
                         frame.dispose();
-                        new messengergui(user, password, user2);
+                        new MessengerGui(user, password, user2);
                     }
                 }
                 key.reset();
@@ -81,7 +81,7 @@ public class messengergui implements Runnable {
     }
 
     // place all panels and components properly
-    private void placeComponents(JPanel panel, JFrame frame, AuctionClient client, String user2) {
+    private void placeComponents(JPanel panel, AuctionClient AuClient, String secUser) {
         panel.setLayout(new BorderLayout());
 
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -90,7 +90,7 @@ public class messengergui implements Runnable {
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // make new setup for chat with user
-        JLabel title = new JLabel("Chat with " + user2, SwingConstants.CENTER);
+        JLabel title = new JLabel("Chat with " + secUser, SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
         headerPanel.add(title, BorderLayout.CENTER);
 
@@ -113,7 +113,7 @@ public class messengergui implements Runnable {
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> {
             frame.dispose();
-            new messagesgui(user, password);
+            new MessagesGui(user, password);
         });
         headerButtonPanel.add(backButton);
 
@@ -126,7 +126,7 @@ public class messengergui implements Runnable {
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
         messagePanel.setBackground(Color.WHITE);
 
-        messagePanel = getMessages(user, user2, messagePanel);
+        messagePanel = getMessages(user, secUser, messagePanel);
 
         scrollPane = new JScrollPane(messagePanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -148,7 +148,7 @@ public class messengergui implements Runnable {
             String message = messageField.getText();
             if (!message.isEmpty()) {
                 try {
-                    client.sendMessage(user, user2, message);
+                    AuClient.sendMessage(user, secUser, message);
                     messageField.setText("");
 
                 } catch (Exception ex) {
@@ -162,16 +162,17 @@ public class messengergui implements Runnable {
     }
 
     // Method used to return all messages between two users and append to messagepanel
-    public static JPanel getMessages(String user, String user2, JPanel messagePanel) {
-        String u1 = user;
-        String u2 = user2;
+    public static JPanel getMessages(String firUser, String secUser, JPanel messagePanel) {
+        String u1 = firUser;
+        String u2 = secUser;
         if (u1.compareTo(u2) > 0) {
             String temp = u1;
             u1 = u2;
             u2 = temp;
         }
         // Read file contents
-        File messageFile = new File(System.getProperty("user.dir") + "/../src/serverclient/msg/" + u1 + "_to_" + u2 + ".txt");
+        File messageFile = new File(System.getProperty("user.dir") + "/../src/serverclient/msg/" 
+            + u1 + "_to_" + u2 + ".txt");
         try (BufferedReader br = new BufferedReader(new FileReader(messageFile))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -214,7 +215,7 @@ public class messengergui implements Runnable {
     }
     
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new messagesgui(user, password));
+        SwingUtilities.invokeLater(() -> new MessengerGui("user1", "password", "user2"));
     }
     
     // Count messages in file
@@ -229,7 +230,8 @@ public class messengergui implements Runnable {
                 u2 = temp;
             }
     
-            File messageFile = new File(System.getProperty("user.dir") + "/src/serverclient/msg/" + u1 + "_to_" + u2 + ".txt");
+            File messageFile = new File(System.getProperty("user.dir") + "/src/serverclient/msg/" 
+                + u1 + "_to_" + u2 + ".txt");
             if (messageFile.exists()) {
                 try (BufferedReader reader = new BufferedReader(new FileReader(messageFile))) {
                     while (reader.readLine() != null) {

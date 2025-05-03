@@ -1,8 +1,8 @@
 package gui.messages;
 
 import accounts.AuctionClient;
-import gui.buyer.searchgui;
-import gui.buyer.selleracct;
+import gui.buyer.SearchGui;
+import gui.buyer.SellerAcct;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
@@ -21,7 +21,7 @@ import javax.swing.JTextField;
                @hsupple
     * @version May, 2025
     */
-public class rating {
+public class Rating {
     // define all private vals
     private static String user;
     private static String user2;
@@ -32,7 +32,7 @@ public class rating {
     private static AuctionClient client = null;
 
     // new rating gui constructor
-    public rating(String user, String password, String query, String user2, String past) {
+    public Rating(String user, String password, String query, String user2, String past) {
         this.user = user;
         this.user2 = user2;
         this.password = password;
@@ -86,7 +86,8 @@ public class rating {
                 String message = messagetextField.getText();
                 
                 if (message.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Please enter a Decimal Rating.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Please enter a Decimal Rating.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 } else {
                     if (isDouble(message) && Double.parseDouble(message) >= 0 && Double.parseDouble(message) <= 5) {
@@ -95,17 +96,19 @@ public class rating {
                             client.setRating(user2, Double.parseDouble(message));
                             JOptionPane.showMessageDialog(frame, "Message sent successfully!");
                             if (past.equals("search")) {
-                                new searchgui(user, password, query);
+                                new SearchGui(user, password, query);
                                 frame.dispose();
                             } else {
-                                new selleracct(user, password, user2);
+                                new SellerAcct(user, password, user2);
                                 frame.dispose();
                             }
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), 
+                                "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
-                        JOptionPane.showMessageDialog(frame, "Please enter a valid decimal number between 0 and 5!", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Please enter a valid decimal number between 0 and 5!", 
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -116,10 +119,10 @@ public class rating {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (past.equals("search")) {
-                    new searchgui(user, password, query);
+                    new SearchGui(user, password, query);
                     frame.dispose();
                 } else {
-                    new selleracct(user, password, user2);
+                    new SellerAcct(user, password, user2);
                     frame.dispose();
                 }
             }

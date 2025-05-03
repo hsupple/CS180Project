@@ -544,7 +544,7 @@ public class AuctionServer implements Runnable {
     // Send a message from one user to another
     private String sendMess(String user, String user2, String message) {
         synchronized (LOCK) {
-            String Origuser = user;
+            String origUser = user;
             if (user.compareTo(user2) > 0) {
                 String temp = user;
                 user = user2;
@@ -564,7 +564,7 @@ public class AuctionServer implements Runnable {
                 messageList = readFile("msg/" + user + "_to_" + user2 + ".txt"); 
             }
 
-            String newMessage = Origuser + ": " + message.replace("/", " ");
+            String newMessage = origUser + ": " + message.replace("/", " ");
             messageList.add(newMessage);
             writeFile("msg/" + user + "_to_" + user2 + ".txt", messageList);
             return "Message sent successfully from " + user + " to " + user2;

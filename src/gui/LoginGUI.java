@@ -73,17 +73,17 @@ public class LoginGUI {
                 }
             } else {
             if (accountType == true) {
-                    new gui.buyer.buyergui(user, password); 
-                } else {
-                    new gui.seller.sellergui(user, password); 
-                }
-                frame.dispose();
+                new gui.buyer.BuyerGui(user, password); 
+            } else {
+                new gui.seller.SellerGui(user, password); 
+            }
+            frame.dispose();
             }
         });
 
         makeAccount.addActionListener(e -> {
             frame.dispose();
-            new newacct();   
+            new NewAcct();   
         });
     }
 

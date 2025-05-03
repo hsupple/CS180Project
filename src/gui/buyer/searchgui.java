@@ -23,19 +23,20 @@ import javax.swing.*;
                @hsupple
     * @version May, 2025
     */
-public class searchgui {
+public class SearchGui {
 
     // Define all private fields
     private static String user;
     private static String password;
     private static String query;
+    private static JFrame frame;
     private static AuctionClient client;
-    private static String[] Listings;
-    private static String[] Sellers;
+    private static String[] listings;
+    private static String[] sellers;
     private static Map<String, Timer> auctionTimers = new HashMap<>();
 
     // Construct new gui for search
-    public searchgui(String user, String password, String query) {
+    public SearchGui(String user, String password, String query) {
         this.user = user;
         this.password = password;
         this.query = query;
@@ -84,22 +85,22 @@ public class searchgui {
         }
 
         // append array to private fields
-        this.Listings = listingsData.toArray(new String[0]);
-        this.Sellers = sellersData.toArray(new String[0]);
+        this.listings = listingsData.toArray(new String[0]);
+        this.sellers = sellersData.toArray(new String[0]);
 
-        JFrame frame = new JFrame("Buyer Interface");
+        this.frame = new JFrame("Buyer Interface");
         frame.setSize(1250, 750);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         JPanel panel = new JPanel();
         frame.add(panel);
 
-        placeComponents(panel, frame, client);
+        placeComponents(panel, client);
 
         frame.setVisible(true);
     }
 
-    private static void placeComponents(JPanel panel, JFrame frame, AuctionClient client) {
+    private static void placeComponents(JPanel panel, AuctionClient newClient) {
         panel.setLayout(new BorderLayout());
         JPanel verticalContent = new JPanel();
         verticalContent.setLayout(new BoxLayout(verticalContent, BoxLayout.Y_AXIS));
@@ -129,9 +130,9 @@ public class searchgui {
         headerInfoPanel.add(typeLabel);
 
         // Return button
-        JButton ReturnButton = new JButton("Return");
-        ReturnButton.setPreferredSize(new Dimension(165, 45));
-        ReturnButton.setMaximumSize(new Dimension(165, 45));
+        JButton returnButton = new JButton("Return");
+        returnButton.setPreferredSize(new Dimension(165, 45));
+        returnButton.setMaximumSize(new Dimension(165, 45));
 
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
@@ -139,20 +140,20 @@ public class searchgui {
         
         JPanel returnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         returnPanel.setBackground(Color.LIGHT_GRAY);
-        returnPanel.add(ReturnButton);
+        returnPanel.add(returnButton);
         
         headerPanel.add(headerInfoPanel, BorderLayout.WEST);
         headerPanel.add(returnPanel, BorderLayout.EAST);
 
         // Return to buyergui and clear all timers
-        ReturnButton.addActionListener(e -> {
+        returnButton.addActionListener(e -> {
             for (Timer timer : auctionTimers.values()) {
                 timer.stop();
             }
             auctionTimers.clear();
             
             frame.dispose();
-            new buyergui(user, password);
+            new BuyerGui(user, password);
         });
         
         JPanel formPanel = new JPanel();
@@ -172,7 +173,7 @@ public class searchgui {
         sellersPanel.setBackground(Color.WHITE);
         
         // Show all sellers
-        if (Sellers != null && Sellers.length > 0) {
+        if (sellers != null && sellers.length > 0) {
             JLabel sellersHeader = new JLabel("Sellers");
             sellersHeader.setFont(new Font("SansSerif", Font.BOLD, 18));
             sellersHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -180,7 +181,7 @@ public class searchgui {
             sellersPanel.add(Box.createVerticalStrut(10));
             
             // new panel per seller
-            for (String seller : Sellers) {
+            for (String seller : sellers) {
                 JPanel sellerPanel = new JPanel();
                 sellerPanel.setLayout(new BorderLayout());
                 sellerPanel.setBackground(new Color(245, 245, 245));
@@ -194,7 +195,7 @@ public class searchgui {
                 JLabel sellerLabel = new JLabel("Seller: " + seller);
                 sellerLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 
-                JLabel sellerRating = new JLabel("       Rating: " + client.getRating(seller));
+                JLabel sellerRating = new JLabel("       Rating: " + newClient.getRating(seller));
                 sellerRating.setFont(new Font("SansSerif", Font.PLAIN, 14));
                 
                 JButton messageButton = new JButton("Send Message");
@@ -206,15 +207,16 @@ public class searchgui {
                 final String sellerName = seller;
                 messageButton.addActionListener(e -> {
                     try {
-                        new gui.messages.newmessage(user, sellerName);
+                        new gui.messages.NewMessage(user, sellerName);
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
 
                 setRating.addActionListener(e -> {
                     frame.dispose();
-                    new gui.messages.rating(user, password, query, sellerName, "search");
+                    new gui.messages.Rating(user, password, query, sellerName, "search");
                 });
                 
                 JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -239,14 +241,14 @@ public class searchgui {
         listingsPanel.setBackground(Color.WHITE);
         
         // Show all listings
-        if (Listings != null && Listings.length > 0) {
+        if (listings != null && listings.length > 0) {
             JLabel listingsHeader = new JLabel("Listings");
             listingsHeader.setFont(new Font("SansSerif", Font.BOLD, 18));
             listingsHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
             listingsPanel.add(listingsHeader);
             listingsPanel.add(Box.createVerticalStrut(10));
             
-            for (String listing : Listings) {
+            for (String listing : listings) {
                 // Per each valid listing, append a new listingpanel
                 try {
                     
@@ -296,13 +298,13 @@ public class searchgui {
                     sellerLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                     leftPanel.add(sellerLabel);
 
-                    JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
+                    JLabel bidLabel = new JLabel(String.format("Current Bid: $%.2f", currentBid));
                     bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                     leftPanel.add(bidLabel);
 
                     // Add text to show valid buy now price
                     if (buyNowPrice > 0) {
-                        JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
+                        JLabel buyNowLabel = new JLabel(String.format("Buy Now Price: $%.2f", buyNowPrice));
                         buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                         leftPanel.add(buyNowLabel);
                     }
@@ -326,10 +328,11 @@ public class searchgui {
                         try {
                             double bid = Double.parseDouble(bidText.getText());
                             if (bid <= currentBid) {
-                                JOptionPane.showMessageDialog(frame, "Bid must be over current bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(frame, "Bid must be over current bid.", 
+                                    "Error", JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
-                            client.makeBid(itemName.replace(" ", "/"), user, bid);
+                            newClient.makeBid(itemName.replace(" ", "/"), user, bid);
                             
                             for (Timer timer : auctionTimers.values()) {
                                 timer.stop();
@@ -337,9 +340,10 @@ public class searchgui {
                             auctionTimers.clear();
                             
                             frame.dispose();
-                            new buyergui(user, password);
+                            new BuyerGui(user, password);
                         } catch (NumberFormatException ex) {
-                            JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", 
+                                "Error", JOptionPane.ERROR_MESSAGE);
                         } 
                     });
 
@@ -350,9 +354,10 @@ public class searchgui {
                     
                     sendMess.addActionListener(e -> {
                         try {
-                            new gui.messages.newmessage(user, seller);
+                            new gui.messages.NewMessage(user, seller);
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), 
+                                "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     });
 
@@ -361,7 +366,7 @@ public class searchgui {
                     bidPanel.add(bidButton);
                     bidPanel.add(Box.createHorizontalStrut(10));
                     bidPanel.add(sendMess);
-
+                    bidPanel.add(Box.createHorizontalStrut(10));
                     // Only add buy now button if valid buy now is set
                     if (buyNowPrice > 0) {
                         JButton buyNowButton = new JButton("Buy Now");
@@ -369,7 +374,7 @@ public class searchgui {
                         buyNowButton.setMaximumSize(new Dimension(100, 25));
                         buyNowButton.addActionListener(e -> {
                             try {
-                                client.buyNow(itemName.replace(" ", "/"), user);
+                                newClient.buyNow(itemName.replace(" ", "/"), user);
                                 
                                 for (Timer timer : auctionTimers.values()) {
                                     timer.stop();
@@ -377,9 +382,10 @@ public class searchgui {
                                 auctionTimers.clear();
                                 
                                 frame.dispose();
-                                new buyergui(user, password);
+                                new BuyerGui(user, password);
                             } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(frame, "Failed to buy now: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(frame, "Failed to buy now: " + ex.getMessage(), 
+                                    "Error", JOptionPane.ERROR_MESSAGE);
                             }
                         });
                         bidPanel.add(buyNowButton);
@@ -395,9 +401,9 @@ public class searchgui {
                     File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
                     if (imageDir.exists()) {
                         try {
-                            BufferedImage Image = ImageIO.read(imageDir);
+                            BufferedImage image = ImageIO.read(imageDir);
 
-                            Image scaledImage = Image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                            Image scaledImage = image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                             JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
                             imagePanel.add(imageLabel, BorderLayout.WEST);
 
@@ -429,7 +435,7 @@ public class searchgui {
         }
         
         // If none, show no search results
-        if ((Sellers == null || Sellers.length == 0) && (Listings == null || Listings.length == 0)) {
+        if ((sellers == null || sellers.length == 0) && (listings == null || listings.length == 0)) {
             JLabel noResultsLabel = new JLabel("There are no search results!");
             noResultsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             noResultsLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));

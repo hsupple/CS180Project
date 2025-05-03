@@ -19,18 +19,18 @@ import javax.swing.Timer;
                @hsupple
     * @version May, 2025
     */
-public class buyergui implements Runnable {
+public class BuyerGui implements Runnable {
     // define all private fields
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
-    private static String[] Listings; 
+    private static String[] listings; 
     private static JFrame frame = null;
     private static Map<String, Timer> auctionTimers = new HashMap<>();
-    private Thread WatchThread;
+    private Thread watchThread;
 
     // construct new gui fro buyer
-    public buyergui(String user, String password) {
+    public BuyerGui(String user, String password) {
         this.user = user;
         this.password = password;
 
@@ -39,21 +39,30 @@ public class buyergui implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // get all valid listings
-        this.Listings = client.getMyListings("ALL").toString().substring(1, client.getMyListings("ALL").toString().length() - 2).split("9000");
-        for (int i = 0; i < Listings.length; i++) {
-            System.out.println(Listings[i]);
+        // Get user listings
+        String listingsStr = client.getMyListings("ALL").toString();
+        if (listingsStr != null && listingsStr.length() > 2) {
+            // Remove the square brackets and split
+            listingsStr = listingsStr.substring(1, listingsStr.length() - 1);
+            // Split by 9000 if it exists, otherwise treat as single listing
+            if (listingsStr.contains("9000")) {
+                this.listings = listingsStr.split("9000");
+            } else {
+                this.listings = new String[]{listingsStr};
+            }
+        } else {
+            this.listings = new String[0];
         }
 
         // create new buyer frame
-        frame = new JFrame("Buyer Interface");
+        this.frame = new JFrame("Buyer Interface");
         frame.setSize(1250, 750);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
         frame.add(panel);
-        placeComponents(panel, frame, client);
+        placeComponents(panel, client);
 
         frame.setVisible(true);
         // find timer and stop when cleared
@@ -67,8 +76,8 @@ public class buyergui implements Runnable {
             }
         });
         // create new watcher to find new listings
-        WatchThread = new Thread(this);
-        WatchThread.start();
+        watchThread = new Thread(this);
+        watchThread.start();
     }
 
     // run thread to find all new lisitngs
@@ -106,20 +115,20 @@ public class buyergui implements Runnable {
                         auctionTimers.clear();
                         
                         frame.dispose();
-                        new buyergui(user, password);
+                        new BuyerGui(user, password);
                     });
                     return;
                 }
                 
                 key.reset();
             }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // place all components within layout
-    private static void placeComponents(JPanel panel, JFrame frame, AuctionClient client) {
+    private static void placeComponents(JPanel panel, AuctionClient newClient) {
         panel.setLayout(new BorderLayout());
         JPanel verticalContent = new JPanel();
         verticalContent.setLayout(new BoxLayout(verticalContent, BoxLayout.Y_AXIS));
@@ -196,14 +205,15 @@ public class buyergui implements Runnable {
             if (confirm == JOptionPane.YES_OPTION) {
                 String enterpassword = JOptionPane.showInputDialog(frame, "Enter your password to confirm deletion:");
                 if (enterpassword == null || enterpassword.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Password cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Password cannot be empty.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 for (Timer timer : auctionTimers.values()) {
                     timer.stop();
                 }
                 auctionTimers.clear();
-                client.deleteAccount(user, enterpassword);
+                newClient.deleteAccount(user, enterpassword);
                 frame.dispose();
             }
         });
@@ -235,7 +245,7 @@ public class buyergui implements Runnable {
                     timer.stop();
                 }
                 auctionTimers.clear();
-                new searchgui(user, password, searchQuery);
+                new SearchGui(user, password, searchQuery);
                 frame.dispose();
             }
         });
@@ -247,15 +257,16 @@ public class buyergui implements Runnable {
         listingsPanel.setLayout(new BoxLayout(listingsPanel, BoxLayout.Y_AXIS));
         
         // Find all listings that are active and create new panel with item lisitng
-        for (int i = 1; i < Listings.length; i++) {
-            if (Listings[i].split(",")[5].strip().equals("false")) {
+        for (int i = 0; i < listings.length; i++) {
+            String[] listingParts = listings[i].split(",");
+            if (listingParts.length >= 6 && listingParts[5].strip().equals("false")) {
                 
                 // find all data based on stored info
-                String itemName = Listings[i].split(",")[1].strip().replace("/", " ");
-                String description = Listings[i].split(",")[3].strip().replace("/", " ");
-                double buyNowPrice = Double.parseDouble(Listings[i].split(",")[2].strip());
-                double currentBid = Double.parseDouble(Listings[i].split(",")[7].strip());
-                String endTime = Listings[i].split(",")[8].strip();
+                String itemName = listingParts[1].strip().replace("/", " ");
+                String description = listingParts[3].strip().replace("/", " ");
+                double buyNowPrice = Double.parseDouble(listingParts[2].strip());
+                double currentBid = Double.parseDouble(listingParts[7].strip());
+                String endTime = listingParts[8].strip();
         
                 JPanel listingPanel = new JPanel();
                 listingPanel.setLayout(new BorderLayout());
@@ -278,12 +289,12 @@ public class buyergui implements Runnable {
                 descLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                 leftPanel.add(descLabel);
 
-                JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
+                JLabel bidLabel = new JLabel(String.format("Current Bid: $%.2f", currentBid));
                 bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                 leftPanel.add(bidLabel);
 
                 if (buyNowPrice > 0) {
-                    JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
+                    JLabel buyNowLabel = new JLabel(String.format("Buy Now Price: $%.2f", buyNowPrice));
                     buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
                     leftPanel.add(buyNowLabel);
                 }
@@ -308,10 +319,11 @@ public class buyergui implements Runnable {
                     try {
                         double bid = Double.parseDouble(bidText.getText());
                         if (bid <= currentBid) {
-                            JOptionPane.showMessageDialog(frame, "Bid must be over current bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "Bid must be over current bid.", 
+                                "Error", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
-                        client.makeBid(itemName.replace(" ", "/"), user, bid);
+                        newClient.makeBid(itemName.replace(" ", "/"), user, bid);
                         
                         for (Timer timer : auctionTimers.values()) {
                             timer.stop();
@@ -319,9 +331,10 @@ public class buyergui implements Runnable {
                         auctionTimers.clear();
                         
                         frame.dispose();
-                        new buyergui(user, password);
+                        new BuyerGui(user, password);
                     } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", 
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
 
@@ -330,26 +343,28 @@ public class buyergui implements Runnable {
                 sendMess.setPreferredSize(new Dimension(150, 25));
                 sendMess.setMaximumSize(new Dimension(150, 25));
                 
-                JButton SeeSeller = new JButton("See Seller Info");
-                SeeSeller.setPreferredSize(new Dimension(150, 25));
-                SeeSeller.setMaximumSize(new Dimension(150, 25));
+                JButton seeSeller = new JButton("See Seller Info");
+                seeSeller.setPreferredSize(new Dimension(150, 25));
+                seeSeller.setMaximumSize(new Dimension(150, 25));
 
                 // ensure valid message
-                String seller = Listings[i].split(",")[4].strip();
+                String seller = listingParts[4].strip();
                 sendMess.addActionListener(e -> {
                     try {
-                        new gui.messages.newmessage(user, seller);
+                        new gui.messages.NewMessage(user, seller);
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), 
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
 
-                SeeSeller.addActionListener(e -> {
+                seeSeller.addActionListener(e -> {
                     try {
-                        new selleracct(user, password, seller);
+                        new SellerAcct(user, password, seller);
                         frame.dispose();
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Failed to view seller: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Failed to view seller: " + ex.getMessage(), 
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
 
@@ -360,7 +375,7 @@ public class buyergui implements Runnable {
                 bidPanel.add(Box.createHorizontalStrut(10));
                 bidPanel.add(sendMess);
                 bidPanel.add(Box.createHorizontalStrut(10));
-                bidPanel.add(SeeSeller);
+                bidPanel.add(seeSeller);
                 bidPanel.add(Box.createHorizontalStrut(10));
 
                 // Ensure buy now is properly setup and displayed
@@ -370,7 +385,7 @@ public class buyergui implements Runnable {
                     buyNowButton.setMaximumSize(new Dimension(100, 25));
                     buyNowButton.addActionListener(e -> {
                         try {
-                            client.buyNow(itemName.replace(" ", "/"), user);
+                            newClient.buyNow(itemName.replace(" ", "/"), user);
                             
                             for (Timer timer : auctionTimers.values()) {
                                 timer.stop();
@@ -378,9 +393,10 @@ public class buyergui implements Runnable {
                             auctionTimers.clear();
                             
                             frame.dispose();
-                            new buyergui(user, password);
+                            new BuyerGui(user, password);
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, "Failed to buy now: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "Failed to buy now: " + ex.getMessage(), 
+                                "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     });
                     bidPanel.add(buyNowButton);
@@ -397,9 +413,9 @@ public class buyergui implements Runnable {
                 File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
                 if (imageDir.exists()) {
                     try {
-                        BufferedImage Image = ImageIO.read(imageDir);
+                        BufferedImage image = ImageIO.read(imageDir);
 
-                        Image scaledImage = Image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                        Image scaledImage = image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                         JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
                         imagePanel.add(imageLabel, BorderLayout.WEST);
 
@@ -426,17 +442,17 @@ public class buyergui implements Runnable {
         }
 
         // create messages button at top to view all
-        JButton Messages = new JButton("Messages");
-        Messages.setBounds(250, 175, 350, 25);
-        Messages.setMinimumSize(new Dimension(350, 25));
-        formButtonPanel.add(Messages);
-        Messages.addActionListener(e -> {
+        JButton messages = new JButton("Messages");
+        messages.setBounds(250, 175, 350, 25);
+        messages.setMinimumSize(new Dimension(350, 25));
+        formButtonPanel.add(messages);
+        messages.addActionListener(e -> {
             for (Timer timer : auctionTimers.values()) {
                 timer.stop();
             }
             auctionTimers.clear();
             frame.dispose();
-            new gui.messages.messagesgui(user, password);
+            new gui.messages.MessagesGui(user, password);
         });
 
         // Ensure pane can scroll when overflowed with listings

@@ -19,15 +19,15 @@ import javax.swing.border.*;
     * @version May, 2025
     */
 
-public class sellergui {
+public class SellerGui {
     //Define all private fields
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
-    private static String[] Listings; 
+    private static String[] listings; 
     private static JFrame frame = null;
     // Constructor for sellergui
-    public sellergui(String user, String password) {
+    public SellerGui(String user, String password) {
 
         this.user = user;
         this.password = password;
@@ -39,10 +39,13 @@ public class sellergui {
         }
 
         // Get user listings
-        this.Listings = client.getMyListings(user).toString().substring(1, client.getMyListings(user).toString().length() - 2).split("9000");
-        for (int i = 0; i < Listings.length; i++) {
-            System.out.println(Listings[i]);
+        String listingsStr = client.getMyListings(user).toString();
+        if (listingsStr.length() > 2) {
+            this.listings = listingsStr.substring(1, listingsStr.length() - 1).split("9000");
+        } else {
+            this.listings = new String[0];
         }
+
         frame = new JFrame("Seller Interface");
         frame.setSize(1250, 750);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -56,7 +59,7 @@ public class sellergui {
     }
 
     // Place components into seller gui frame
-    private static void placeComponents(JPanel panel, JFrame frame, AuctionClient client) {
+    private static void placeComponents(JPanel panel, JFrame newFrame, AuctionClient newClient) {
         panel.setLayout(new BorderLayout());
 
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -110,33 +113,34 @@ public class sellergui {
         headerPanel.add(headerButtonPanel, BorderLayout.EAST);
 
         logoutButton.addActionListener(e -> {
-            frame.dispose();
+            newFrame.dispose();
         });
         
         deleteButton.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(frame,
+            int confirm = JOptionPane.showConfirmDialog(newFrame,
                 "Are you sure you want to delete your account?",
                 "Confirm Account Deletion",
                 JOptionPane.YES_NO_OPTION);
                 
             if (confirm == JOptionPane.YES_OPTION) {
-                String enterpassword = JOptionPane.showInputDialog(frame, "Enter your password to confirm deletion:");
+                String enterpassword = JOptionPane.showInputDialog(newFrame, "Enter your password to confirm deletion:");
                 if (enterpassword == null || enterpassword.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Password cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(newFrame, "Password cannot be empty.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 client.deleteAccount(user, enterpassword);
-                frame.dispose();
+                newFrame.dispose();
             }
         });
 
         panel.add(headerPanel, BorderLayout.NORTH);
 
-        JButton Messages = new JButton("Messages");
-        Messages.setBounds(250, 175, 350, 25);
-        Messages.setMinimumSize(new Dimension(350, 25));
-        Messages.addActionListener(e -> {
-            new gui.messages.messagesgui(user, password);
+        JButton messages = new JButton("Messages");
+        messages.setBounds(250, 175, 350, 25);
+        messages.setMinimumSize(new Dimension(350, 25));
+        messages.addActionListener(e -> {
+            new gui.messages.MessagesGui(user, password);
             frame.dispose();
         });
 
@@ -147,7 +151,7 @@ public class sellergui {
         JPanel listingsTitlePanel = new JPanel(new BorderLayout());
         listingsTitlePanel.setBackground(Color.WHITE);
         
-        listingsTitlePanel.add(Messages, BorderLayout.NORTH);
+        listingsTitlePanel.add(messages, BorderLayout.NORTH);
 
         JLabel listingsTitle = new JLabel("My Listings");
         listingsTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
@@ -157,7 +161,7 @@ public class sellergui {
         JButton auctionButton = new JButton("New Auction");
         auctionButton.setPreferredSize(new Dimension(120, 30));
         auctionButton.addActionListener(e -> {
-            new newauction(user, password);
+            new NewAuction(user, password);
             frame.dispose();
         });
         
@@ -174,26 +178,32 @@ public class sellergui {
         listingsPanel.setBackground(Color.WHITE);
         
         // If no listings new No Listing panel
-        if (Listings.length == 0) {
+        if (listings == null || listings.length == 0) {
             JLabel noListingsLabel = new JLabel("You don't have any active listings.");
             noListingsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             noListingsLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
             listingsPanel.add(Box.createVerticalStrut(20));
             listingsPanel.add(noListingsLabel);
         } else {
-            // Else create a new panel first for active listingss than for not active ones
-            for (int i = 1; i < Listings.length; i++) {
-                if (Listings[i].split(",")[5].strip().equals("false")) {
-                    JPanel listingPanel = createListingPanel(Listings[i]);
-                    listingsPanel.add(listingPanel);
-                    listingsPanel.add(Box.createVerticalStrut(10)); 
+            // Else create a new panel first for active listings than for not active ones
+            for (String listing : listings) {
+                if (listing != null && !listing.trim().isEmpty()) {
+                    String[] parts = listing.split(",");
+                    if (parts.length >= 6 && parts[5].strip().equals("false")) {
+                        JPanel listingPanel = createListingPanel(listing);
+                        listingsPanel.add(listingPanel);
+                        listingsPanel.add(Box.createVerticalStrut(10));
+                    }
                 }
             }
-            for (int i = 1; i < Listings.length; i++) {
-                if (!Listings[i].split(",")[5].strip().equals("false")) {
-                    JPanel listingPanel = createListingPanel(Listings[i]);
-                    listingsPanel.add(listingPanel);
-                    listingsPanel.add(Box.createVerticalStrut(10)); 
+            for (String listing : listings) {
+                if (listing != null && !listing.trim().isEmpty()) {
+                    String[] parts = listing.split(",");
+                    if (parts.length >= 6 && !parts[5].strip().equals("false")) {
+                        JPanel listingPanel = createListingPanel(listing);
+                        listingsPanel.add(listingPanel);
+                        listingsPanel.add(Box.createVerticalStrut(10));
+                    }
                 }
             }
         }
@@ -242,11 +252,11 @@ public class sellergui {
         descLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
         detailPanel.add(descLabel);
     
-        JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
+        JLabel bidLabel = new JLabel(String.format("Current Bid: $%.2f", currentBid));
         bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
         detailPanel.add(bidLabel);
         if (buyNowPrice > 0) {
-            JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
+            JLabel buyNowLabel = new JLabel(String.format("Buy Now Price: $%.2f", buyNowPrice));
             buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
             detailPanel.add(buyNowLabel);
         } else {
@@ -271,23 +281,25 @@ public class sellergui {
                     String[] listingArr = listing.split(",");
                     double newPrice = Double.parseDouble(setPrice.getText());
                     if (newPrice <= 0) {
-                        JOptionPane.showMessageDialog(panel, "Price must be greater than zero", "Invalid Price", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(panel, "Price must be greater than zero",
+                            "Invalid Price", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     client.updateItemListing(900000 + Integer.valueOf(listingArr[0]), 
-                                             listingArr[1].strip(), 
-                                             listingArr[3].strip(), 
-                                             newPrice, 
-                                             listingArr[4].strip(), 
-                                             false, 
-                                             listingArr[6].strip(), 
-                                             Double.parseDouble(listingArr[7]), 
-                                             listingArr[8].strip());
+                        listingArr[1].strip(), 
+                        listingArr[3].strip(), 
+                        newPrice, 
+                        listingArr[4].strip(), 
+                        false, 
+                        listingArr[6].strip(), 
+                        Double.parseDouble(listingArr[7]), 
+                        listingArr[8].strip());
                     
                     frame.dispose();
-                    new sellergui(user, password);
+                    new SellerGui(user, password);
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(panel, "Please enter a valid number", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(panel, "Please enter a valid number", 
+                        "Invalid Input", JOptionPane.ERROR_MESSAGE);
                 }
             });
             
@@ -304,12 +316,11 @@ public class sellergui {
         // Find file directory and store with underlines
         File imageDir = new File("src/gui/img/" + itemName.replaceAll("\\s+", "_") + ".png");
         if (imageDir.exists()) {
-            try 
-                {
-                    // Image is proportioned 90 degrees wrongly, correct with AffineTransform
-                BufferedImage Image = ImageIO.read(imageDir);
+            try {
+                // Image is proportioned 90 degrees wrongly, correct with AffineTransform
+                BufferedImage image = ImageIO.read(imageDir);
         
-                Image scaledImage = Image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                Image scaledImage = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 
                 JLabel imageLabel = new JLabel();
                 imageLabel.setIcon(new ImageIcon(scaledImage));
@@ -331,7 +342,7 @@ public class sellergui {
             deleteButton.setPreferredSize(new Dimension(80, 25));
             actionPanel.add(deleteButton);
             
-            // Delet button logic
+            // Delete button logic
             deleteButton.addActionListener(e -> {
                 int confirm = JOptionPane.showConfirmDialog(panel,
                     "Are you sure you want to delete this listing?",
@@ -342,7 +353,7 @@ public class sellergui {
                     client.endListing("9000" + listing.substring(0, 2));
                     JOptionPane.showMessageDialog(panel, "Listing deleted successfully.");
                     frame.dispose();
-                    new sellergui(user, password);
+                    new SellerGui(user, password);
                 }
             });
         }
@@ -353,6 +364,6 @@ public class sellergui {
     }
     
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new sellergui(user, password));
+        SwingUtilities.invokeLater(() -> new SellerGui(user, password));
     }
 }

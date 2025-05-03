@@ -1,2 +1,1 @@
 Username, Password, Rating, RateNums, Active ## DO NOT DELETE THIS LINE
-seller1,password,5.00,1,true

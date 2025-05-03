@@ -14,14 +14,14 @@ import javax.swing.*;
                @hsupple
     * @version May, 2025
     */
-public class newmessage {
+public class NewMessage {
     // Define all private fields
     private static String user;
     private static String user2;
     private static AuctionClient client = null;
 
     // Constructor for new message gui
-    public newmessage(String user, String user2) {
+    public NewMessage(String user, String user2) {
         this.user = user;
         this.user2 = user2;
 
@@ -73,14 +73,14 @@ public class newmessage {
                 if (message.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Please enter a message.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
-                }
-                else {
+                } else {
                     try {
                         client.sendMessage(user, user2, message);
                         JOptionPane.showMessageDialog(frame, "Message sent successfully!");
                         frame.dispose();
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Failed to send message: " + ex.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }

@@ -17,7 +17,7 @@ import javax.swing.*;
     * @version May, 2025
     */
 
-public class messagesgui implements Runnable {
+public class MessagesGui implements Runnable {
     // Define all private fields
     private static String user;
     private static String password;
@@ -27,9 +27,9 @@ public class messagesgui implements Runnable {
     private JPanel messagesListPanel;
 
     // construct new gui for messages
-    public messagesgui(String user, String password) {
-        messagesgui.user = user;
-        messagesgui.password = password;
+    public MessagesGui(String user, String password) {
+        MessagesGui.user = user;
+        MessagesGui.password = password;
         
         try {
             this.client = new AuctionClient();
@@ -159,8 +159,8 @@ public class messagesgui implements Runnable {
                 messagesListPanel.add(noMessagesLabel);
                 messagesListPanel.add(Box.createVerticalGlue());
             } else {
-                for (String user : listingsList) {
-                    JPanel listingPanel = createMessagePanel(user);
+                for (String loadUser : listingsList) {
+                    JPanel listingPanel = createMessagePanel(loadUser);
                     messagesListPanel.add(Box.createVerticalStrut(10));
                     messagesListPanel.add(listingPanel);
                 }
@@ -234,9 +234,9 @@ public class messagesgui implements Runnable {
         returnButton.addActionListener(e -> {
             frame.dispose();
             if (client.isBuyer(user)) {
-                new gui.buyer.buyergui(user, password);
+                new gui.buyer.BuyerGui(user, password);
             } else {
-                new gui.seller.sellergui(user, password);
+                new gui.seller.SellerGui(user, password);
             }
         });
 
@@ -275,7 +275,7 @@ public class messagesgui implements Runnable {
                                                          JOptionPane.QUESTION_MESSAGE);
             if (recipient != null && !recipient.trim().isEmpty()) {
                 frame.dispose();
-                new messengergui(user, password, recipient.trim());
+                new MessengerGui(user, password, recipient.trim());
             }
         });
         
@@ -285,7 +285,7 @@ public class messagesgui implements Runnable {
                 for (String otherUser : listingsList) {
                     if (otherUser.contains(searchText)) {
                         frame.dispose();
-                        new messengergui(user, password, otherUser);
+                        new MessengerGui(user, password, otherUser);
                         return;
                     }
                 }
@@ -346,7 +346,7 @@ public class messagesgui implements Runnable {
         JButton viewButton = new JButton("View Conversation");
         viewButton.addActionListener(e -> {
             frame.dispose();
-            new messengergui(user, password, otherUser);
+            new MessengerGui(user, password, otherUser);
         });
         
         buttonPanel.add(viewButton);
@@ -362,7 +362,7 @@ public class messagesgui implements Runnable {
         SwingUtilities.invokeLater(() -> {
             String testUser = "testuser";
             String testPass = "testpass";
-            new messagesgui(testUser, testPass);
+            new MessagesGui(testUser, testPass);
         });
     }
 }

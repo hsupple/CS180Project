@@ -11,11 +11,11 @@ import javax.swing.*;
                @hsupple
     * @version May, 2025
     */
-public class newacct {
+public class NewAcct {
     private AuctionClient client = null;
     private JFrame frame = null;
 
-    public newacct() {
+    public NewAcct() {
         try {
             this.client = new AuctionClient();
         } catch (Exception e) {
@@ -76,7 +76,8 @@ public class newacct {
                 frame.dispose();
                 new LoginGUI();
             } else if (user.contains(" ")) { 
-                JOptionPane.showMessageDialog(panel, "Username cannot contain spaces!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(panel, "Username cannot contain spaces!", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(panel, "Username already exists!", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -93,6 +94,6 @@ public class newacct {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new newacct());
+        SwingUtilities.invokeLater(() -> new NewAcct());
     }
 }

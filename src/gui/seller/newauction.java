@@ -19,12 +19,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
                @hsupple
     * @version May, 2025
     */
-public class newauction {
+public class NewAuction {
 
     private static String user;
     private static String password;
 
-    public newauction(String user, String password) {
+    public NewAuction(String user, String password) {
         this.user = user;
         this.password = password;
 
@@ -113,31 +113,32 @@ public class newauction {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Select Image");
-            fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "png", "jpg", "jpeg"));
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Select Image");
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "png", "jpg", "jpeg"));
 
-            int result = fileChooser.showOpenDialog(frame);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                System.out.println("Image selected: " + selectedFile.getPath());
-                System.out.println("Absolute path: " + imageDir.getAbsolutePath());
+                int result = fileChooser.showOpenDialog(frame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    System.out.println("Image selected: " + selectedFile.getPath());
+                    System.out.println("Absolute path: " + imageDir.getAbsolutePath());
 
-                File imageDir = new File("src/gui/img");
-                if (!imageDir.exists()) imageDir.mkdirs();
+                    File imageDir = new File("src/gui/img");
+                    if (!imageDir.exists()) 
+                        imageDir.mkdirs();
 
-                String uniqueFileName = titleTextField.getText().replaceAll("\\s+", "_") + ".png";
-                File destFile = new File(imageDir, uniqueFileName);
-                try {
-                    Files.copy(selectedFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                    String uniqueFileName = titleTextField.getText().replaceAll("\\s+", "_") + ".png";
+                    File destFile = new File(imageDir, uniqueFileName);
+                    try {
+                        Files.copy(selectedFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    System.out.println("Image copied to: " + destFile.getPath());
+                
                 }
-
-                System.out.println("Image copied to: " + destFile.getPath());
-            
             }
-        }
         });
 
         // Submit
@@ -148,7 +149,9 @@ public class newauction {
                 String title = titleTextField.getText();
                 String description = descriptionTextArea.getText().strip();
                 String buyNowPrice = buyNowTextField.getText();
-                if (buyNowPrice.isEmpty()){ buyNowPrice = "-1.0"; }
+                if (buyNowPrice.isEmpty()) { 
+                    buyNowPrice = "-1.0"; 
+                }
                 String minBidPrice = minBidTextField.getText();
                 String timer = timerTextField.getText();
 
@@ -158,7 +161,8 @@ public class newauction {
                     try {
                         minBid = Double.parseDouble(minBidPrice); 
                     } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(frame, "Please enter a valid number for Minimum Bid Price ( >= 0).", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, 
+                            "Please enter a valid number for Minimum Bid Price ( >= 0).", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                         return; 
                     }
                     
@@ -173,10 +177,11 @@ public class newauction {
                             item.setBuyNowItemPrice(Double.parseDouble(buyNowPrice)); 
                         }
                         frame.dispose(); 
-                        new sellergui(user, password);
+                        new SellerGui(user, password);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(frame, "Please fill in all required fields marked with *.", "Missing Information", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Please fill in all required fields marked with *.", 
+                        "Missing Information", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -186,7 +191,7 @@ public class newauction {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();
-                new sellergui(user, password);
+                new SellerGui(user, password);
             }
         });
 

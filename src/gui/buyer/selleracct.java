@@ -24,18 +24,18 @@ import javax.swing.*;
  * @version May, 2025
  */
 
-public class selleracct {
+public class SellerAcct {
     // Define all private fields
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
     private static String seller; 
-    private static String[] Listings;
-    private static JFrame frame = null;
+    private static String[] listings;
+    private static JFrame frame;
     private static Map<String, Timer> auctionTimers = new HashMap<>();
     
     // Constructor for sellergui
-    public selleracct(String user, String password, String seller) {
+    public SellerAcct(String user, String password, String seller) {
         this.seller = seller;
         this.user = user;
         this.password = password;
@@ -47,9 +47,10 @@ public class selleracct {
         }
 
         // Get seller listings
-        this.Listings = client.getMyListings(seller).toString().substring(1, client.getMyListings(seller).toString().length() - 1).split("9000");
-        for (int i = 0; i < Listings.length; i++) {
-            System.out.println(Listings[i]);
+        this.listings = client.getMyListings(seller).toString().substring(1, 
+            client.getMyListings(seller).toString().length() - 1).split("9000");
+        for (int i = 0; i < listings.length; i++) {
+            System.out.println(listings[i]);
         }
         
         frame = new JFrame("Seller Account: " + seller);
@@ -59,13 +60,13 @@ public class selleracct {
 
         JPanel panel = new JPanel();
         frame.add(panel);
-        placeComponents(panel, frame, client);
+        placeComponents(panel, client);
 
         frame.setVisible(true);
     }
 
     // Place components into seller gui frame
-    private static void placeComponents(JPanel panel, JFrame frame, AuctionClient client) {
+    private static void placeComponents(JPanel panel, AuctionClient newClient) {
         panel.setLayout(new BorderLayout());
 
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -123,19 +124,19 @@ public class selleracct {
                 timer.stop();
             }
             auctionTimers.clear();
-            new buyergui(user, password);
+            new BuyerGui(user, password);
             frame.dispose();
         });
 
         panel.add(headerPanel, BorderLayout.NORTH);
 
-        JButton Messages = new JButton("Message User: " + seller);
-        Messages.addActionListener(e -> {
+        JButton messages = new JButton("Message User: " + seller);
+        messages.addActionListener(e -> {
             for (Timer timer : auctionTimers.values()) {
                 timer.stop();
             }
             auctionTimers.clear();
-            new gui.messages.newmessage(user, seller);
+            new gui.messages.NewMessage(user, seller);
         });
 
         JButton rateButton = new JButton("Rate User: " + seller);
@@ -145,7 +146,7 @@ public class selleracct {
                 timer.stop();
             }
             auctionTimers.clear();
-            new gui.messages.rating(user, password, "", seller, "Seller");
+            new gui.messages.Rating(user, password, "", seller, "Seller");
         });
 
         JPanel contentPanel = new JPanel(new BorderLayout());
@@ -155,24 +156,24 @@ public class selleracct {
         JPanel listingsTitlePanel = new JPanel(new BorderLayout());
         listingsTitlePanel.setBackground(Color.WHITE);
         
-        JPanel ListingTitlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        ListingTitlePanel.setBackground(Color.WHITE);
+        JPanel listingTitlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        listingTitlePanel.setBackground(Color.WHITE);
 
         JLabel listingsTitle = new JLabel(seller + "'s Listings");
         listingsTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
 
-        JLabel ratingLabel = new JLabel("Rating: " + client.getRating(seller));
+        JLabel ratingLabel = new JLabel("Rating: " + newClient.getRating(seller));
         ratingLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
 
-        ListingTitlePanel.add(listingsTitle);
-        ListingTitlePanel.add(Box.createHorizontalStrut(10));
-        ListingTitlePanel.add(ratingLabel);
+        listingTitlePanel.add(listingsTitle);
+        listingTitlePanel.add(Box.createHorizontalStrut(10));
+        listingTitlePanel.add(ratingLabel);
         
-        listingsTitlePanel.add(ListingTitlePanel, BorderLayout.WEST);
+        listingsTitlePanel.add(listingTitlePanel, BorderLayout.WEST);
 
         JPanel auctionBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         auctionBtnPanel.setBackground(Color.WHITE);
-        auctionBtnPanel.add(Messages);
+        auctionBtnPanel.add(messages);
         auctionBtnPanel.add(rateButton);
         listingsTitlePanel.add(auctionBtnPanel, BorderLayout.EAST);
         
@@ -184,7 +185,7 @@ public class selleracct {
         listingsPanel.setBackground(Color.WHITE);
         
         // If no listings or only one entry (which would be an empty/header entry)
-        if (Listings.length <= 1) {
+        if (listings.length <= 1) {
             JLabel noListingsLabel = new JLabel("This seller doesn't have any active listings.");
             noListingsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             noListingsLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
@@ -193,20 +194,20 @@ public class selleracct {
         } else {
             // First show active listings, then inactive ones
             // Show active listings first
-            for (int i = 1; i < Listings.length; i++) {
-                String[] parts = Listings[i].split(",");
+            for (int i = 1; i < listings.length; i++) {
+                String[] parts = listings[i].split(",");
                 if (parts.length >= 6 && parts[5].strip().equals("false")) {
-                    JPanel listingPanel = createListingPanel(Listings[i], i);
+                    JPanel listingPanel = createListingPanel(listings[i], i);
                     listingsPanel.add(listingPanel);
                     listingsPanel.add(Box.createVerticalStrut(10));
                 }
             }
             
             // Then show inactive listings
-            for (int i = 1; i < Listings.length; i++) {
-                String[] parts = Listings[i].split(",");
+            for (int i = 1; i < listings.length; i++) {
+                String[] parts = listings[i].split(",");
                 if (parts.length >= 6 && !parts[5].strip().equals("false")) {
-                    JPanel listingPanel = createListingPanel(Listings[i], i);
+                    JPanel listingPanel = createListingPanel(listings[i], i);
                     listingsPanel.add(listingPanel);
                     listingsPanel.add(Box.createVerticalStrut(10));
                 }
@@ -262,12 +263,12 @@ public class selleracct {
         descLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
         leftPanel.add(descLabel);
 
-        JLabel bidLabel = new JLabel("Current Bid: $" + currentBid);
+        JLabel bidLabel = new JLabel(String.format("Current Bid: $%.2f", currentBid));
         bidLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
         leftPanel.add(bidLabel);
 
         if (buyNowPrice > 0) {
-            JLabel buyNowLabel = new JLabel("Buy Now Price: $" + buyNowPrice);
+            JLabel buyNowLabel = new JLabel(String.format("Buy Now Price: $%.2f", buyNowPrice));
             buyNowLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
             leftPanel.add(buyNowLabel);
         }
@@ -303,7 +304,8 @@ public class selleracct {
                 try {
                     double bid = Double.parseDouble(bidText.getText());
                     if (bid <= currentBid) {
-                        JOptionPane.showMessageDialog(frame, "Bid must be over current bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Bid must be over current bid.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     client.makeBid(itemName.replace(" ", "/"), user, bid);
@@ -314,9 +316,10 @@ public class selleracct {
                     auctionTimers.clear();
                     
                     frame.dispose();
-                    new selleracct(user, password, seller);
+                    new SellerAcct(user, password, seller);
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Enter a valid number for the bid.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 }
             });
 
@@ -341,9 +344,10 @@ public class selleracct {
                         auctionTimers.clear();
                         
                         frame.dispose();
-                        new selleracct(user, password, seller);
+                        new SellerAcct(user, password, seller);
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Failed to buy now: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Failed to buy now: " + ex.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
                 bidPanel.add(Box.createHorizontalStrut(10));
@@ -469,6 +473,6 @@ public class selleracct {
     }
     
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new selleracct("user", "password", "seller"));
+        SwingUtilities.invokeLater(() -> new SellerAcct("user", "password", "seller"));
     }
 }
