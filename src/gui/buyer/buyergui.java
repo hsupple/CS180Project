@@ -435,8 +435,8 @@ public class buyergui implements Runnable {
                 timer.stop();
             }
             auctionTimers.clear();
-            new gui.messages.messagesgui(user, password);
             frame.dispose();
+            new gui.messages.messagesgui(user, password);
         });
 
         // Ensure pane can scroll when overflowed with listings
