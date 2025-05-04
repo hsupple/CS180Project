@@ -64,7 +64,7 @@ public class SearchGui {
                 String[] sellerArray = sellerPart.split(",");
                 for (String seller : sellerArray) {
                     seller = seller.trim();
-                    if (!seller.isEmpty()) {
+                    if (!seller.isEmpty() && !seller.equals("Listings")) {
                         sellersData.add(seller);
                     }
                 }

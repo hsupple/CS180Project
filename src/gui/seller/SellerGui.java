@@ -5,6 +5,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -19,13 +26,15 @@ import javax.swing.border.*;
     * @version May, 2025
     */
 
-public class SellerGui {
+public class SellerGui implements Runnable {
     //Define all private fields
     private static String user;
     private static String password;
     private static AuctionClient client = null; 
     private static String[] listings; 
     private static JFrame frame = null;
+    private Thread watchThread;
+
     // Constructor for sellergui
     public SellerGui(String user, String password) {
 
@@ -56,8 +65,51 @@ public class SellerGui {
         placeComponents(panel, frame, client);
 
         frame.setVisible(true);
+        watchThread = new Thread(this);
+        watchThread.start();
     }
 
+    // run thread to find all new lisitngs
+    public void run() {
+        try {
+            WatchService watcher = FileSystems.getDefault().newWatchService();
+            Path path = Paths.get(System.getProperty("user.dir") + "/../src/serverclient/txt");
+            path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+
+            while (true) {
+                WatchKey key = watcher.take();
+                boolean shouldReload = false;
+                
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind<?> kind = event.kind();
+                    
+                    @SuppressWarnings("unchecked")
+                    WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
+                    Path filename = pathEvent.context();
+                    
+                    // Check if the file is not SellerList.txt
+                    if (kind == StandardWatchEventKinds.ENTRY_MODIFY && 
+                        !filename.toString().equals("SellerList.txt")) {
+                        
+                        System.out.println("File changed: " + filename + ". Reloading GUI...");
+                        shouldReload = true;
+                    }
+                }
+                
+                if (shouldReload) {
+                    SwingUtilities.invokeLater(() -> {
+                        frame.dispose();
+                        new SellerGui(user, password);
+                    });
+                    return;
+                }
+                
+                key.reset();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     // Place components into seller gui frame
     private static void placeComponents(JPanel panel, JFrame newFrame, AuctionClient newClient) {
         panel.setLayout(new BorderLayout());
