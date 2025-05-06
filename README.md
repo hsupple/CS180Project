@@ -38,7 +38,7 @@ Open a terminal and navigate to preferred Directory (dir).
 - $ cd src/serverclient && java AuctionServer
 
 - Then in a second terminal in the CS180Project dir run:
-- $ cd src/gui && java gui.LoginGUI
+- $ cd bin && java gui.LoginGUI
 
 - To Create an Account:
 - Press "Create Account" and add details such as username, password, and user type.
